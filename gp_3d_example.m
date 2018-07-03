@@ -21,9 +21,9 @@ end
 
 %% GP Regression %%
 X_predict = X_train;
-ind_test = datasample(1:size(X_predict,1),10);
-X_test = X_train(ind_test,:);
-Y_test = Y_train(ind_test);
+test_ind = datasample(1:size(X_predict,1),3);
+X_test = X_train(test_ind,:);
+Y_test = Y_train(test_ind);
 
 % ymu, ys: mean and covariance for output
 % fmu, fs: mean and covariance for latent variables
