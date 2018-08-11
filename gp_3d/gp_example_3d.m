@@ -1,4 +1,4 @@
-load ground_truth.mat
+load ground_truth_3d.mat
 
 %% Hyperparameter training %%
 

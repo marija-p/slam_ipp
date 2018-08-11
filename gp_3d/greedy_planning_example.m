@@ -1,5 +1,5 @@
 clear all;
-load training_data.mat
+load training_data_3d.mat
 
 X_predict = X_train;
 test_ind = datasample(1:size(X_predict,1),2);
