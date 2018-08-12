@@ -13,5 +13,5 @@ s=sin(theta);
 P=[c -s; s c]*P; %rotate by theta
 P(1,:)=P(1,:)*l1+Xr(1); %scale and shift to x
 P(2,:)=P(2,:)*l2+Xr(2);
-H = plot(P(1,:),P(2,:),col,'LineWidth',0.1);% draw
+H = patch(P(1,:),P(2,:), 'b');% draw
 plot(Xr(1),Xr(2),sprintf('%s+',col));

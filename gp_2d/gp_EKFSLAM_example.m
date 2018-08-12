@@ -1,14 +1,8 @@
-%% Extended kalman filter
-function gp_EKFSLAM_example
-
 load training_data_2d.mat
 
 X_predict = X_train;
 X_test = [];
 Y_test = [];
-
-% Clear all
-close all; clear all;
 
 % Global variables (avoid extra copies)
 global xVehicleTrue;
@@ -66,11 +60,13 @@ figure(1); hold on;
 %grid off;
 grid minor;
 %axis equal;
+colormap hot
 plot(LandFeatures(1,:),LandFeatures(2,:),'b+');hold on;
 set(gcf,'doublebuffer','on');
 hLine = line([0,0],[0,0]);
 set(hLine,'linestyle',':');
-axis([-WorldSize/4 WorldSize/2 -WorldSize/4 WorldSize/2]);
+%axis([-WorldSize/4 WorldSize/2 -WorldSize/4 WorldSize/2]);
+axis([-20 80 -20 80]);
 xlabel(' Initial Conditions and beacons at blue +');
 display(sprintf('\n\n\n Showing initial Location \n Press any key to procced\n'));
 pause;
@@ -209,6 +205,16 @@ for k = 2:nSteps
         PESt = PPred;
     end;
     
+    %% Mapping
+    % Take measurement at nearest point available in the training set.
+    ind = knnsearch(X_train, xEst(1:2)');
+    X_test = [X_test; X_train(ind, :)];
+    Y_test = [Y_test; Y_train(ind)];
+    
+    % Do GP regression.
+    [ymu, ys, fmu, fs, ~ , post] = ...
+        gp(hyp_trained, inf_func, [], cov_func, lik_func, ...
+        X_test, Y_test, X_predict);
     
     %% Visualization
     % at all interactions
@@ -218,6 +224,9 @@ for k = 2:nSteps
         clf;
         axis(a);hold on;
         grid minor
+        
+        scatter(X_predict(:,1), X_predict(:,2), 100, ymu, 'filled');
+        
         n  = length(xEst); % get the total state and vector also
         % only the landmarks
         nF = (n-3)/2;
@@ -243,12 +252,11 @@ for k = 2:nSteps
         % For all plot the covariance elipse of each state fr the landmark
         for(i = 1:nF)
             iF = 3+2*i-1; 
-            plot(xEst(iF),xEst(iF+1),'b*');
+            plot(xEst(iF),xEst(iF+1),'kd', 'MarkerFaceColor', 'g', 'MarkerSize', 14 );
             PlotEllipse(xEst(iF:iF+1),PEst(iF:iF+1,iF:iF+1),3);
         end;        
         k      
         drawnow;  
-end
 end
 
 
