@@ -3,7 +3,7 @@ function gp_EKFSLAM_example
 
 load training_data_2d.mat
 
-X_predict = X_train;
+X_pr
 X_test = [];
 Y_test = [];
 
@@ -210,10 +210,9 @@ for k = 2:nSteps
     end;
     
     
-    %% Visualization
     % at all interactions
     
-    % Plot the vehicle shape LOL
+    % Plot the veicule shape LOL
         a = axis;
         clf;
         axis(a);hold on;
