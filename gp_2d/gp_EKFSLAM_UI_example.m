@@ -1,20 +1,15 @@
-%% Extended kalman filter
-function gp_EKFSLAM_example
-
 load training_data_2d.mat
 
-X_pr
+X_predict = X_train;
 X_test = [];
+S2_test = [];
 Y_test = [];
-
-% Clear all
-close all; clear all;
 
 % Global variables (avoid extra copies)
 global xVehicleTrue;
 global LandFeatures;
 global LaserSensorSettings;
-global VisionSensorSettings; % for latter incorporation id possible
+global VisionSensorSettings; % for latter incorporation if possible
 global xOdomLast;
 global nSteps;
 global UTrue;
@@ -66,11 +61,13 @@ figure(1); hold on;
 %grid off;
 grid minor;
 %axis equal;
+colormap hot
 plot(LandFeatures(1,:),LandFeatures(2,:),'b+');hold on;
 set(gcf,'doublebuffer','on');
 hLine = line([0,0],[0,0]);
 set(hLine,'linestyle',':');
-axis([-WorldSize/4 WorldSize/2 -WorldSize/4 WorldSize/2]);
+%axis([-WorldSize/4 WorldSize/2 -WorldSize/4 WorldSize/2]);
+axis([-10 70 -10 70]);
 xlabel(' Initial Conditions and beacons at blue +');
 display(sprintf('\n\n\n Showing initial Location \n Press any key to procced\n'));
 pause;
@@ -100,7 +97,7 @@ for k = 2:nSteps
     SimulateMovement(CtrlNoise);
     
     xOdomNow = GetOdometry(CtrlNoise); % Get the odometry values c
-    u = tcomp(tinv(xOdomLast),xOdomNow); % figure out control 
+    u = tcomp(tinv(xOdomLast),xOdomNow); % figure out control
     xOdomLast = xOdomNow; % refhesh odometry vector
     
     % extract the two compoments of the estimation ( Vehicle and
@@ -109,10 +106,10 @@ for k = 2:nSteps
     xVehicle = xEst(1:3); % estimated only the part for the vehicle
     % get landferatures estimation
     xMap = xEst(4:end); % Landfeatures estimation are the rest ones
- 
     
-    %do prediction (the following is simply the result of multiplying 
-    %out block form of jacobians)     
+    
+    %do prediction (the following is simply the result of multiplying
+    %out block form of jacobians)
     xVehiclePred = tcomp(xVehicle,u); % estimation is regarding current and control vector
     % covariance for vehicle
     %J2 is just an simple rotation matrix over x
@@ -127,19 +124,19 @@ for k = 2:nSteps
     
     % agregates robot prediction and beacons
     xPred = [xVehiclePred;xMap];
-%     % Compose the covariance matrix
-%          Ppred = |Pvv Pvm
-%                  |Pvm' Pmm
+    %     % Compose the covariance matrix
+    %          Ppred = |Pvv Pvm
+    %                  |Pvm' Pmm
     PPred = [PPredvv PPredvm;
         PPredvm' PPredmm];
-       
-
+    
+    
     % Get the observation (passing noise to be added and Noise true
     ObsNoise =randn(2,1);
     [z,iFeature] = GetObservation(ObsNoise,RTrue);
     
-   
-     if(~isempty(z)) % if i get an valid observation
+    
+    if(~isempty(z)) % if i get an valid observation
         %have we seen this feature before?
         % need to change here ( see Validation gate White)
         if( ~isnan(MappedLandFeatures(iFeature,1)))
@@ -167,7 +164,7 @@ for k = 2:nSteps
             Innov(2) = AngleWrapping(Innov(2));
             
             S = jH*PPred*jH'+REst;
-            W = PPred*jH'*inv(S); 
+            W = PPred*jH'*inv(S);
             xEst = xPred+ W*Innov;
             
             PEst = PPred-W*S*W';
@@ -178,15 +175,15 @@ for k = 2:nSteps
             % this is a new feature
             
             % extract length of the current tracking landmarks
-            nStates = length(xEst); 
+            nStates = length(xEst);
             
             % Compute the x,y position of the landmark x,y robot plus
             % Xxvehicle +distance*cos(angle + Xthvehicle)
             % Xyvehicle + distance* sin(angle + Xthvehicle)
             xFeature = xVehicle(1:2)+ [z(1)*cos(z(2)+xVehicle(3));z(1)*sin(z(2)+xVehicle(3))];
             xEst = [xEst;xFeature]; %add to state vector estimated
-            % compute jacobians regaing feature and observation 
-            [jGxv, jGz] = GetNewFeatureJacs(xVehicle,z); 
+            % compute jacobians regaing feature and observation
+            [jGxv, jGz] = GetNewFeatureJacs(xVehicle,z);
             
             % M=| 1 0 0  0 0
             %   | 0 1 0  0 0
@@ -202,52 +199,70 @@ for k = 2:nSteps
             %remember this feature as being mapped we store its ID and position in the state vector
             MappedLandFeatures(iFeature,:) = [length(xEst)-1, length(xEst)];
             
-        end;
-     else
-        % notinng new found lets procced refreshing the values for next run
+        end
+    else
         xEst = xPred;
         PESt = PPred;
-    end;
+    end
     
+    %% Mapping
+    % Take measurement at nearest point available in the training set.
+    ind = knnsearch(X_train, xEst(1:2)');
+    X_test = [X_test; X_train(ind, :)];
+    Y_test = [Y_test; Y_train(ind)];
     
+    % Do GP regression.
+    [ymu, ys, fmu, fs, ~ , post] = ...
+        gpUI(hyp_trained, inf_func, [], cov_func, lik_func, ...
+        X_test, Y_test, 11, PEst(1:2,1:2), X_predict);
+    
+    %% Visualization
     % at all interactions
     
-    % Plot the veicule shape LOL
-        a = axis;
-        clf;
-        axis(a);hold on;
-        grid minor
-        n  = length(xEst); % get the total state and vector also
-        % only the landmarks
-        nF = (n-3)/2;
+    % Plot the vehicle shape LOL
+    a = axis;
+    clf;
+    axis(a);hold on;
+    grid minor
+    
+    scatter(X_predict(:,1), X_predict(:,2), 100, ymu, 'filled');
+    
+    n  = length(xEst); % get the total state and vector also
+    % only the landmarks
+    nF = (n-3)/2;
+    
+    % Draw vehicle and its eliipse only the 3 first are the vehicle
+    %         % state   P = |v v v|-----
+    %                       |v v v|-----
+    %                       |v v v|-----
+    %                       ------------
+    DoVehicleGraphics(xEst(1:3),PEst(1:3,1:3),3,[0 1]);
+    disp(xEst(1:3))
+    disp(PEst(1:3,1:3))
+    
+    % if we get an valid observation plot is values
+    if(~isnan(z))
+        % Plot the line to beacon
+        h = line([xEst(1),xFeature(1)],[xEst(2),xFeature(2)]);
+        set(h,'linestyle',':');
+        %make some visible information
+        %legend( sprintf('Range: %3.2fm; Angle: %3.2f: °  ',z(1),(z(2)-pi/2)*180/pi));
         
-        % Draw vehicle and its eliipse only the 3 first are the vehicle
-%         % state   P = |v v v|-----
-%                       |v v v|-----
-%                       |v v v|-----
-%                       ------------
-        DoVehicleGraphics(xEst(1:3),PEst(1:3,1:3),3,[0 1]);
-        disp(xEst(1:3))
-        disp(PEst(1:3,1:3))
-        
-        % if we get an valid observation plot is values
-        if(~isnan(z))
-            % Plot the line to beacon
-            h = line([xEst(1),xFeature(1)],[xEst(2),xFeature(2)]);
-            set(h,'linestyle',':');
-            %make some visible information
-            %legend( sprintf('Range: %3.2fm; Angle: %3.2f: °  ',z(1),(z(2)-pi/2)*180/pi));
-            
-        end;
-        % For all plot the covariance elipse of each state fr the landmark
-        for(i = 1:nF)
-            iF = 3+2*i-1; 
-            plot(xEst(iF),xEst(iF+1),'b*');
-            PlotEllipse(xEst(iF:iF+1),PEst(iF:iF+1,iF:iF+1),3);
-        end;        
-        k      
-        drawnow;  
-end
+    end
+    
+    % For all plot the covariance elipse of each state fr the landmark
+    for(i = 1:nF)
+        iF = 3+2*i-1;
+        plot(xEst(iF),xEst(iF+1),'kd', 'MarkerFaceColor', 'g', 'MarkerSize', 14 );
+        PlotEllipse(xEst(iF:iF+1),PEst(iF:iF+1,iF:iF+1),3);
+    end
+    
+    drawnow;
+    
+    if (mod(k,100) == 0)
+        keyboard
+    end
+    
 end
 
 

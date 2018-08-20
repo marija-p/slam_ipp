@@ -8,7 +8,7 @@ Y_test = [];
 global xVehicleTrue;
 global LandFeatures;
 global LaserSensorSettings;
-global VisionSensorSettings; % for latter incorporation id possible
+global VisionSensorSettings; % for latter incorporation if possible
 global xOdomLast;
 global nSteps;
 global UTrue;
@@ -66,7 +66,7 @@ set(gcf,'doublebuffer','on');
 hLine = line([0,0],[0,0]);
 set(hLine,'linestyle',':');
 %axis([-WorldSize/4 WorldSize/2 -WorldSize/4 WorldSize/2]);
-axis([-20 80 -20 80]);
+axis([-10 70 -10 70]);
 xlabel(' Initial Conditions and beacons at blue +');
 display(sprintf('\n\n\n Showing initial Location \n Press any key to procced\n'));
 pause;
@@ -257,6 +257,11 @@ for k = 2:nSteps
         end;        
         k      
         drawnow;  
+        
+        if (mod(k,100) == 0)
+            keyboard
+        end
+        
 end
 
 
