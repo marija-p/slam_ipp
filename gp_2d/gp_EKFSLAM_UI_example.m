@@ -225,7 +225,8 @@ for k = 2:nSteps
     axis(a);hold on;
     grid minor
     
-    scatter(X_predict(:,1), X_predict(:,2), 100, ymu, 'filled');
+    scatter(X_predict(:,1), X_predict(:,2), 100, ys, 'filled');
+    caxis([0 300])
     
     n  = length(xEst); % get the total state and vector also
     % only the landmarks
@@ -237,8 +238,8 @@ for k = 2:nSteps
     %                       |v v v|-----
     %                       ------------
     DoVehicleGraphics(xEst(1:3),PEst(1:3,1:3),3,[0 1]);
-    disp(xEst(1:3))
-    disp(PEst(1:3,1:3))
+    %disp(xEst(1:3))
+    %disp(PEst(1:3,1:3))
     
     % if we get an valid observation plot is values
     if(~isnan(z))
@@ -260,6 +261,7 @@ for k = 2:nSteps
     drawnow;
     
     if (mod(k,100) == 0)
+        colorbar
         keyboard
     end
     

@@ -225,7 +225,8 @@ for k = 2:nSteps
         axis(a);hold on;
         grid minor
         
-        scatter(X_predict(:,1), X_predict(:,2), 100, ymu, 'filled');
+        scatter(X_predict(:,1), X_predict(:,2), 100, ys, 'filled');
+        caxis([0 200])
         
         n  = length(xEst); % get the total state and vector also
         % only the landmarks
@@ -237,8 +238,8 @@ for k = 2:nSteps
 %                       |v v v|-----
 %                       ------------
         DoVehicleGraphics(xEst(1:3),PEst(1:3,1:3),3,[0 1]);
-        disp(xEst(1:3))
-        disp(PEst(1:3,1:3))
+        %disp(xEst(1:3))
+        %disp(PEst(1:3,1:3))
         
         % if we get an valid observation plot is values
         if(~isnan(z))
@@ -248,17 +249,18 @@ for k = 2:nSteps
             %make some visible information
             %legend( sprintf('Range: %3.2fm; Angle: %3.2f: °  ',z(1),(z(2)-pi/2)*180/pi));
             
-        end;
+        end
         % For all plot the covariance elipse of each state fr the landmark
         for(i = 1:nF)
             iF = 3+2*i-1; 
             plot(xEst(iF),xEst(iF+1),'kd', 'MarkerFaceColor', 'g', 'MarkerSize', 14 );
             PlotEllipse(xEst(iF:iF+1),PEst(iF:iF+1,iF:iF+1),3);
-        end;        
-        k      
+        end
+        
         drawnow;  
         
         if (mod(k,100) == 0)
+            colorbar
             keyboard
         end
         
