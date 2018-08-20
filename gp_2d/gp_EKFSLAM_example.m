@@ -53,7 +53,7 @@ MappedLandFeatures = NaN*zeros(nLandFeatures,2);
 
 
 % Additive noise to be added at the observation
-obsNoise = randn(2,1);
+obsNoise = [0; 0]; %randn(2,1);
 
 % Ok lets show where are our Landmarks located in the world
 figure(1); hold on;
@@ -86,13 +86,13 @@ REst = 2.0*RTrue;
 
 % All Setup and ready to go
 % Extract first odometry for predict
-CtrlNoise = randn(3,1); % some random control noise to be added ( note change to gaussian)
+CtrlNoise = [0; 0; 0]; %randn(3,1); % some random control noise to be added ( note change to gaussian)
 xOdomLast = GetOdometry(CtrlNoise);
 
 for k = 2:nSteps
     
     % get robot Control and simulate the movement
-    CtrlNoise = randn(3,1); % some random control noise to be added
+    CtrlNoise = [0; 0; 0]; %randn(3,1); % some random control noise to be added
     SimulateMovement(CtrlNoise);
     
     xOdomNow = GetOdometry(CtrlNoise); % Get the odometry values c
@@ -131,7 +131,7 @@ for k = 2:nSteps
        
 
     % Get the observation (passing noise to be added and Noise true
-    ObsNoise =randn(2,1);
+    ObsNoise = [0; 0]; %randn(2,1);
     [z,iFeature] = GetObservation(ObsNoise,RTrue);
     
    
@@ -226,7 +226,7 @@ for k = 2:nSteps
         grid minor
         
         scatter(X_predict(:,1), X_predict(:,2), 100, ys, 'filled');
-        caxis([0 200])
+        caxis([0 300])
         
         n  = length(xEst); % get the total state and vector also
         % only the landmarks
@@ -259,7 +259,7 @@ for k = 2:nSteps
         
         drawnow;  
         
-        if (mod(k,100) == 0)
+        if (mod(k,50) == 0)
             colorbar
             keyboard
         end
