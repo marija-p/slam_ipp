@@ -2,6 +2,7 @@ load training_data_2d.mat
 
 X_predict = X_train;
 X_test = [];
+X_test_gt = [];
 Y_test = [];
 
 % Global variables (avoid extra copies)
@@ -45,17 +46,16 @@ LandFeatures(:,:,5)=[40 40]';
 xVehicleTrue = [40 25 0]'; % start position (x, y, theta)
 
 % Set the initial conditions of the filter
-xEst =[xVehicleTrue]; % already an columm vector
-PEst = diag([1 1 0.01]); % start with an medium covar ( Atention EKF need an good initialization)
+xEst =xVehicleTrue; % already a column vector
+PEst = diag([1 1 0.01]); % start with an medium covar
 
-% Make some space to save the Landmarks detected (arraylist (x,y)
+% Array of detected landmarks
 MappedLandFeatures = NaN*zeros(nLandFeatures,2);
-
 
 % Additive noise to be added at the observation
 obsNoise = [0; 0]; %randn(2,1);
 
-% Ok lets show where are our Landmarks located in the world
+% Plotting: Where landmarks are located in the world.
 figure(1); hold on;
 %grid off;
 grid minor;
@@ -79,8 +79,8 @@ RTrue = diag([1.1,5*pi/180]).^2;
 
 
 % Aditive factor for control estimation and noise
-UEst = 2.0*UTrue;
-REst = 2.0*RTrue;
+UEst = 0*UTrue;
+REst = 0.2*RTrue;
 
 
 
@@ -97,7 +97,7 @@ for k = 2:nSteps
     
     xOdomNow = GetOdometry(CtrlNoise); % Get the odometry values c
     u = tcomp(tinv(xOdomLast),xOdomNow); % figure out control 
-    xOdomLast = xOdomNow; % refhesh odometry vector
+    xOdomLast = xOdomNow; % Refresh odometry vector
     
     % extract the two compoments of the estimation ( Vehicle and
     % landfeatures
@@ -123,12 +123,9 @@ for k = 2:nSteps
     
     % agregates robot prediction and beacons
     xPred = [xVehiclePred;xMap];
-%     % Compose the covariance matrix
-%          Ppred = |Pvv Pvm
-%                  |Pvm' Pmm
+    % Compose the covariance matrix
     PPred = [PPredvv PPredvm;
         PPredvm' PPredmm];
-       
 
     % Get the observation (passing noise to be added and Noise true
     ObsNoise = [0; 0]; %randn(2,1);
@@ -198,18 +195,26 @@ for k = 2:nSteps
             %remember this feature as being mapped we store its ID and position in the state vector
             MappedLandFeatures(iFeature,:) = [length(xEst)-1, length(xEst)];
             
-        end;
+        end
+        
      else
         % notinng new found lets procced refreshing the values for next run
         xEst = xPred;
         PESt = PPred;
-    end;
+     end
     
     %% Mapping
-    % Take measurement at nearest point available in the training set.
-    ind = knnsearch(X_train, xEst(1:2)');
-    X_test = [X_test; X_train(ind, :)];
-    Y_test = [Y_test; Y_train(ind)];
+%     % Take measurement - discrete.
+%     ind = knnsearch(X_train, xEst(1:2)');
+%     X_test = [X_test; X_train(ind, :)];
+%     Y_test = [Y_test; Y_train(ind)];
+%     
+    % Take measurement - continuous.
+    X_test = [X_test; xEst(1:2)'];
+    X_test_gt = [X_test_gt; xVehicleTrue(1:2)'];
+    Y_test = [Y_test; interp2(reshape(X_train(:,1),30,30), ...
+        reshape(X_train(:,2),30,30), ...
+        reshape(Y_train,30,30), xEst(1), xEst(2))];
     
     % Do GP regression.
     [ymu, ys, fmu, fs, ~ , post] = ...
@@ -225,8 +230,8 @@ for k = 2:nSteps
         axis(a);hold on;
         grid minor
         
-        scatter(X_predict(:,1), X_predict(:,2), 100, ys, 'filled');
-        caxis([0 300])
+        scatter(X_predict(:,1), X_predict(:,2), 100, ymu, 'filled');
+        caxis([0 50])
         
         n  = length(xEst); % get the total state and vector also
         % only the landmarks
@@ -246,11 +251,9 @@ for k = 2:nSteps
             % Plot the line to beacon
             h = line([xEst(1),xFeature(1)],[xEst(2),xFeature(2)]);
             set(h,'linestyle',':');
-            %make some visible information
-            %legend( sprintf('Range: %3.2fm; Angle: %3.2f: °  ',z(1),(z(2)-pi/2)*180/pi));
             
         end
-        % For all plot the covariance elipse of each state fr the landmark
+        % Plot the covariance ellipse of each landmark state.
         for(i = 1:nF)
             iF = 3+2*i-1; 
             plot(xEst(iF),xEst(iF+1),'kd', 'MarkerFaceColor', 'g', 'MarkerSize', 14 );
@@ -259,7 +262,7 @@ for k = 2:nSteps
         
         drawnow;  
         
-        if (mod(k,50) == 0)
+        if (mod(k,200) == 0)
             colorbar
             keyboard
         end
