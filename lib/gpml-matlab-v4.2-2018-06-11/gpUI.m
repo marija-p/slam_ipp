@@ -15,9 +15,9 @@ function [varargout] = gpUI(hyp, inf, mean, cov, lik, x, y, N_gauss, s2, xs, ys)
 % the hyperparameters. If test cases are given, then the test set predictive
 % probabilities are returned. Usage:
 %
-%   training: [nlZ dnlZ          ] = gpUI(hyp, inf, mean, cov, lik, x, y, s2);
-% prediction: [ymu ys2 fmu fs2   ] = gpUI(hyp, inf, mean, cov, lik, x, y, s2, xs);
-%         or: [ymu ys2 fmu fs2 lp] = gpUI(hyp, inf, mean, cov, lik, x, y, s2, xs, ys);
+%   training: [nlZ dnlZ          ] = gpUI(hyp, inf, mean, cov, lik, x, y, N_gauss, s2);
+% prediction: [ymu ys2 fmu fs2   ] = gpUI(hyp, inf, mean, cov, lik, x, y, N_gauss, s2, xs);
+%         or: [ymu ys2 fmu fs2 lp] = gpUI(hyp, inf, mean, cov, lik, x, y, N_gauss, s2, xs, ys);
 %
 % where:
 %
@@ -51,9 +51,9 @@ function [varargout] = gpUI(hyp, inf, mean, cov, lik, x, y, N_gauss, s2, xs, ys)
 % Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2018-06-15.
 %                                      File automatically generated using noweb.
 if nargin<9 || nargin>11
-  disp('Usage: [nlZ dnlZ          ] = gpUI(hyp, inf, mean, cov, lik, x, y, N, s2);')
-  disp('   or: [ymu ys2 fmu fs2   ] = gpUI(hyp, inf, mean, cov, lik, x, y, N, s2, xs);')
-  disp('   or: [ymu ys2 fmu fs2 lp] = gpUI(hyp, inf, mean, cov, lik, x, y, N, s2, xs, ys);')
+  disp('Usage: [nlZ dnlZ          ] = gpUI(hyp, inf, mean, cov, lik, x, y, N_gauss, s2);')
+  disp('   or: [ymu ys2 fmu fs2   ] = gpUI(hyp, inf, mean, cov, lik, x, y, N_gauss, s2, xs);')
+  disp('   or: [ymu ys2 fmu fs2 lp] = gpUI(hyp, inf, mean, cov, lik, x, y, N_gauss, s2, xs, ys);')
   return
 end
 
