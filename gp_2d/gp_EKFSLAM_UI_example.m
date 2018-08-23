@@ -5,11 +5,17 @@ X_test = [];
 X_test_gt = [];
 Y_test = [];
 
+% Fixed covariance matrix on uncertain input (for testing).
+P_test = [0.1, 0; 0, 0.1];
+
+% Number of test points for Gauss-Hermite quadrature.
+N_gauss = 11;
+covUI_func = {@covUI, {cov_func}, N_gauss, P_test};
+
 % Global variables (avoid extra copies).
 global xVehicleTrue;
 global LandFeatures;
 global LaserSensorSettings;
-global VisionSensorSettings; % For incorporating later.
 global xOdomLast;
 global nSteps;
 global UTrue;
@@ -18,8 +24,8 @@ global UTrue;
 LaserSensorSettings.Bearing = 30; % Degrees
 LaserSensorSettings.Range = 50; % Meters
 display(sprintf('=== Sensor Definitions ===  \n Max Range:  %d Meters\n Max Bearing: %d Degrees \n========================== \n',LaserSensorSettings.Range,LaserSensorSettings.Bearing));
-display(' Paused!!! Press any Key!! ');
-pause;
+%display(' Paused!!! Press any Key!! ');
+%pause;
 
 % Length of the simulation (number of time-steps).
 nSteps = 600;
@@ -28,10 +34,10 @@ nSteps = 600;
 WorldSize = 200;
 
 % Number of landmarks to add to the map.
-nLandFeatures =5;
+nLandFeatures = 5;
 LandFeatures = zeros(2,1,nLandFeatures);
 
-% Place beacons at the desired positions.
+% Landmark positions.
 LandFeatures(:,:,1)=[0 10]';
 LandFeatures(:,:,2)=[0 50]';
 LandFeatures(:,:,3)=[50 50]';
@@ -40,7 +46,7 @@ LandFeatures(:,:,5)=[40 40]';
 
 % Initialization.
 xVehicleTrue = [40 25 0]'; % start position (x, y, theta)
-xEst =xVehicleTrue;
+xEst = xVehicleTrue;
 PEst = diag([1 1 0.01]);
 
 % Array of detected landmarks.
@@ -49,7 +55,7 @@ MappedLandFeatures = NaN*zeros(nLandFeatures,2);
 % Additive noise to be added at the observations.
 obsNoise = [0; 0]; %randn(2,1);
 
-% Plotting: Where landmarks are located in the world.
+% Initial plotting.
 figure(1); hold on;
 %grid off;
 grid minor;
@@ -62,25 +68,24 @@ set(hLine,'linestyle',':');
 %axis([-WorldSize/4 WorldSize/2 -WorldSize/4 WorldSize/2]);
 axis([-10 70 -10 70]);
 xlabel(' Initial Conditions and beacons at blue +');
-display(sprintf('\n\n\n Showing initial Location \n Press any key to procced\n'));
-pause;
+%display(sprintf('\n\n\n Showing initial Location \n Press any key to procced\n'));
+%pause;
 
 % Standard deviation errors.
 UTrue = diag([0.01,0.01,1.5*pi/180]).^2; % Control.
 RTrue = diag([1.1,5*pi/180]).^2; % Observation.
-
 
 % Additive factor for control estimation and noise.
 UEst = 0*UTrue;
 REst = 0.2*RTrue;
 
 % Initialize odometry measurement.
-CtrlNoise = [0; 0; 0]; %randn(3,1); % some random control noise to be added
+CtrlNoise = [0; 0; 0]; %randn(3,1);
 xOdomLast = GetOdometry(CtrlNoise);
 
 for k = 2:nSteps
     
-    CtrlNoise = [0; 0; 0]; %randn(3,1); % some random control noise to be added
+    CtrlNoise = [0; 0; 0]; %randn(3,1);
     SimulateMovement(CtrlNoise);
     
     % Refresh odometry vector.
@@ -92,7 +97,6 @@ for k = 2:nSteps
     xVehicle = xEst(1:3);
     % Landmarks estimate.
     xMap = xEst(4:end);
-    
     
     % Kalman prediction.
     xVehiclePred = tcomp(xVehicle,u);
@@ -109,9 +113,9 @@ for k = 2:nSteps
     ObsNoise = [0; 0]; %randn(2,1);
     [z,iFeature] = GetObservation(ObsNoise,RTrue);
     
-    
-    if(~isempty(z)) % Valid observation received.
-        % Have we seen this feature before?
+    % Valid observation received.
+    if(~isempty(z))
+        % Already seen feature.
         if( ~isnan(MappedLandFeatures(iFeature,1)))
             
             % Predict the observation.
@@ -138,7 +142,8 @@ for k = 2:nSteps
         else
             
             nStates = length(xEst);
-            xFeature = xVehicle(1:2)+ [z(1)*cos(z(2)+xVehicle(3));z(1)*sin(z(2)+xVehicle(3))];
+            xFeature = xVehicle(1:2)+ ...
+                [z(1)*cos(z(2)+xVehicle(3));z(1)*sin(z(2)+xVehicle(3))];
             xEst = [xEst;xFeature];
             [jGxv, jGz] = GetNewFeatureJacs(xVehicle,z);
             
@@ -147,7 +152,6 @@ for k = 2:nSteps
             %   | 0 0 1  0 0
             %   -------------
             %   |
-            
             M = [eye(nStates), zeros(nStates,2);
                 jGxv zeros(2,nStates-3)  , jGz];
             
@@ -157,7 +161,7 @@ for k = 2:nSteps
             MappedLandFeatures(iFeature,:) = [length(xEst)-1, length(xEst)];
             
         end
-     
+        
     % No observation received.
     else
         xEst = xPred;
@@ -175,12 +179,12 @@ for k = 2:nSteps
     X_test_gt = [X_test_gt; xVehicleTrue(1:2)'];
     Y_test = [Y_test; interp2(reshape(X_train(:,1),30,30), ...
         reshape(X_train(:,2),30,30), ...
-        reshape(Y_train,30,30), xEst(1), xEst(2))];
+        reshape(Y_train,30,30), xVehicleTrue(1), xVehicleTrue(2))];
     
     % Do GP regression.
     [ymu, ys, fmu, fs, ~ , post] = ...
-        gpUI(hyp_trained, inf_func, [], cov_func, lik_func, ...
-        X_test, Y_test, 11, PEst(1:2,1:2), X_predict);
+        gpUI(hyp_trained, inf_func, mean_func, cov_func, lik_func, ...
+        X_test, Y_test, N_gauss, P_test, X_predict);
     
     %% Visualization
     a = axis;
@@ -214,8 +218,25 @@ for k = 2:nSteps
     drawnow;
     
     if (mod(k,200) == 0)
+        
         colorbar
         keyboard
+        
+        % Visualize GP covariance matrix.
+        alpha = post.alpha;
+        L = post.L;
+        sW = post.sW;
+        Kss = real(feval(covUI_func{:}, hyp_trained.cov, X_predict));
+        Ks = feval(covUI_func{:}, hyp_trained.cov, X_test, X_predict);
+        Lchol = isnumeric(L) && all(all(tril(L,-1)==0)&diag(L)'>0&isreal(diag(L))');
+        if Lchol    % L contains chol decomp => use Cholesky parameters (alpha,sW,L)
+            V = L'\(sW.*Ks);
+            covariance_matrix = Kss - V'*V;                       % predictive variances
+        else                % L is not triangular => use alternative parametrisation
+            if isnumeric(L), LKs = L*(Ks); else LKs = L(Ks); end    % matrix or callback
+            covariance_matrix = Kss + Ks'*LKs;                    % predictive variances
+        end
+        
     end
     
 end
