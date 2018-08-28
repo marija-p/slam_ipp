@@ -1,19 +1,21 @@
 load ground_truth_2d.mat
 
+rng(2)
+
 %% Hyperparameter Training %%
-train_hyperparameters = 0;
+train_hyperparameters = 1;
 
 % Training data.
 X_gt = mesh;
 Y_gt = ground_truth;
 
 % Number of training points (input).
-N_train_points = 10;
+N_train_points = 20;
 
 % Number of sample points in Gauss Hermite quadrature.
 N_gauss = 11;
-% Uncertainty on input.
-S2X = diag([0.6^2, 0.6^2]);
+% Uncertainty on location input (covariance matrix).
+S2X = diag([5^2, 5^2]);
 
 % GP hyperparameters.
 mean_func = {@meanConst};
@@ -27,12 +29,12 @@ if (train_hyperparameters)
     hyp.lik = log(0.1);
     hyp.mean = 25.5421;
     hyp_trained = ...
-        minimize(hyp, @gp, -200, inf_func, mean_func, ...
+        minimize(hyp, @gp, -100, inf_func, mean_func, ...
         cov_func, lik_func, X_gt, Y_gt);
     
-    %hyp_trained_UI = ...
-    %    minimize(hyp, @gp, -200, inf_func, mean_func, ...
-    %    cov_func_UI, lik_func, X_train, Y_train);
+    hyp_trained_UI = ...
+        minimize(hyp, @gp, -100, inf_func, mean_func, ...
+        cov_func_UI, lik_func, X_gt, Y_gt);
 end
 
 
@@ -44,8 +46,8 @@ Y_train = Y_gt(test_ind);
 
 % add noise to measurements
 n = size(X_train,1);
-yn = log(0.05) * rand(n,1);
-Y_train = Y_train + yn;
+yn = log(0.1) * rand(n,1);
+%Y_train = Y_train + yn;
 
 % ymu, ys: mean and covariance for output
 % fmu, fs: mean and covariance for latent variables
@@ -117,4 +119,4 @@ zlabel('z')
 caxis([0 100])
 colorbar
 
-set(gcf, 'Position', [224, 639, 1021, 332]);
+set(gcf, 'Position', [-1032, 196, 856, 907]);
