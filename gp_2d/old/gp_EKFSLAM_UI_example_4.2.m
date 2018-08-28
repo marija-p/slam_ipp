@@ -5,6 +5,13 @@ X_test = [];
 X_test_gt = [];
 Y_test = [];
 
+% Fixed covariance matrix on uncertain input (for testing).
+P_test = [0, 0; 0, 0];
+
+% Number of test points for Gauss-Hermite quadrature.
+N_gauss = 11;
+covUI_func = {@covUI, {cov_func}, N_gauss, P_test};
+
 % Global variables (avoid extra copies).
 global xVehicleTrue;
 global LandFeatures;
@@ -176,8 +183,8 @@ for k = 2:nSteps
     
     % Do GP regression.
     [ymu, ys, fmu, fs, ~ , post] = ...
-        gp(hyp_trained, inf_func, mean_func, cov_func, lik_func, ...
-        X_test, Y_test, X_predict);
+        gpUI(hyp_trained, inf_func, mean_func, cov_func, lik_func, ...
+        X_test, Y_test, N_gauss, P_test, X_predict);
     
     %% Visualization
     a = axis;
@@ -231,17 +238,5 @@ for k = 2:nSteps
         end
         
     end
-    
+     
 end
-
-
-
-
-
-
-
-
-
-
-
-

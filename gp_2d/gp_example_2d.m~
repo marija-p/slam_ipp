@@ -1,14 +1,11 @@
 load ground_truth_2d.mat
 
-%% Hyperparameter Training %%
-train_hyperparameters = 0;
+%% Hyperparameter training %%
+train_hyperparameters = 1;
 
 % Training data.
-X_gt = mesh;
-Y_gt = ground_truth;
-
-% Number of training points (input).
-N_train_points = 10;
+X_train = mesh;
+Y_train = ground_truth;
 
 % Number of sample points in Gauss Hermite quadrature.
 N_gauss = 11;
@@ -28,24 +25,18 @@ if (train_hyperparameters)
     hyp.mean = 25.5421;
     hyp_trained = ...
         minimize(hyp, @gp, -200, inf_func, mean_func, ...
-        cov_func, lik_func, X_gt, Y_gt);
+        cov_func, lik_func, X_train, Y_train);
     
     %hyp_trained_UI = ...
     %    minimize(hyp, @gp, -200, inf_func, mean_func, ...
     %    cov_func_UI, lik_func, X_train, Y_train);
 end
 
-
 %% GP Regression %%
-X_test = X_gt;
-test_ind = datasample(1:size(X_test,1),N_train_points);
-X_train = X_gt(test_ind,:);
-Y_train = Y_gt(test_ind);
-
-% add noise to measurements
-n = size(X_train,1);
-yn = log(0.05) * rand(n,1);
-Y_train = Y_train + yn;
+X_predict = X_train;
+test_ind = datasample(1:size(X_predict,1),3);
+X_test = X_train(test_ind,:);
+Y_test = Y_train(test_ind);
 
 % ymu, ys: mean and covariance for output
 % fmu, fs: mean and covariance for latent variables
@@ -54,67 +45,54 @@ Y_train = Y_train + yn;
 % With certain input.
 [ymu1, ys1, fmu1, fs1, ~ , post1] = ...
     gp(hyp_trained, inf_func, mean_func, cov_func, lik_func, ...
-    X_train, Y_train, X_test);
+    X_test, Y_test, X_predict);
+Y_predict = ymu;
 
 % With uncertain input.
 [ymu2, ys2, fmu2, fs2, ~ , post2] = ...
     gp(hyp_trained, inf_func, mean_func, cov_func_UI, lik_func, ...
-    X_train, Y_train, X_test);
+    X_test, Y_test, X_predict);
 
 
 %% Plotting %%
 subplot(3,2,1)
-scatter(X_gt(:,1), X_gt(:,2), 100, Y_gt, 'filled');
-title('Ground truth')
-xlabel('x')
-ylabel('y')
-zlabel('z')
-caxis([0 45])
-colorbar
-
-subplot(3,2,2)
 scatter(X_train(:,1), X_train(:,2), 100, Y_train, 'filled');
-title('Training data (Input)')
+title('Training data (GT)')
 xlabel('x')
 ylabel('y')
 zlabel('z')
 caxis([0 45])
-colorbar
-
+subplot(3,2,2)
+scatter(X_test(:,1), X_test(:,2), 100, Y_test, 'filled');
+title('Test (input)')
+xlabel('x')
+ylabel('y')
+zlabel('z')
+caxis([0 45])
 subplot(3,2,3)
-scatter(X_test(:,1), X_test(:,2), 100, ymu1, 'filled');
-title('Prediction - w/o uncertainty')
+scatter(X_predict(:,1), X_predict(:,2), 100, ymu1, 'filled');
+title('Prediction')
 xlabel('x')
 ylabel('y')
 zlabel('z')
 caxis([0 45])
-colorbar
-
 subplot(3,2,4)
-scatter(X_test(:,1), X_test(:,2), 100, ys1, 'filled');
-title('Variance - w/o uncertainty')
+scatter(X_predict(:,1), X_predict(:,2), 100, ys1, 'filled');
+title('Variance')
 xlabel('x')
 ylabel('y')
 zlabel('z')
-caxis([0 100])
-colorbar
-
-subplot(3,2,5)
-scatter(X_test(:,1), X_test(:,2), 100, ymu2, 'filled');
-title('Prediction - w/ uncertainty')
+scatter(X_predict(:,1), X_predict(:,2), 100, ymu2, 'filled');
+title('Prediction')
 xlabel('x')
 ylabel('y')
 zlabel('z')
 caxis([0 45])
-colorbar
-
 subplot(3,2,6)
-scatter(X_test(:,1), X_test(:,2), 100, ys2, 'filled');
-title('Variance - w/ uncertainty')
+scatter(X_predict(:,1), X_predict(:,2), 100, ys2, 'filled');
+title('Variance')
 xlabel('x')
 ylabel('y')
 zlabel('z')
-caxis([0 100])
-colorbar
 
 set(gcf, 'Position', [224, 639, 1021, 332]);
