@@ -3,7 +3,7 @@ load ground_truth_2d.mat
 rng(2)
 
 %% Hyperparameter Training %%
-train_hyperparameters = 1;
+train_hyperparameters = 0;
 
 % Training data.
 X_gt = mesh;
@@ -15,7 +15,7 @@ N_train_points = 20;
 % Number of sample points in Gauss Hermite quadrature.
 N_gauss = 11;
 % Uncertainty on location input (covariance matrix).
-S2X = diag([5^2, 5^2]);
+S2X = diag([10^2, 10^2]);
 
 % GP hyperparameters.
 mean_func = {@meanConst};
@@ -32,9 +32,9 @@ if (train_hyperparameters)
         minimize(hyp, @gp, -100, inf_func, mean_func, ...
         cov_func, lik_func, X_gt, Y_gt);
     
-    hyp_trained_UI = ...
-        minimize(hyp, @gp, -100, inf_func, mean_func, ...
-        cov_func_UI, lik_func, X_gt, Y_gt);
+%     hyp_trained_UI = ...
+%         minimize(hyp, @gp, -100, inf_func, mean_func, ...
+%         cov_func_UI, lik_func, X_gt, Y_gt);
 end
 
 
@@ -65,6 +65,8 @@ yn = log(0.1) * rand(n,1);
 
 
 %% Plotting %%
+
+% Visualize regression results.
 subplot(3,2,1)
 scatter(X_gt(:,1), X_gt(:,2), 100, Y_gt, 'filled');
 title('Ground truth')
@@ -118,5 +120,47 @@ ylabel('y')
 zlabel('z')
 caxis([0 100])
 colorbar
+
+% Visualize covariance matrices.
+figure;
+subplot(1,2,1)
+alpha = post1.alpha;
+L = post1.L;
+sW = post1.sW;
+Kss = real(feval(cov_func{:}, hyp_trained.cov, X_test));
+Ks = feval(cov_func{:}, hyp_trained.cov, X_train, X_test);
+Lchol = isnumeric(L) && all(all(tril(L,-1)==0)&diag(L)'>0&isreal(diag(L))');
+if Lchol    % L contains chol decomp => use Cholesky parameters (alpha,sW,L)
+    V = L'\(sW.*Ks);
+    K = Kss - V'*V;                       % predictive variances
+else                % L is not triangular => use alternative parametrisation
+    if isnumeric(L), LKs = L*(Ks); else LKs = L(Ks); end    % matrix or callback
+    K = Kss + Ks'*LKs;                    % predictive variances
+end
+imagesc(K)
+title('W/o uncertainty')
+colorbar
+caxis([-30, 90])
+
+
+subplot(1,2,2)
+alpha = post2.alpha;
+L = post2.L;
+sW = post2.sW;
+Kss = real(feval(cov_func_UI{:}, hyp_trained.cov, X_test));
+Ks = feval(cov_func_UI{:}, hyp_trained.cov, X_train, X_test);
+Lchol = isnumeric(L) && all(all(tril(L,-1)==0)&diag(L)'>0&isreal(diag(L))');
+if Lchol    % L contains chol decomp => use Cholesky parameters (alpha,sW,L)
+    V = L'\(sW.*Ks);
+    K_UI = Kss - V'*V;                       % predictive variances
+else                % L is not triangular => use alternative parametrisation
+    if isnumeric(L), LKs = L*(Ks); else LKs = L(Ks); end    % matrix or callback
+    K_UI = Kss + Ks'*LKs;                    % predictive variances
+end
+imagesc(K_UI)
+title('W/ uncertainty')
+colorbar
+caxis([-30, 90])
+
 
 set(gcf, 'Position', [-1032, 196, 856, 907]);

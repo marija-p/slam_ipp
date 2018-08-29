@@ -8,5 +8,5 @@ if(~any(diag(P)==0))
     y = nSigma*[cos(0:0.1:2*pi);sin(0:0.1:2*pi)];
     el = V*sqrtm(D)*y;
     el = [el el(:,1)]+repmat(x,1,size(el,2)+1);
-    eH = line(el(1,:),el(2,:),'Color','m','LineWidth',1);
+    eH = line(el(1,:),el(2,:),'Color','w','LineWidth',1);
 end;

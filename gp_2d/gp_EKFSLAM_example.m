@@ -1,9 +1,16 @@
 load training_data_2d.mat
 
-X_predict = X_train;
-X_test = [];
-X_test_gt = [];
-Y_test = [];
+X_test = X_gt;
+X_train = [];
+X_train_gt = [];
+Y_train = [];
+
+% Number of sample points in Gauss Hermite quadrature.
+N_gauss = 11;
+% Uncertainty on location input (covariance matrix) - fixed.
+S2X = diag([10^2, 10^2]);
+cov_func_UI = {@covUI, cov_func, N_gauss, S2X};
+
 
 % Global variables (avoid extra copies).
 global xVehicleTrue;
@@ -94,7 +101,8 @@ for k = 2:nSteps
     % Kalman prediction.
     xVehiclePred = tcomp(xVehicle,u);
     
-    PPredvv = J1(xVehicle,u)* PEst(1:3,1:3) *J1(xVehicle,u)' + J2(xVehicle,u)* UEst * J2(xVehicle,u)';
+    PPredvv = J1(xVehicle,u)* PEst(1:3,1:3) *J1(xVehicle,u)' + ...
+        J2(xVehicle,u)* UEst * J2(xVehicle,u)';
     PPredvm = J1(xVehicle,u)*PEst(1:3,4:end);
     PPredmm = PEst(4:end,4:end);
     
@@ -131,9 +139,10 @@ for k = 2:nSteps
             PEst = PPred-W*S*W';
             
             PEst = 0.5*(PEst+PEst');
+            
         % New feature - add to state vector estimate.
         else
-            
+
             nStates = length(xEst);
             xFeature = xVehicle(1:2)+ ...
                 [z(1)*cos(z(2)+xVehicle(3));z(1)*sin(z(2)+xVehicle(3))];
@@ -168,43 +177,75 @@ for k = 2:nSteps
     %     Y_test = [Y_test; Y_train(ind)];
     %
     % Take measurement - continuous.
-    X_test = [X_test; xEst(1:2)'];
-    X_test_gt = [X_test_gt; xVehicleTrue(1:2)'];
-    Y_test = [Y_test; interp2(reshape(X_train(:,1),30,30), ...
-        reshape(X_train(:,2),30,30), ...
-        reshape(Y_train,30,30), xVehicleTrue(1), xVehicleTrue(2))];
+    X_train = [X_train; xEst(1:2)'];
+    X_train_gt = [X_train_gt; xVehicleTrue(1:2)'];
+    Y_train = [Y_train; interp2(reshape(X_gt(:,1),30,30), ...
+        reshape(X_gt(:,2),30,30), ...
+        reshape(ground_truth,30,30), xVehicleTrue(1), xVehicleTrue(2))];
     
     % Do GP regression.
     [ymu, ys, fmu, fs, ~ , post] = ...
-        gp(hyp_trained, inf_func, mean_func, cov_func, lik_func, ...
-        X_test, Y_test, X_predict);
+        gp(hyp_trained, inf_func, mean_func, cov_func_UI, lik_func, ...
+        X_train, Y_train, X_test);
     
     %% Visualization
-    a = axis;
     clf;
-    axis(a);hold on;
-    grid minor
     
-    scatter(X_predict(:,1), X_predict(:,2), 100, ymu, 'filled');
+    % Mean sub-plot.
+    subplot(1,2,1)
+    title('Mean')
+    hold on;
+    grid minor
+    axis([-10 70 -10 70]);
+    scatter(X_test(:,1), X_test(:,2), 100, ymu, 'filled');
     caxis([0 50])
+    colorbar
     
     n  = length(xEst);
     nF = (n-3)/2;
-    
     DoVehicleGraphics(xEst(1:3),PEst(1:3,1:3),3,[0 1]);
     %disp(xEst(1:3))
     %disp(PEst(1:3,1:3))
     
     % Plot lines to observed landmarks.
     if(~isnan(z))
-        h = line([xEst(1),xFeature(1)],[xEst(2),xFeature(2)]);
+        h = line([xEst(1),xFeature(1)], [xEst(2),xFeature(2)]);
         set(h,'linestyle',':');
         
     end
     % Plot the covariance ellipse of each landmark state.
     for (i = 1:nF)
         iF = 3+2*i-1;
-        plot(xEst(iF),xEst(iF+1),'kd', 'MarkerFaceColor', 'g', 'MarkerSize', 14 );
+        plot(xEst(iF),xEst(iF+1), 'kd', 'MarkerFaceColor', 'g', 'MarkerSize', 14);
+        PlotEllipse(xEst(iF:iF+1),PEst(iF:iF+1,iF:iF+1),3);
+    end
+    
+    % Variance sub-plot.
+    subplot(1,2,2)
+    title('Variance')
+    hold on;
+    grid minor
+    axis([-10 70 -10 70]);
+    scatter(X_test(:,1), X_test(:,2), 100, ys, 'filled');
+    caxis([0 200])
+    colorbar
+    
+    n  = length(xEst);
+    nF = (n-3)/2;
+    DoVehicleGraphics(xEst(1:3),PEst(1:3,1:3),3,[0 1]);
+    %disp(xEst(1:3))
+    %disp(PEst(1:3,1:3))
+    
+    % Plot lines to observed landmarks.
+    if(~isnan(z))
+        h = line([xEst(1),xFeature(1)], [xEst(2),xFeature(2)]);
+        set(h,'linestyle',':');
+        
+    end
+    % Plot the covariance ellipse of each landmark state.
+    for (i = 1:nF)
+        iF = 3+2*i-1;
+        plot(xEst(iF),xEst(iF+1), 'kd', 'MarkerFaceColor', 'g', 'MarkerSize', 14);
         PlotEllipse(xEst(iF:iF+1),PEst(iF:iF+1,iF:iF+1),3);
     end
     
@@ -220,7 +261,7 @@ for k = 2:nSteps
         L = post.L;
         sW = post.sW;
         Kss = real(feval(covUI_func{:}, hyp_trained.cov, X_predict));
-        Ks = feval(covUI_func{:}, hyp_trained.cov, X_test, X_predict);
+        Ks = feval(covUI_func{:}, hyp_trained.cov, X_train, X_predict);
         Lchol = isnumeric(L) && all(all(tril(L,-1)==0)&diag(L)'>0&isreal(diag(L))');
         if Lchol    % L contains chol decomp => use Cholesky parameters (alpha,sW,L)
             V = L'\(sW.*Ks);
