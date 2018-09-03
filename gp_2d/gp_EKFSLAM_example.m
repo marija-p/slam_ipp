@@ -1,5 +1,7 @@
 load training_data_2d.mat
 
+rng(1);
+
 X_test = X_gt;
 X_train = [];
 X_train_gt = [];
@@ -8,9 +10,10 @@ Y_train = [];
 % Number of sample points in Gauss Hermite quadrature.
 N_gauss = 11;
 % Uncertainty on location input (covariance matrix) - fixed.
-S2X = diag([10^2, 10^2]);
-cov_func_UI = {@covUI, cov_func, N_gauss, S2X};
+S2X = diag([0^2, 0^2]);
 
+% Number of simulation time-steps between each measurement.
+measurement_time_steps = 1;
 
 % Global variables (avoid extra copies).
 global xVehicleTrue;
@@ -47,7 +50,7 @@ LandFeatures(:,:,5)=[40 40]';
 % Initialization.
 xVehicleTrue = [40 25 0]'; % start position (x, y, theta)
 xEst = xVehicleTrue;
-PEst = diag([1 1 0.01]);
+PEst = diag([1^2 1^2 0.01]);
 
 % Array of detected landmarks.
 MappedLandFeatures = NaN*zeros(nLandFeatures,2);
@@ -76,8 +79,8 @@ UTrue = diag([0.01,0.01,1.5*pi/180]).^2; % Control.
 RTrue = diag([1.1,5*pi/180]).^2; % Observation.
 
 % Additive factor for control estimation and noise.
-UEst = 0*UTrue;
-REst = 0.2*RTrue;
+UEst = 2.0*UTrue; %0*UTrue;
+REst = 2.0*RTrue; %0.2*RTrue;
 
 % Initialize odometry measurement.
 CtrlNoise = [0; 0; 0]; %randn(3,1);
@@ -176,17 +179,21 @@ for k = 2:nSteps
     %     X_test = [X_test; X_train(ind, :)];
     %     Y_test = [Y_test; Y_train(ind)];
     %
-    % Take measurement - continuous.
-    X_train = [X_train; xEst(1:2)'];
-    X_train_gt = [X_train_gt; xVehicleTrue(1:2)'];
-    Y_train = [Y_train; interp2(reshape(X_gt(:,1),30,30), ...
-        reshape(X_gt(:,2),30,30), ...
-        reshape(ground_truth,30,30), xVehicleTrue(1), xVehicleTrue(2))];
     
-    % Do GP regression.
-    [ymu, ys, fmu, fs, ~ , post] = ...
-        gp(hyp_trained, inf_func, mean_func, cov_func_UI, lik_func, ...
-        X_train, Y_train, X_test);
+    if (mod(k,measurement_time_steps) == 0)
+        % Take measurement - continuous.
+        X_train = [X_train; xEst(1:2)'];
+        X_train_gt = [X_train_gt; xVehicleTrue(1:2)'];
+        Y_train = [Y_train; interp2(reshape(X_gt(:,1),30,30), ...
+            reshape(X_gt(:,2),30,30), ...
+            reshape(ground_truth,30,30), xVehicleTrue(1), xVehicleTrue(2))];
+        
+        % Do GP regression.
+        cov_func_UI = {@covUI, cov_func, N_gauss, PEst(1:2,1:2)};
+        [ymu, ys, fmu, fs, ~ , post] = ...
+            gp(hyp_trained_UI, inf_func, mean_func, cov_func_UI, lik_func, ...
+            X_train, Y_train, X_test);
+    end
     
     %% Visualization
     clf;
@@ -205,7 +212,7 @@ for k = 2:nSteps
     nF = (n-3)/2;
     DoVehicleGraphics(xEst(1:3),PEst(1:3,1:3),3,[0 1]);
     %disp(xEst(1:3))
-    %disp(PEst(1:3,1:3))
+    %disp(PEst(1:2,1:2))
     
     % Plot lines to observed landmarks.
     if(~isnan(z))
@@ -233,8 +240,6 @@ for k = 2:nSteps
     n  = length(xEst);
     nF = (n-3)/2;
     DoVehicleGraphics(xEst(1:3),PEst(1:3,1:3),3,[0 1]);
-    %disp(xEst(1:3))
-    %disp(PEst(1:3,1:3))
     
     % Plot lines to observed landmarks.
     if(~isnan(z))
@@ -251,17 +256,16 @@ for k = 2:nSteps
     
     drawnow;
     
-    if (mod(k,200) == 0)
+    if (mod(k,50) == 0)
         
-        colorbar
         keyboard
         
         % Visualize GP covariance matrix.
         alpha = post.alpha;
         L = post.L;
         sW = post.sW;
-        Kss = real(feval(covUI_func{:}, hyp_trained.cov, X_predict));
-        Ks = feval(covUI_func{:}, hyp_trained.cov, X_train, X_predict);
+        Kss = real(feval(cov_func_UI{:}, hyp_trained.cov, X_test));
+        Ks = feval(cov_func_UI{:}, hyp_trained.cov, X_train, X_test);
         Lchol = isnumeric(L) && all(all(tril(L,-1)==0)&diag(L)'>0&isreal(diag(L))');
         if Lchol    % L contains chol decomp => use Cholesky parameters (alpha,sW,L)
             V = L'\(sW.*Ks);

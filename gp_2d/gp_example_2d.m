@@ -3,7 +3,7 @@ load ground_truth_2d.mat
 rng(2)
 
 %% Hyperparameter Training %%
-train_hyperparameters = 0;
+train_hyperparameters = 1;
 
 % Training data.
 X_gt = mesh;
@@ -15,7 +15,7 @@ N_train_points = 20;
 % Number of sample points in Gauss Hermite quadrature.
 N_gauss = 11;
 % Uncertainty on location input (covariance matrix).
-S2X = diag([10^2, 10^2]);
+S2X = diag([1^2, 1^2]);
 
 % GP hyperparameters.
 mean_func = {@meanConst};
@@ -32,9 +32,9 @@ if (train_hyperparameters)
         minimize(hyp, @gp, -100, inf_func, mean_func, ...
         cov_func, lik_func, X_gt, Y_gt);
     
-%     hyp_trained_UI = ...
-%         minimize(hyp, @gp, -100, inf_func, mean_func, ...
-%         cov_func_UI, lik_func, X_gt, Y_gt);
+    hyp_trained_UI = ...
+        minimize(hyp, @gp, -100, inf_func, mean_func, ...
+        cov_func_UI, lik_func, X_gt, Y_gt);
 end
 
 
@@ -124,7 +124,6 @@ colorbar
 % Visualize covariance matrices.
 figure;
 subplot(1,2,1)
-alpha = post1.alpha;
 L = post1.L;
 sW = post1.sW;
 Kss = real(feval(cov_func{:}, hyp_trained.cov, X_test));
@@ -144,7 +143,6 @@ caxis([-30, 90])
 
 
 subplot(1,2,2)
-alpha = post2.alpha;
 L = post2.L;
 sW = post2.sW;
 Kss = real(feval(cov_func_UI{:}, hyp_trained.cov, X_test));
