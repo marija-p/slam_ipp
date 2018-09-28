@@ -1,7 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [xnow] = GetOdometry(CtrlNoise)
 % This can save internal, similar to static, avoids store the value and
-% making blobal
+% making global
 persistent LastOdom; 
 global UTrue;
 
