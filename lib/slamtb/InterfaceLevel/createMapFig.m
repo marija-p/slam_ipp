@@ -121,7 +121,7 @@ for rob = 1:numel(Rob)
         % create and draw sensor
         MapFig.Sen(sen) = createObjPatch(Sen(sen),FigOpt.map.colors.est,MapFig.axes);
         
-        % redraw sensor in robot frame
+        % redraw sensor in robot 
         F = composeFrames(Rob(rob).frame,Sen(sen).frame);
         drawObject(MapFig.Sen(sen),Sen(sen),F);
         

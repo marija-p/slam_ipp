@@ -19,7 +19,6 @@ Map.P(r,r) = Map.P(r,r) + F_u * U * F_u';
 
 % ========== End of function - Start GPL license ==========
 
-
 %   # START GPL LICENSE
 
 %---------------------------------------------------------------------

@@ -1,6 +1,7 @@
-function [MapFig,SenFig] = createGraphicsStructures(...
+function [MapFig,SenFig,FldFig] = createGraphicsStructures(...
     Rob, Sen, Lmk, Obs,...
     SimRob, SimSen, SimLmk,...
+    X_test, ...
     FigOpt)
 
 % CREATEGRAPHICSSTRUCTURES Create figures and graphics handles structures.
@@ -31,6 +32,9 @@ MapFig = createMapFig(Rob,Sen,Lmk,SimRob,SimSen,SimLmk,FigOpt);
 
 % Init sensor's measurement space figures
 SenFig = createSenFig(Sen,Obs,SimLmk,FigOpt);
+
+% Init GP field mapping figure
+FldFig = createFldFig(Rob,SimRob,X_test,FigOpt);
 
 
 
