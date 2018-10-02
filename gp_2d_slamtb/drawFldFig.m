@@ -1,11 +1,10 @@
-function FldFig = drawFldFig(FldFig, Rob, SimRob, X_test, ymu, ys, FigOpt)
+function FldFig = drawFldFig(FldFig, Rob, SimRob, ymu, ys)
 
 % DRAWFIELDFIG  Redraw the field figure.
 
 global Map
 
 hold on
-
 for k = 1:2
     
     % ESTIMATED OBJECTS
@@ -20,8 +19,7 @@ for k = 1:2
     end
     
     % SIMULATED OBJECTS
-    
-    % for each robot:
+    % robots
     for rob = 1:numel(SimRob)
         
         FldFig.simRob(rob,k) = drawObject(FldFig.simRob(rob,k),SimRob(rob));

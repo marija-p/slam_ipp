@@ -1,5 +1,5 @@
 function FldFig = createFldFig(Rob,SimRob,X_test,FigOpt)
-% CREATEFLDFIG Visualizes GP field mapping.
+% CREATEFLDFIG Create field figure and handles.
 
 FldFig.fig = figure(5);
 clf
@@ -10,19 +10,20 @@ set(FldFig.fig,...
     'doublebuffer',  'off',...
     'renderer',      FigOpt.renderer,...
     'toolbar',       'none',...
-    'color',         FigOpt.map.colors.bckgnd);
+    'color',         FigOpt.map.colors.bckgnd, ...
+    'Position',      [662, 144, 857, 306]);
 
 
 % Axes
-
 for k = 1:2
-    FldFig.axes(k) = subplot(1,2,k);
+    subplot(1,2,k)
+    FldFig.axes(k) = gca;
+    axis equal
     set(FldFig.axes(k),...
         'parent',              FldFig.fig,...
         'xlim',                [FigOpt.map.lims.xMin FigOpt.map.lims.xMax],...
         'ylim',                [FigOpt.map.lims.yMin FigOpt.map.lims.yMax]);
     grid minor;
-    axis equal
     xlabel('x (m)')
     ylabel('y (m)')
     
@@ -46,7 +47,7 @@ for k = 1:2
     % SIMULATED OBJECTS
     if ~isempty(SimRob)
         
-        % Robots
+        % robots
         for rob = 1:numel(SimRob)
             
             % create and draw robot
@@ -57,7 +58,8 @@ for k = 1:2
     
 end
 
-% FIELD OBJECT
+% FIELD OBJECTS
+% Initialise with zero values.
 subplot(1,2,1)
 hold on
 FldFig.field_mean = scatter(X_test(:,1), X_test(:,2), 100, zeros(size(X_test,1),1), ...
