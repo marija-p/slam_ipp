@@ -5,6 +5,10 @@ function FldFig = drawFldFig(FldFig, Rob, SimRob, ymu, ys)
 global Map
 
 hold on
+% FIELD MAP
+FldFig.field_mean.CData = ymu;
+FldFig.field_cov.CData = ys;
+
 for k = 1:2
     
     % ESTIMATED OBJECTS
@@ -27,7 +31,3 @@ for k = 1:2
     end
     
 end
-
-% FIELD MAP
-FldFig.field_mean.CData = ymu;
-FldFig.field_cov.CData = ys;

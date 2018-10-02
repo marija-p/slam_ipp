@@ -33,7 +33,7 @@
 Time = struct(...
   'dt',                   .1,...          % sampling time, seconds
   'firstFrame',           1,...           % first frame #
-  'lastFrame',            800);           % last frame #
+  'lastFrame',            600);           % last frame #
 
 % Simulated world
 %   - Simulation landmark sets, playground dimensions
@@ -55,12 +55,12 @@ Robot{1} = struct(...                  % ODOMETRY EXAMPLE
   'motion',             'odometry',...  % motion model
   'position',           [0;-5;0],...     % robot position in map
   'orientationDegrees', [0;0;0],...     % orientation, in degrees, [roll; pitch; yaw].
-  'positionStd',        [0;0;0],...     % position error, std
+  'positionStd',        [0.8;0.8;0],...     % position error, std
   'orientationStd',     [0;0;0],...     % orient. error, std, in degrees
-  'dx',                 [.08;0;0],...     % position increment
+  'dx',                 [.058;0;0],...     % position increment
   'daDegrees',          [0;0;.9],...     % angle increment, degrees
-  'dxStd',              0.005*[1;1;1],...  % odo linear error std
-  'daStd',              0.05*[1;1;1]);      % odo ang error std, degrees
+  'dxStd',              0.011*[1;10;1],...  % odo linear error std  | Default: 0.005*[1;1;1]
+  'daStd',              -0.74*[2;2;1]);      % odo ang error std, degrees | Default: 0.05*[1;1;1]
 
 % Robot{2} = struct(...                  % ODOMETRY EXAMPLE
 %   'id',                 2,...           % robot identifier
@@ -214,8 +214,8 @@ Opt = struct(...
 %   - random
 SimOpt = struct(...                    
   'random',           struct(...      % random generator options
-    'newSeed',        true,...         % select new random seed?
-    'fixedSeed',      208948,...            % random seed for non-random runs
+    'newSeed',        false,...         % select new random seed?
+    'fixedSeed',      208423,...            % random seed for non-random runs
     'seed',           []),...          % current seed
   'obs',              Opt.obs);       % Observation options
 
@@ -239,7 +239,7 @@ SimOpt = struct(...
 %       [r g b]     RGB color vector. [0 0 0] is black, [1 1 1] is white.
 FigOpt = struct(...
   'renderer',       'zbuffer',...    % renderer
-  'rendPeriod',     1,...           % frames to skip for faster processing
+  'rendPeriod',     5,...           % frames to skip for faster processing
   'createVideo',    false,...       % create video sequences?
   'map',            struct(...      % map figure options
     'size',         [320 240],...   % map figure size

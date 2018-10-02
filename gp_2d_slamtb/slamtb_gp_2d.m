@@ -63,6 +63,7 @@ X_train = [];
 P_train = zeros(2,2,Tim.lastFrame); % Covariance matrices.
 X_train_gt = [];
 Y_train = [];
+measurement_frame_interval = 5; % Number of time frames between each measurement. 
 
 % Graphics handles
 [MapFig,SenFig,FldFig]               = createGraphicsStructures(...
@@ -155,22 +156,24 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
     
     % 3. SENSING + GP UPDATE
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    for rob = [Rob.rob]
-        
-        % Take a measurement - add to training data.
-        X_train = [X_train; Map.x(1:2)'];
-        X_train_gt = [X_train_gt; SimRob(rob).state.x(1:2)'];
-        P_train(:,:,currentFrame) = Map.P(1:2,1:2);
-        Y_train = [Y_train; interp2(reshape(X_gt(:,1),24,24), ...
-            reshape(X_gt(:,2),24,24), reshape(ground_truth,24,24), ...
-            SimRob(rob).state.x(1), SimRob(rob).state.x(2))];
-        
-        % Do GP regression.
-        cov_func_UI = {@covUI, cov_func, N_gauss, Map.P(1:2,1:2)};
-        [ymu, ys, fmu, fs, ~ , post] = ...
-            gp(hyp_trained, inf_func, mean_func, cov_func_UI, lik_func, ...
-            X_train, Y_train, X_test);
-        
+    if mod(currentFrame,measurement_frame_interval) == 0
+        for rob = [Rob.rob]
+
+            % Take a measurement - add to training data.
+            X_train = [X_train; Map.x(1:2)'];
+            X_train_gt = [X_train_gt; SimRob(rob).state.x(1:2)'];
+            P_train(:,:,size(X_train,1)) = Map.P(1:2,1:2);
+            Y_train = [Y_train; interp2(reshape(X_gt(:,1),24,24), ...
+                reshape(X_gt(:,2),24,24), reshape(ground_truth,24,24), ...
+                SimRob(rob).state.x(1), SimRob(rob).state.x(2))];
+
+            % Do GP regression.
+            cov_func_UI = {@covUI, cov_func, N_gauss, Map.P(1:2,1:2)};
+            [ymu, ys, fmu, fs, ~ , post] = ...
+                gp(hyp_trained, inf_func, mean_func, cov_func, lik_func, ...
+                X_train, Y_train, X_test);
+
+        end
     end
     
     % 4. VISUALIZATION
@@ -187,10 +190,12 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
             FigOpt);
         
         % Figure of the Field:
-        FldFig = drawFldFig(FldFig,  ...
-            Rob, ...
-            SimRob, ...
-            ymu, ys);
+        if mod(currentFrame,measurement_frame_interval) == 0
+            FldFig = drawFldFig(FldFig,  ...
+                Rob, ...
+                SimRob, ...
+                ymu, ys);
+        end
         
         if FigOpt.createVideo
             makeVideoFrame(MapFig, ...

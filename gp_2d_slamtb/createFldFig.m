@@ -11,7 +11,7 @@ set(FldFig.fig,...
     'renderer',      FigOpt.renderer,...
     'toolbar',       'none',...
     'color',         FigOpt.map.colors.bckgnd, ...
-    'Position',      [662, 144, 857, 306]);
+    'Position',      [-1834          88        1213         546]);
 
 
 % Axes
@@ -62,7 +62,7 @@ end
 % Initialise with zero values.
 subplot(1,2,1)
 hold on
-FldFig.field_mean = scatter(X_test(:,1), X_test(:,2), 100, zeros(size(X_test,1),1), ...
+FldFig.field_mean = scatter(X_test(:,1), X_test(:,2), 80, zeros(size(X_test,1),1), ...
     'filled');
 caxis([0 50])
 colorbar
@@ -70,7 +70,7 @@ title('Mean')
 
 subplot(1,2,2)
 hold on
-FldFig.field_cov = scatter(X_test(:,1), X_test(:,2), 100, zeros(size(X_test,1),1), ...
+FldFig.field_cov = scatter(X_test(:,1), X_test(:,2), 80, zeros(size(X_test,1),1), ...
     'filled');
 caxis([10 180])
 colorbar
