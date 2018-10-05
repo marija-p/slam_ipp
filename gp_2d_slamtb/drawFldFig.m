@@ -18,7 +18,7 @@ for k = 1:2
         % create and draw robot - with ellipse
         FldFig.Rob(rob,k).patch = drawObject(FldFig.Rob(rob,k).patch,Rob(rob));
         r = Rob(rob).state.r(1:3);
-        drawEllipse(FldFig.Rob(rob,k).ellipse,Map.x(r),Map.P(r,r));
+        drawEllipse(FldFig.Rob(rob,k).ellipse,Map.x(r),3*Map.P(r,r));
         
     end
     

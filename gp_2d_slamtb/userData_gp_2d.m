@@ -38,7 +38,7 @@ Time = struct(...
 % Simulated world
 %   - Simulation landmark sets, playground dimensions
 World = struct(...
-  'points',           thickCloister(-6,6,-6,6,1,7),... % 3d point landmarks - see THICKCLOISTER. 
+  'points',           thickCloister(-6,6,-6,6,1,3),... % 3d point landmarks - see THICKCLOISTER. 
   'segments',         []);  % 3D segments - see HOUSE. 
     
 % Robot things with their controls
@@ -55,12 +55,12 @@ Robot{1} = struct(...                  % ODOMETRY EXAMPLE
   'motion',             'odometry',...  % motion model
   'position',           [0;-5;0],...     % robot position in map
   'orientationDegrees', [0;0;0],...     % orientation, in degrees, [roll; pitch; yaw].
-  'positionStd',        [0.8;0.8;0],...     % position error, std
+  'positionStd',        [0.3;0.3;0],...     % position error, std
   'orientationStd',     [0;0;0],...     % orient. error, std, in degrees
-  'dx',                 [.058;0;0],...     % position increment
-  'daDegrees',          [0;0;.9],...     % angle increment, degrees
-  'dxStd',              0.011*[1;10;1],...  % odo linear error std  | Default: 0.005*[1;1;1]
-  'daStd',              -0.74*[2;2;1]);      % odo ang error std, degrees | Default: 0.05*[1;1;1]
+  'dx',                 [.038;0;0],...     % position increment
+  'daDegrees',          [0;0;.8],...     % angle increment, degrees
+  'dxStd',              0.01*[1;5;1],...  % odo linear error std  | Default: 0.005*[1;1;1]
+  'daStd',              -0.04*[2;2;1]);      % odo ang error std, degrees | Default: 0.05*[1;1;1]
 
 % Robot{2} = struct(...                  % ODOMETRY EXAMPLE
 %   'id',                 2,...           % robot identifier
