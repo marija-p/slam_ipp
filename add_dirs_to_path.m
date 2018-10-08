@@ -1,0 +1,5 @@
+addpath(genpath('lib/slamtb_graph'))
+addpath(genpath('lib/random_field'), genpath('lib/polynomial_planning'), ...
+    genpath('lib/gpml-matlab-v3.5'), genpath('lib/cmaes'))
+
+addpath(genpath('gp_2d_slamtb_graph'))
