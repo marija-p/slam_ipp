@@ -166,7 +166,6 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
     for rob = [Rob.rob]
 
         % Robot motion
-
         % NOTE: in a regular, non-simulated SLAM, this line is not here and
         % noise just comes from the real world. Here, the estimated robot
         % is noised so that the simulated trajectory can be made perfect
@@ -244,6 +243,8 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
             
         end % end process robots
         
+        keyboard
+        
         % Solve graph
         [Rob,Sen,Lmk,Obs,Frm,Fac] = solveGraph(Rob,Sen,Lmk,Obs,Frm,Fac,Opt);
         
@@ -256,6 +257,8 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
             % Reset motion robot
             factorRob(rob) = resetMotion(Rob(rob));
         end
+        
+        keyboard
         
     end
     
@@ -333,7 +336,6 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
     % TODO: do something here to collect data for post-processing or
     % plotting. Think about collecting data in files using fopen, fwrite,
     % etc., instead of creating large Matlab variables for data logging.
-    
 
 end
 

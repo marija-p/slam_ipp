@@ -55,7 +55,7 @@ Robot{1} = struct(...                  % ODOMETRY EXAMPLE
   'motion',             'odometry',...  % motion model
   'position',           [0;-5;0],...     % robot position in map
   'orientationDegrees', [0;0;0],...     % orientation, in degrees, [roll; pitch; yaw].
-  'positionStd',        [0;0;0],...     % position error, std
+  'positionStd',        [0.3;0.3;0],...     % position error, std
   'orientationStd',     [0;0;0],...     % orient. error, std, in degrees
   'dx',                 [.038;0;0],...     % position increment
   'daDegrees',          [0;0;.8],...     % angle increment, degrees
@@ -206,7 +206,7 @@ FigOpt = struct(...
     'orbit',        [0 0],...       % Azimuth and Elevation orbit angle increments - use to animate figure
     'showSimLmk',   false,...        % show simulated landmarks?
     'showLmkId',    true,...        % Show landmark id?
-    'showEllip',    true,...        % show ellipsoids?
+    'showEllip',    false,...        % show ellipsoids?
     'showMotFac',   true,...        % show motion factors?
     'showMeaFac',   false,...       % show measurement factors?
     'colors',       struct(...      % map figure colors
