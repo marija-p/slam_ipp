@@ -72,7 +72,6 @@ measurement_frame_interval = 5; % Number of time frames between each measurement
 % Clear user data - not needed anymore
 clear Robot Sensor World Time   % clear all user data
 
-
 %% III. Initialize data logging
 % TODO: Create source and/or destination files and paths for data input and
 % logs.
@@ -243,8 +242,6 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
             
         end % end process robots
         
-        keyboard
-        
         % Solve graph
         [Rob,Sen,Lmk,Obs,Frm,Fac] = solveGraph(Rob,Sen,Lmk,Obs,Frm,Fac,Opt);
         
@@ -256,9 +253,8 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
             
             % Reset motion robot
             factorRob(rob) = resetMotion(Rob(rob));
+      
         end
-        
-        keyboard
         
     end
     
@@ -291,7 +287,8 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
     if currentFrame == Tim.firstFrame ...
             || currentFrame == Tim.lastFrame ...
             || mod(currentFrame,FigOpt.rendPeriod) == 0
-        
+
+
         % Figure of the Map:
         MapFig = drawMapFig(MapFig,  ...
             Rob, Sen, Lmk,  ...
