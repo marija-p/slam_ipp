@@ -260,24 +260,27 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
     
     % 3. SENSING + GP UPDATE
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    if mod(currentFrame,measurement_frame_interval) == 0
-%         for rob = [Rob.rob]
-%             
-%             % Take a measurement - add to training data.
-%             X_train = [X_train; Map.x(1:2)'];
-%             X_train_gt = [X_train_gt; SimRob(rob).state.x(1:2)'];
-%             P_train(:,:,size(X_train,1)) = Map.P(1:2,1:2);
-%             Y_train = [Y_train; interp2(reshape(X_gt(:,1),24,24), ...
-%                 reshape(X_gt(:,2),24,24), reshape(ground_truth,24,24), ...
-%                 SimRob(rob).state.x(1), SimRob(rob).state.x(2))];
-%             
-%             % Do GP regression.
-%             cov_func_UI = {@covUI, cov_func, N_gauss, Map.P(1:2,1:2)};
-%             [ymu, ys, fmu, fs, ~ , post] = ...
-%                 gp(hyp_trained, inf_func, mean_func, cov_func, lik_func, ...
-%                 X_train, Y_train, X_test);
-%             
-%         end
+    if (mod(currentFrame,measurement_frame_interval) == 0 && ...
+            ~isempty(Map.pr))
+        for rob = [Rob.rob]
+            
+            % Take a measurement - add to training data.
+            X_train = [X_train; Rob(rob).state.x(1:2)'];
+            X_train_gt = [X_train_gt; SimRob(rob).state.x(1:2)'];
+            [~, r] = ismember(Rob(rob).state.r(1:2), Map.pr);
+            P = Map.P(r,r);
+            P_train(:,:,size(X_train,1)) = P;
+            Y_train = [Y_train; interp2(reshape(X_gt(:,1),24,24), ...
+                reshape(X_gt(:,2),24,24), reshape(ground_truth,24,24), ...
+                SimRob(rob).state.x(1), SimRob(rob).state.x(2))];
+            
+            % Do GP regression.
+            cov_func_UI = {@covUI, cov_func, N_gauss, P};
+            [ymu, ys, fmu, fs, ~ , post] = ...
+                gp(hyp_trained, inf_func, mean_func, cov_func, lik_func, ...
+                X_train, Y_train, X_test);
+            
+        end
     end
     
     
@@ -295,15 +298,15 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
             Trj, Frm, Fac, ...
             SimRob, SimSen, ...
             FigOpt);
- 
-%         % Figure of the Field:
-%         if mod(currentFrame,measurement_frame_interval) == 0
-%             FldFig = drawFldFig(FldFig,  ...
-%                 Rob, ...
-%                 SimRob, ...
-%                 ymu, ys);
-%         end
-%         
+        
+        % Figure of the Field:
+        if mod(currentFrame,measurement_frame_interval) == 0 && ~isempty(Map.pr)
+            FldFig = drawFldFig(FldFig,  ...
+                Rob, ...
+                SimRob, ...
+                ymu, ys);
+        end
+        
         if FigOpt.createVideo
             makeVideoFrame(MapFig, ...
                 sprintf('map-%04d.png',currentFrame), ...
