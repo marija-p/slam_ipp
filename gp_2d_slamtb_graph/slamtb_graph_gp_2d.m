@@ -69,6 +69,8 @@ measurement_frame_interval = 5; % Number of time frames between each measurement
     X_test, ...                 % Field data
     FigOpt);                    % User-defined graphic options
 
+goal_pose = [0 3 0];
+
 % Clear user data - not needed anymore
 clear Robot Sensor World Time   % clear all user data
 
@@ -134,6 +136,15 @@ end
 
 %% V. Main loop
 for currentFrame = Tim.firstFrame : Tim.lastFrame
+    
+    dy = goal_pose(2) - SimRob.state.x(2);
+    dx = goal_pose(1) - SimRob.state.x(1);
+    dz = 0;
+    
+    theta = atan2(dy,dx);
+    
+    SimRob.con.u(1:3) = 0.06*[cos(theta), sin(theta), 0];
+    Rob.con.u(1:3) = 0.06*[cos(theta), sin(theta), 0];
     
     % 1. SIMULATION
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

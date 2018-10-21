@@ -58,7 +58,7 @@ Robot{1} = struct(...                  % ODOMETRY EXAMPLE
     'positionStd',        [0.9;0.9;0],...     % position error, std
     'orientationStd',     [0;0;0],...     % orient. error, std, in degrees
     'dx',                 [.038;0;0],...     % position increment
-    'daDegrees',          [0;0;.8],...     % angle increment, degrees
+    'daDegrees',          [0;0;0],...     % angle increment, degrees
     'dxStd',              0.01*[1;5;1],...  % odo linear error std  | Default: 0.005*[1;1;1]
     'daStd',              -0.04*[2;2;1]);      % odo ang error std, degrees | Default: 0.05*[1;1;1]
 
