@@ -6,17 +6,20 @@ load ground_truth_3d.mat
 X_train = mesh;
 Y_train = ground_truth;
 
-train_hyperparameters = 1;
+train_hyperparameters = 0;
 
 inf_func = @infExact;
 cov_func = @covSEiso; 
 lik_func = @likGauss; sn = 0.1; hyp.lik = log(sn);
+mean_func = @meanConst;
 
 if (train_hyperparameters)
     hyp.cov = [0 ; 0];
     hyp.lik = log(0.1);
+    hyp.mean = 24.3446;
     hyp_trained = ...
-        minimize(hyp, @gp, -200, inf_func, [], cov_func, lik_func, X_train, Y_train);
+        minimize(hyp, @gp, -200, inf_func, mean_func, ...
+        cov_func, lik_func, X_train, Y_train);
 end
 
 %% GP Regression %%
@@ -29,7 +32,7 @@ Y_test = Y_train(test_ind);
 % fmu, fs: mean and covariance for latent variables
 % post: struct representation of the (approximate) posterior
 [ymu, ys, fmu, fs, ~ , post] = ...
-    gp(hyp_trained, inf_func, [], cov_func, lik_func, ...
+    gp(hyp_trained, inf_func, mean_func, cov_func, lik_func, ...
     X_test, Y_test, X_predict);
 Y_predict = ymu;
 

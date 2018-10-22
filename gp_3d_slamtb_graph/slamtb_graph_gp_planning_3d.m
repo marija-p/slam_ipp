@@ -54,20 +54,25 @@ factorRob = Rob;
 % Field mapping data
 load training_data_3d.mat
 % Scale for this environment.
-X_gt(:,1) = X_gt(:,1) + map_params.position_x;
-X_gt(:,2) = X_gt(:,2) + map_params.position_y;
+X_gt(:,1) = X_gt(:,1) + map_params.pos_x;
+X_gt(:,2) = X_gt(:,2) + map_params.pos_y;
+X_gt(:,3) = X_gt(:,3) + map_params.pos_z;
 X_test = X_gt;
 X_train = [];
-P_train = zeros(2,2,Tim.lastFrame); % Covariance matrices.
+P_train = zeros(3,3,Tim.lastFrame); % Covariance matrices.
 X_train_gt = [];
 Y_train = [];
 measurement_frame_interval = 5;     % Number of time frames between each measurement. 
+dim_x = map_params.dim_x;
+dim_y = map_params.dim_y;
+dim_z = map_params.dim_z;
 
 % Planning parameters
 % First measurement, at current robot pose
 goal_pose = Rob.state.x(1:3)';
+
 % Distance before a waypoint is considered "reached" [m]
-achievement_dist = 0.5;
+achievement_dist = 0.1;
 % Reference speed [m/s]
 speed = 0.1;
 
@@ -147,12 +152,14 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
     
     dy = goal_pose(2) - SimRob.state.x(2);
     dx = goal_pose(1) - SimRob.state.x(1);
-    dz = 0;
+    dz = goal_pose(3) - SimRob.state.x(3);
     
     theta = atan2(dy,dx);
     
-    SimRob.con.u(1:3) = speed*[cos(theta), sin(theta), 0];
-    Rob.con.u(1:3) = speed*[cos(theta), sin(theta), 0];
+    %SimRob.con.u(1:3) = speed*[cos(theta), sin(theta), 0];
+    %Rob.con.u(1:3) = speed*[cos(theta), sin(theta), 0];
+    SimRob.con.u(1:3) = speed*[dx,dy,dz];
+    Rob.con.u(1:3) = speed*[dx,dy,dz];
     
     % 1. SIMULATION
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -286,14 +293,19 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
         for rob = [Rob.rob]
             
             % Take a measurement - add to training data.
-            X_train = [X_train; Rob(rob).state.x(1:2)'];
-            X_train_gt = [X_train_gt; SimRob(rob).state.x(1:2)'];
-            [~, r] = ismember(Rob(rob).state.r(1:2), Map.pr);
+            X_train = [X_train; Rob(rob).state.x(1:3)'];
+            X_train_gt = [X_train_gt; SimRob(rob).state.x(1:3)'];
+            r = Rob.state.r(1:3);
             P = Map.P(r,r);
             P_train(:,:,size(X_train,1)) = P;
-            Y_train = [Y_train; interp2(reshape(X_gt(:,1),24,24), ...
-                reshape(X_gt(:,2),24,24), reshape(Y_gt,24,24), ...
-                SimRob(rob).state.x(1), SimRob(rob).state.x(2))];
+            Y_train = [Y_train; ...
+                interp3(reshape(X_gt(:,1),dim_y,dim_x,dim_z), ...
+                reshape(X_gt(:,2),dim_y,dim_x,dim_z), ...
+                reshape(X_gt(:,3),dim_y,dim_x,dim_z), ...
+                reshape(Y_gt,dim_y,dim_x,dim_z), ...
+                SimRob(rob).state.x(1), ...
+                SimRob(rob).state.x(2), ...
+                SimRob(rob).state.x(3))];
             
             % Do GP regression.
             cov_func_UI = {@covUI, cov_func, N_gauss, P};
@@ -305,12 +317,11 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
         
         % 4. PLANNING
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %ys = reshape(ys, dim_y_env/res_y, dim_x_env/res_x);
-        [~, max_ind] = max(ys);
-        [max_i, max_j] = ...
-            ind2sub([map_params.dim_y, map_params.dim_x], max_ind);
-        goal_pose = grid_to_env_coordinates([max_j, max_i, 0], map_params);
-        disp(['Next goal: ', num2str(goal_pose)])
+   %     [~, max_ind] = max(ys);
+   %     [max_i, max_j] = ...
+   %         ind2sub([dim_y, dim_x], max_ind);
+   %     goal_pose = grid_to_env_coordinates([max_j, max_i, 0], map_params);
+   %     disp(['Next goal: ', num2str(goal_pose)])
         
     end
     
