@@ -66,8 +66,10 @@ measurement_frame_interval = 5;     % Number of time frames between each measure
 % Planning parameters
 % First measurement, at current robot pose
 goal_pose = Rob.state.x(1:3)';
-% Distance before a waypoint is considered "reached"
-achievement_dist = 0.25;
+% Distance before a waypoint is considered "reached" [m]
+achievement_dist = 0.5;
+% Reference speed [m/s]
+speed = 0.1;
 
 % Graphics handles.
 [MapFig,SenFig,FldFig]          = createGraphicsStructures(...
@@ -149,8 +151,8 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
     
     theta = atan2(dy,dx);
     
-    SimRob.con.u(1:3) = 0.06*[cos(theta), sin(theta), 0];
-    Rob.con.u(1:3) = 0.06*[cos(theta), sin(theta), 0];
+    SimRob.con.u(1:3) = speed*[cos(theta), sin(theta), 0];
+    Rob.con.u(1:3) = speed*[cos(theta), sin(theta), 0];
     
     % 1. SIMULATION
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -307,7 +309,7 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
         [~, max_ind] = max(ys);
         [max_i, max_j] = ...
             ind2sub([map_params.dim_y, map_params.dim_x], max_ind);
-        goal_pose = grid_to_env_coordinates([max_i, max_j, 0], map_params);
+        goal_pose = grid_to_env_coordinates([max_j, max_i, 0], map_params);
         disp(['Next goal: ', num2str(goal_pose)])
         
     end
@@ -358,6 +360,7 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
 
         % Do draw all objects
         drawnow;
+        
     end
     
     % 5. DATA LOGGING
