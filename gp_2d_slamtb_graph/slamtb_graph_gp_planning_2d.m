@@ -53,15 +53,23 @@ factorRob = Rob;
 
 % Field mapping data
 load training_data_2d.mat
-X_gt = X_gt - 6; % Scale for this environment.
+% Scale for this environment.
+X_gt(:,1) = X_gt(:,1) + map_params.position_x;
+X_gt(:,2) = X_gt(:,2) + map_params.position_y;
 X_test = X_gt;
 X_train = [];
 P_train = zeros(2,2,Tim.lastFrame); % Covariance matrices.
 X_train_gt = [];
 Y_train = [];
-measurement_frame_interval = 5; % Number of time frames between each measurement. 
+measurement_frame_interval = 5;     % Number of time frames between each measurement. 
 
-% Graphics handles
+% Planning parameters
+% First measurement, at current robot pose
+goal_pose = Rob.state.x(1:3)';
+% Distance before a waypoint is considered "reached"
+achievement_dist = 0.25;
+
+% Graphics handles.
 [MapFig,SenFig,FldFig]          = createGraphicsStructures(...
     Rob, Sen, Lmk, Obs,...      % SLAM data
     Trj, Frm, Fac, ...
@@ -134,6 +142,15 @@ end
 
 %% V. Main loop
 for currentFrame = Tim.firstFrame : Tim.lastFrame
+    
+    dy = goal_pose(2) - SimRob.state.x(2);
+    dx = goal_pose(1) - SimRob.state.x(1);
+    dz = 0;
+    
+    theta = atan2(dy,dx);
+    
+    SimRob.con.u(1:3) = 0.06*[cos(theta), sin(theta), 0];
+    Rob.con.u(1:3) = 0.06*[cos(theta), sin(theta), 0];
     
     % 1. SIMULATION
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -261,7 +278,9 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
     % 3. SENSING + GP UPDATE
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     if (mod(currentFrame,measurement_frame_interval) == 0 && ...
-            ~isempty(Map.pr))
+            ~isempty(Map.pr) && ...
+            pdist([Rob.state.x(1:3)'; goal_pose]) < achievement_dist)
+        
         for rob = [Rob.rob]
             
             % Take a measurement - add to training data.
@@ -281,10 +300,20 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
                 X_train, Y_train, X_test);
             
         end
+        
+        % 4. PLANNING
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %ys = reshape(ys, dim_y_env/res_y, dim_x_env/res_x);
+        [~, max_ind] = max(ys);
+        [max_i, max_j] = ...
+            ind2sub([map_params.dim_y, map_params.dim_x], max_ind);
+        goal_pose = grid_to_env_coordinates([max_i, max_j, 0], map_params);
+        disp(['Next goal: ', num2str(goal_pose)])
+        
     end
     
     
-    % 4. VISUALIZATION
+    % 5. VISUALIZATION
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     if currentFrame == Tim.firstFrame ...
