@@ -54,8 +54,8 @@ factorRob = Rob;
 % Field mapping data
 load training_data_2d.mat
 % Scale for this environment.
-X_gt(:,1) = X_gt(:,1) + map_params.position_x;
-X_gt(:,2) = X_gt(:,2) + map_params.position_y;
+X_gt(:,1) = X_gt(:,1) + map_params.pos_x;
+X_gt(:,2) = X_gt(:,2) + map_params.pos_y;
 X_test = X_gt;
 X_train = [];
 P_train = zeros(2,2,Tim.lastFrame); % Covariance matrices.
