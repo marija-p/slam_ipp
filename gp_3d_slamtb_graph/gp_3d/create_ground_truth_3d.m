@@ -3,17 +3,17 @@ close all;
 % Function to generate 3-D Gaussian random field for a given mesh.
 
 % Environment parameters.
-dim_x_env = 20;
-dim_y_env = 20;
-dim_z_env = 10;
-res_x = 2;
-res_y = 2;
-res_z = 2;
+dim_x_env = 12;
+dim_y_env = 12;
+dim_z_env = 5;
+res_x = 0.5;
+res_y = 0.5;
+res_z = 1;
 
 % Correlation function parameters.
 corr.name = 'gauss';
-corr.c0 = [80, 80, 80];
-corr.sigma = 100;
+corr.c0 = [20, 20, 60];
+corr.sigma = 600;
 
 % Create the random field.
 x = linspace(0,dim_x_env,dim_x_env/res_x);
@@ -22,7 +22,7 @@ z = linspace(0,dim_z_env,dim_z_env/res_z);
 [X,Y,Z] = meshgrid(x,y,z); mesh = [X(:) Y(:) Z(:)];
 F = randomfield(corr,mesh);
 % Scale.
-F = F - min(F);
+F = rescale(F, 0, 40);
 
 % Visualize the random field.
 scatter3(mesh(:,1), mesh(:,2), mesh(:,3), 100, F, 'filled')
