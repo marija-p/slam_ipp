@@ -130,7 +130,7 @@ Opt = struct(...
     'numLmks',        8,...         % number of 3d landmarks
     'lmkSize',        3,...          % Size of landmark state
     'lmkDSize',       3,...          % Size of lmk error state
-    'numFrames',      50,...         % number of frames in graph
+    'numFrames',      80,...         % number of frames in graph
     'kfrmPeriod',     20),...        % period between keyframes
     'solver',           struct(...    % graph solver
     'decomposition',  'QR',...        % Matrix decomposition {'Cholesky', 'QR', 'Schur'}

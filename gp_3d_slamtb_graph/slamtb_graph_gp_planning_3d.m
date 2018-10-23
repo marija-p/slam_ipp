@@ -31,7 +31,7 @@ global Map
 %% I. Specify user-defined options - EDIT USER DATA FILE userDataGraph.m
 
 %userDataGraph;           % user-defined data. SCRIPT.
-userData_graph_gp_2d;
+userData_graph_gp_3d;
 
 %% II. Initialize all data structures from user-defined data
 % SLAM data
@@ -72,7 +72,7 @@ dim_z = map_params.dim_z;
 goal_pose = Rob.state.x(1:3)';
 
 % Distance before a waypoint is considered "reached" [m]
-achievement_dist = 0.1;
+achievement_dist = 0.25;
 % Reference speed [m/s]
 speed = 0.1;
 
@@ -317,11 +317,12 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
         
         % 4. PLANNING
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   %     [~, max_ind] = max(ys);
-   %     [max_i, max_j] = ...
-   %         ind2sub([dim_y, dim_x], max_ind);
-   %     goal_pose = grid_to_env_coordinates([max_j, max_i, 0], map_params);
-   %     disp(['Next goal: ', num2str(goal_pose)])
+        [~, max_ind] = max(ys);
+        [max_i, max_j, max_k] = ...
+            ind2sub([dim_y, dim_x, dim_z], max_ind);
+        goal_pose = ...
+            grid_to_env_coordinates([max_j, max_i, max_k], map_params);
+        disp(['Next goal: ', num2str(goal_pose)])
         
     end
     

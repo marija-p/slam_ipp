@@ -11,8 +11,7 @@ set(FldFig.fig,...
     'renderer',      FigOpt.renderer,...
     'toolbar',       'none',...
     'color',         FigOpt.map.colors.bckgnd, ...
-    'Position',      [-1385         637        1053         415]);
-
+    'Position',      [-1833         650        1297         672]);
 
 % Axes
 for k = 1:2
@@ -26,6 +25,14 @@ for k = 1:2
     grid minor;
     xlabel('x (m)')
     ylabel('y (m)')
+    daspect([1 1 0.5])
+    axis([-10, 10, -10, 10, 0, 6])
+    % 2D/3D plot orientation
+    if (size(X_test,2) == 2)
+        view(2)
+    elseif (size(X_test,2) == 3)
+        view(3)
+    end
     
     % ESTIMATED OBJECTS
     % robots
@@ -62,17 +69,30 @@ end
 % Initialise with zero values.
 subplot(1,2,1)
 hold on
-FldFig.field_mean = scatter(X_test(:,1), X_test(:,2), 80, zeros(size(X_test,1),1), ...
-    'filled');
+% 2D/3D data
+if (size(X_test,2) == 2)
+    FldFig.field_mean = scatter(X_test(:,1), X_test(:,2), 80, zeros(size(X_test,1),1), ...
+        'filled');
+elseif (size(X_test,2) == 3)
+    FldFig.field_mean = scatter3(X_test(:,1), X_test(:,2), X_test(:,3), ...
+        80, zeros(size(X_test,1),1), 'filled');
+end
 caxis([0 50])
 colorbar
 title('Mean')
 
 subplot(1,2,2)
 hold on
-FldFig.field_cov = scatter(X_test(:,1), X_test(:,2), 80, zeros(size(X_test,1),1), ...
-    'filled');
-caxis([10 180])
+% 2D/3D data
+if (size(X_test,2) == 2)
+    FldFig.field_cov = scatter(X_test(:,1), X_test(:,2), ...
+        10, zeros(size(X_test,1),1), 'filled');
+    caxis([10 180])
+elseif (size(X_test,2) == 3)
+    FldFig.field_cov = scatter3(X_test(:,1), X_test(:,2), X_test(:,3), ...
+        10, zeros(size(X_test,1),1), 'filled');
+    caxis([0 2e4])
+end
 colorbar
 title('Variance')
 
