@@ -11,7 +11,7 @@ set(FldFig.fig,...
     'renderer',      FigOpt.renderer,...
     'toolbar',       'none',...
     'color',         FigOpt.map.colors.bckgnd, ...
-    'Position',      [-1833         650        1297         672]);
+    'Position',      [-1833         833         985         461]);
 
 % Axes
 for k = 1:2
@@ -71,11 +71,11 @@ subplot(1,2,1)
 hold on
 % 2D/3D data
 if (size(X_test,2) == 2)
-    FldFig.field_mean = scatter(X_test(:,1), X_test(:,2), 80, zeros(size(X_test,1),1), ...
-        'filled');
+    FldFig.field_mean = scatter(X_test(:,1), X_test(:,2), ...
+        80, zeros(size(X_test,1),1), 'filled');
 elseif (size(X_test,2) == 3)
     FldFig.field_mean = scatter3(X_test(:,1), X_test(:,2), X_test(:,3), ...
-        80, zeros(size(X_test,1),1), 'filled');
+        10, zeros(size(X_test,1),1), 'filled');
 end
 caxis([0 50])
 colorbar
@@ -86,7 +86,7 @@ hold on
 % 2D/3D data
 if (size(X_test,2) == 2)
     FldFig.field_cov = scatter(X_test(:,1), X_test(:,2), ...
-        10, zeros(size(X_test,1),1), 'filled');
+        80, zeros(size(X_test,1),1), 'filled');
     caxis([10 180])
 elseif (size(X_test,2) == 3)
     FldFig.field_cov = scatter3(X_test(:,1), X_test(:,2), X_test(:,3), ...

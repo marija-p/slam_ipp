@@ -72,7 +72,7 @@ dim_z = map_params.dim_z;
 goal_pose = Rob.state.x(1:3)';
 
 % Distance before a waypoint is considered "reached" [m]
-achievement_dist = 0.25;
+achievement_dist = 0.4;
 % Reference speed [m/s]
 speed = 0.1;
 
@@ -310,7 +310,7 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
             % Do GP regression.
             cov_func_UI = {@covUI, cov_func, N_gauss, P};
             [ymu, ys, fmu, fs, ~ , post] = ...
-                gp(hyp_trained, inf_func, mean_func, cov_func, lik_func, ...
+                gp(hyp_trained, inf_func, mean_func, cov_func_UI, lik_func, ...
                 X_train, Y_train, X_test);
             
         end

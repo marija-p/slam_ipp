@@ -37,8 +37,12 @@ Time = struct(...
 
 % Simulated world
 %   - Simulation landmark sets, playground dimensions
+landmarks = [thickCloister(-6,6,-6,6,1,3), thickCloister(-3,3,-3,3,2,3)];
+num_landmarks = size(landmarks,2);
+landmarks(3,1:num_landmarks/2) = landmarks(3,1:num_landmarks/2) + 0.5;
+landmarks(3,num_landmarks/2+1:end) = landmarks(3,num_landmarks/2+1:end) + 2;
 World = struct(...
-    'points',           thickCloister(-6,6,-6,6,1,3),... % 3d point landmarks - see THICKCLOISTER.
+    'points',           landmarks,... % 3d point landmarks - see THICKCLOISTER.
     'segments',         []);  % 3D segments - see HOUSE.
 
 % Robot things with their controls
