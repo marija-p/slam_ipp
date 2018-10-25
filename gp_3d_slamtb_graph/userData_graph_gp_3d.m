@@ -111,8 +111,8 @@ Sensor{1} = struct(...
     'name',               'Micropix',...  % sensor name
     'type',               'pinHoleDepth',...   % type of sensor
     'robot',              1,...           % robot where it is mounted
-    'position',           [0;0;.6],...    % position in robot
-    'orientationDegrees', [-90;0;-90],... % orientation in robot, [roll; pitch; yaw]
+    'position',           [0;0;-0.6],...    % position in robot | Default: [0;0;0.6]
+    'orientationDegrees', [-180;0;-90],... % orientation in robot, [roll; pitch; yaw] | Default: [-90;0;-90]
     'positionStd',        [0;0;0],...     % position error std
     'orientationStd',     [0;0;0],...     % orient. error std
     'imageSize',          [640;480],...   % image size
