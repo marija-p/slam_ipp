@@ -6,7 +6,7 @@ function K = covUI(cov, N, S2, hyp, x, z, i)
 % This function uses Gauss-Hermite quadrature to numerically compute the
 % integral of the covariance function over N(x,S2) where x is
 % 2-dimensional.
-% N: number of sample points in Gauss-Hermite quadrature 
+% N: number of sample points in Gauss-Hermite quadrature
 % S2: 2-dimensional covariance matrix for input data
 %
 % Maani Ghaffari Jadidi
@@ -25,49 +25,102 @@ catch
     else
         K = feval(cov{:}, hyp, x, z, i);
     end
-    return    
+    return
 end
 
 K = 0;
-if nargin < 7                                                % covariances
-    if dg
-        K = feval(cov{:},hyp,x,'diag');
-    else
-        for j = 1:N
-            for l = 1:N
-                Wtot = W(j) * W(l);
-                if abs(Wtot) > 1e-8
-                    v =  L * [X(j); X(l)];
-                    u = repmat(v',size(x,1),1) + x;
-                    if xeqz
-                        K = K + Wtot * feval(cov{:},hyp,u);
-                    else
-                        K = K + Wtot * feval(cov{:},hyp,u,z);
+
+if (size(x,2) == 2)
+    if nargin < 7                                                % covariances
+        if dg
+            K = feval(cov{:},hyp,x,'diag');
+        else
+            for j = 1:N
+                for l = 1:N
+                    Wtot = W(j) * W(l);
+                    if abs(Wtot) > 1e-8
+                        v =  L * [X(j); X(l)];
+                        u = repmat(v',size(x,1),1) + x;
+                        if xeqz
+                            K = K + Wtot * feval(cov{:},hyp,u);
+                        else
+                            K = K + Wtot * feval(cov{:},hyp,u,z);
+                        end
+                    end
+                end
+            end
+        end
+    else                                                         % derivatives
+        if dg
+            K = feval(cov{:},hyp,x,'diag',i);
+        else
+            for j = 1:N
+                for l = 1:N
+                    Wtot = W(j) * W(l);
+                    if abs(Wtot) > 1e-8
+                        v =  L * [X(j); X(l)];
+                        u = repmat(v',size(x,1),1) + x;
+                        if xeqz
+                            K = K + Wtot * feval(cov{:},hyp,u,[],i);
+                        else
+                            K = K + Wtot * feval(cov{:},hyp,u,z,i);
+                        end
                     end
                 end
             end
         end
     end
-else                                                         % derivatives
-    if dg
-        K = feval(cov{:},hyp,x,'diag',i);
-    else
-        for j = 1:N
-            for l = 1:N
-                Wtot = W(j) * W(l);
-                if abs(Wtot) > 1e-8
-                    v =  L * [X(j); X(l)];
-                    u = repmat(v',size(x,1),1) + x;
-                    if xeqz
-                        K = K + Wtot * feval(cov{:},hyp,u,[],i);
-                    else
-                        K = K + Wtot * feval(cov{:},hyp,u,z,i);
+    if ~dg
+        K = K / (2*pi);
+    end
+    
+elseif (size(x,2) == 3)
+    
+    if nargin < 7                                                % covariances
+        if dg
+            K = feval(cov{:},hyp,x,'diag');
+        else
+            for j = 1:N
+                for k = 1:N
+                    for l = 1:N
+                        Wtot = W(j) * W(k) * W(l);
+                        if abs(Wtot) > 1e-8
+                            v =  L * [X(j); X(k); X(l)];
+                            u = repmat(v',size(x,1),1) + x;
+                            if xeqz
+                                K = K + Wtot * feval(cov{:},hyp,u);
+                            else
+                                K = K + Wtot * feval(cov{:},hyp,u,z);
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    else                                                         % derivatives
+        if dg
+            K = feval(cov{:},hyp,x,'diag',i);
+        else
+            for j = 1:N
+                for k = 1:N
+                    for l = 1:N
+                        Wtot = W(j) * W(k) * W(l);
+                        if abs(Wtot) > 1e-8
+                            v =  L * [X(j); X(k); X(l)];
+                            u = repmat(v',size(x,1),1) + x;
+                            if xeqz
+                                K = K + Wtot * feval(cov{:},hyp,u,[],i);
+                            else
+                                K = K + Wtot * feval(cov{:},hyp,u,z,i);
+                            end
+                        end
                     end
                 end
             end
         end
     end
-end
-if ~dg
-    K = K / (2*pi);
+    if ~dg
+        K = K / (2*pi)^(3/2);
+    end
+    
 end
