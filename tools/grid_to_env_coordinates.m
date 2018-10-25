@@ -11,6 +11,6 @@ point_env(:,2) = point_env(:,2) * map_params.res_y + ...
 
 if isfield(map_params, 'res_z')
     % 3D: Treat as discrete altitude levels.
-    point_env(:,3) = (point_env(:,3) - 1) * map_params.res_z;
+    point_env(:,3) = (point_env(:,3) - 1 + map_params.pos_z) * map_params.res_z;
 end
 end
