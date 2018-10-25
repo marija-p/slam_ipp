@@ -37,10 +37,13 @@ Time = struct(...
 
 % Simulated world
 %   - Simulation landmark sets, playground dimensions
-landmarks = [thickCloister(-6,6,-6,6,1,3), thickCloister(-3,3,-3,3,2,3)];
-num_landmarks = size(landmarks,2);
-landmarks(3,1:num_landmarks/2) = landmarks(3,1:num_landmarks/2) + 0.5;
-landmarks(3,num_landmarks/2+1:end) = landmarks(3,num_landmarks/2+1:end) + 2;
+%landmarks = [thickCloister(-6,6,-6,6,1,3), thickCloister(-3,3,-3,3,2,3)];
+%num_landmarks = size(landmarks,2);
+%landmarks(3,1:num_landmarks/2) = landmarks(3,1:num_landmarks/2) + 0.5;
+%landmarks(3,num_landmarks/2+1:end) = landmarks(3,num_landmarks/2+1:end) + 2;
+[X,Y] = meshgrid(-6:3:6,-6:3:6);
+landmarks = [X(:), Y(:), zeros(numel(X),1)]';
+
 World = struct(...
     'points',           landmarks,... % 3d point landmarks - see THICKCLOISTER.
     'segments',         []);  % 3D segments - see HOUSE.
@@ -57,7 +60,7 @@ Robot{1} = struct(...                  % ODOMETRY EXAMPLE
     'name',               'Dala',...      % robot name
     'type',               'atrv',...      % type of robot
     'motion',             'odometry',...  % motion model
-    'position',           [0;0;0],...     % robot position in map
+    'position',           [0;0;2],...     % robot position in map
     'orientationDegrees', [0;0;0],...     % orientation, in degrees, [roll; pitch; yaw].
     'positionStd',        [0.9;0.9;0],...     % position error, std
     'orientationStd',     [0;0;0],...     % orient. error, std, in degrees
