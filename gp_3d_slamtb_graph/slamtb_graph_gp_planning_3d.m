@@ -33,9 +33,7 @@ dim_x_env = 12;
 dim_y_env = 12;
 dim_z_env = 5;
 
-%% I. Specify user-defined options - EDIT USER DATA FILE userDataGraph.m
-
-%userDataGraph;           % user-defined data. SCRIPT.
+%% I. Specify user-defined options
 userData_graph_gp_3d;
 
 %% II. Initialize all data structures from user-defined data
@@ -57,9 +55,9 @@ factorRob = Rob;
     SimOpt);
 
 % Field mapping data and parameters
-load training_data_3d.mat
-[planning_params, map_params, gp_params] = ...
-    load_params(dim_x_env,dim_y_env,dim_z_env);
+[planning_params, map_params, gp_params, ...
+    training_data, gt_data, testing_data] = ...
+    load_params_and_data(dim_x_env,dim_y_env,dim_z_env);
 dim_x = map_params.dim_x;
 dim_y = map_params.dim_y;
 dim_z = map_params.dim_z;
@@ -69,16 +67,6 @@ dim_z = map_params.dim_z;
 % GP field map
 field_map = [];
 
-% Scale training datafor this environment.
-gt_data.X_gt(:,1) = X_gt(:,1) + map_params.pos_x;
-gt_data.X_gt(:,2) = X_gt(:,2) + map_params.pos_y;
-gt_data.X_gt(:,3) = X_gt(:,3) + map_params.pos_z;
-gt_data.Y_gt = Y_gt;
-testing_data.X_test = gt_data.X_gt;
-training_data.X_train = [];
-training_data.P_train = zeros(3,3,Tim.lastFrame); % Covariance matrices.
-training_data.X_train_gt = [];
-training_data.Y_train = [];
 % Number of time frames between each measurement.
 measurement_frame_interval = 5; 
 
@@ -100,11 +88,7 @@ speed = 0.1;
 clear Robot Sensor World Time   % clear all user data
 
 %% III. Initialize data logging
-% TODO: Create source and/or destination files and paths for data input and
-% logs.
-% TODO: do something here to collect data for post-processing or
-% plotting. Think about collecting data in files using fopen, fwrite,
-% etc., instead of creating large Matlab variables for data logging.
+% TODO.
 
 %% IV. Startup 
 % TODO: Possibly put in initRobots and createFrames, createFactors, createTrj...
