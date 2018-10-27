@@ -186,11 +186,6 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
     for rob = [Rob.rob]
 
         % Robot motion
-        % NOTE: in a regular, non-simulated SLAM, this line is not here and
-        % noise just comes from the real world. Here, the estimated robot
-        % is noised so that the simulated trajectory can be made perfect
-        % and act as a clear reference. The noise is additive to the
-        % control input 'u'.
         Rob(rob).con.u = ...
             SimRob(rob).con.u + Rob(rob).con.uStd.*randn(size(Rob(rob).con.uStd));
         

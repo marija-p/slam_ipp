@@ -38,14 +38,16 @@ gp_params.inf_func = inf_func;
 gp_params.cov_func = cov_func;
 gp_params.lik_func = lik_func;
 
-% Training data - scale for this environment.
+% Ground truth data - scale for this environment.
 gt_data.X_gt(:,1) = X_gt(:,1) + map_params.pos_x;
 gt_data.X_gt(:,2) = X_gt(:,2) + map_params.pos_y;
 gt_data.X_gt(:,3) = X_gt(:,3) + map_params.pos_z;
 gt_data.Y_gt = Y_gt;
+% Testing data - same resolution as ground truth
 testing_data.X_test = gt_data.X_gt;
+% Training data - estimated and real (ground truth)
 training_data.X_train = [];
-training_data.P_train = zeros(3,3,200); % Covariance matrices.
+training_data.P_train = zeros(3,3,200);
 training_data.X_train_gt = [];
 training_data.Y_train = [];
 
