@@ -28,7 +28,7 @@
 clear
 global Map    
 
-% Workspace dimensions
+% UAV workspace dimensions [m]
 dim_x_env = 12;
 dim_y_env = 12;
 dim_z_env = 5;
@@ -56,32 +56,35 @@ factorRob = Rob;
     World,...
     SimOpt);
 
-% Field mapping data + parameters
+% Field mapping data and parameters
 load training_data_3d.mat
-[planning_params, map_params] = load_params(dim_x_env,dim_y_env,dim_z_env);
-
-% Scale for this environment.
-X_gt(:,1) = X_gt(:,1) + map_params.pos_x;
-X_gt(:,2) = X_gt(:,2) + map_params.pos_y;
-X_gt(:,3) = X_gt(:,3) + map_params.pos_z;
-X_test = X_gt;
-X_train = [];
-P_train = zeros(3,3,Tim.lastFrame); % Covariance matrices.
-X_train_gt = [];
-Y_train = [];
-measurement_frame_interval = 5;     % Number of time frames between each measurement. 
+[planning_params, map_params, gp_params] = ...
+    load_params(dim_x_env,dim_y_env,dim_z_env);
 dim_x = map_params.dim_x;
 dim_y = map_params.dim_y;
 dim_z = map_params.dim_z;
 
+% Lattice for 3D grid search
 [lattice_env] = create_lattice(map_params, planning_params);
+% GP field map
+field_map = [];
+
+% Scale training datafor this environment.
+gt_data.X_gt(:,1) = X_gt(:,1) + map_params.pos_x;
+gt_data.X_gt(:,2) = X_gt(:,2) + map_params.pos_y;
+gt_data.X_gt(:,3) = X_gt(:,3) + map_params.pos_z;
+gt_data.Y_gt = Y_gt;
+testing_data.X_test = gt_data.X_gt;
+training_data.X_train = [];
+training_data.P_train = zeros(3,3,Tim.lastFrame); % Covariance matrices.
+training_data.X_train_gt = [];
+training_data.Y_train = [];
+% Number of time frames between each measurement.
+measurement_frame_interval = 5; 
 
 % Planning parameters
 % First measurement, at current robot pose
 goal_pose = Rob.state.x(1:3)';
-
-% Distance before a waypoint is considered "reached" [m]
-achievement_dist = 0.4;
 % Reference speed [m/s]
 speed = 0.1;
 
@@ -90,7 +93,7 @@ speed = 0.1;
     Rob, Sen, Lmk, Obs,...      % SLAM data
     Trj, Frm, Fac, ...
     SimRob, SimSen, SimLmk,...  % Simulator data
-    X_test, ...                 % Field data
+    testing_data.X_test, ...       % Field data
     FigOpt);                    % User-defined graphic options
 
 % Clear user data - not needed anymore
@@ -163,7 +166,7 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
     dz = goal_pose(3) - SimRob.state.x(3);
     
     theta = atan2(dy,dx);
-    
+
     %SimRob.con.u(1:3) = speed*[cos(theta), sin(theta), 0];
     %Rob.con.u(1:3) = speed*[cos(theta), sin(theta), 0];
     SimRob.con.u(1:3) = speed*[dx,dy,dz];
@@ -296,36 +299,19 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     if (mod(currentFrame,measurement_frame_interval) == 0 && ...
             ~isempty(Map.pr) && ...
-            pdist([Rob.state.x(1:3)'; goal_pose]) < achievement_dist)
+            pdist([Rob.state.x(1:3)'; goal_pose]) < planning_params.achievement_dist)
         
         for rob = [Rob.rob]
             
-            % Take a measurement - add to training data.
-            X_train = [X_train; Rob(rob).state.x(1:3)'];
-            X_train_gt = [X_train_gt; SimRob(rob).state.x(1:3)'];
-            r = Rob.state.r(1:3);
-            P = Map.P(r,r);
-            P_train(:,:,size(X_train,1)) = P;
-            Y_train = [Y_train; ...
-                interp3(reshape(X_gt(:,1),dim_y,dim_x,dim_z), ...
-                reshape(X_gt(:,2),dim_y,dim_x,dim_z), ...
-                reshape(X_gt(:,3),dim_y,dim_x,dim_z), ...
-                reshape(Y_gt,dim_y,dim_x,dim_z), ...
-                SimRob(rob).state.x(1), ...
-                SimRob(rob).state.x(2), ...
-                SimRob(rob).state.x(3))];
-            
-            % Do GP regression.
-            cov_func_UI = {@covUI, cov_func, N_gauss, P};
-            [ymu, ys, fmu, fs, ~ , post] = ...
-                gp(hyp_trained, inf_func, mean_func, cov_func_UI, lik_func, ...
-                X_train, Y_train, X_test);
+            [field_map, training_data] = ...
+                take_measurement_at_point(Rob(rob), SimRob(rob), field_map, .....
+                training_data, gt_data, testing_data, gp_params, map_params);
             
         end
         
         % 4. PLANNING
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        [~, max_ind] = max(ys);
+        [~, max_ind] = max(field_map.cov);
         [max_i, max_j, max_k] = ...
             ind2sub([dim_y, dim_x, dim_z], max_ind);
         goal_pose = ...
@@ -355,7 +341,7 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
             FldFig = drawFldFig(FldFig,  ...
                 Rob, Lmk, ...
                 SimRob, ...
-                ymu, ys, ...
+                field_map.mean, field_map.cov, ...
                 FigOpt);
         end
         
