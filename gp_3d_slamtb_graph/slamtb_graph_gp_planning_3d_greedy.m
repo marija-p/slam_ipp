@@ -28,11 +28,6 @@
 clear
 global Map    
 
-% Workspace dimensions
-dim_x_env = 12;
-dim_y_env = 12;
-dim_z_env = 5;
-
 %% I. Specify user-defined options - EDIT USER DATA FILE userDataGraph.m
 
 %userDataGraph;           % user-defined data. SCRIPT.
@@ -56,10 +51,8 @@ factorRob = Rob;
     World,...
     SimOpt);
 
-% Field mapping data + parameters
+% Field mapping data
 load training_data_3d.mat
-[planning_params, map_params] = load_params(dim_x_env,dim_y_env,dim_z_env);
-
 % Scale for this environment.
 X_gt(:,1) = X_gt(:,1) + map_params.pos_x;
 X_gt(:,2) = X_gt(:,2) + map_params.pos_y;
@@ -73,8 +66,6 @@ measurement_frame_interval = 5;     % Number of time frames between each measure
 dim_x = map_params.dim_x;
 dim_y = map_params.dim_y;
 dim_z = map_params.dim_z;
-
-[lattice_env] = create_lattice(map_params, planning_params);
 
 % Planning parameters
 % First measurement, at current robot pose
