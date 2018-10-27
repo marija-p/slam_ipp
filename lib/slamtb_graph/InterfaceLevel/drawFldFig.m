@@ -30,8 +30,6 @@ for k = 1:2
         
     end
     
-    gca;
-    
     if any(erase)
         [FldFig.Lmk(erase,k).drawn] = deal(false);
         set([FldFig.Lmk(erase,k).mean],   'visible','off');

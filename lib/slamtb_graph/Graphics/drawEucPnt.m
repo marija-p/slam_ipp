@@ -8,6 +8,10 @@ global Map
 
 posOffset = [0;0;.2];
 
+num_axes = size(MapFig.axes, 2);
+
+hold on
+
 switch Map.type
     case 'ekf'
         % Mean and covariance
@@ -22,20 +26,37 @@ switch Map.type
         else
             P = zeros(3);
         end
-            
+        
     otherwise
         error('??? Unknown Map type ''%s''.',Map.type)
 end
 
-drawPnt    (MapFig.Lmk(Lmk.lmk).mean,    x,    color.mean)
 
-if MapOpt.showEllip
-    drawEllipse(MapFig.Lmk(Lmk.lmk).ellipse, x, 2*P, color.ellip)
+if (num_axes > 1)
+    for k = 1:num_axes
+        
+        drawPnt    (MapFig.Lmk(Lmk.lmk,k).mean,    x,    color.mean)
+        
+        if MapOpt.showEllip
+            drawEllipse(MapFig.Lmk(Lmk.lmk,k).ellipse, x, 2*P, color.ellip)
+        end
+        
+        if MapOpt.showLmkId
+            drawLabel  (MapFig.Lmk(Lmk.lmk,k).label,   x+posOffset, num2str(Lmk.id))
+        end
+    end
+else
+    drawPnt    (MapFig.Lmk(Lmk.lmk).mean,    x,    color.mean)
+    
+    if MapOpt.showEllip
+        drawEllipse(MapFig.Lmk(Lmk.lmk).ellipse, x, 2*P, color.ellip)
+    end
+    
+    if MapOpt.showLmkId
+        drawLabel  (MapFig.Lmk(Lmk.lmk).label,   x+posOffset, num2str(Lmk.id))
+    end
 end
 
-if MapOpt.showLmkId
-    drawLabel  (MapFig.Lmk(Lmk.lmk).label,   x+posOffset, num2str(Lmk.id))
-end
 
 
 % ========== End of function - Start GPL license ==========

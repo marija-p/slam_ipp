@@ -86,6 +86,7 @@ end
 caxis([0 50])
 colorbar
 title('Mean')
+%FldFig.field_mean.MarkerFaceAlpha = 0.75;
 
 subplot(1,2,2)
 hold on
@@ -101,5 +102,6 @@ elseif (size(X_test,2) == 3)
 end
 colorbar
 title('Variance')
+%FldFig.field_cov.MarkerFaceAlpha = 0.75;
 
 end
