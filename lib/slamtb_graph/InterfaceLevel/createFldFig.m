@@ -1,4 +1,4 @@
-function FldFig = createFldFig(Rob,SimRob,X_test,FigOpt)
+function FldFig = createFldFig(Rob,Lmk,SimRob,X_test,FigOpt)
 % CREATEFLDFIG Create field figure and handles.
 
 FldFig.fig = figure(5);
@@ -50,6 +50,12 @@ for k = 1:2
         
     end
     
+    % landmarks
+    for lmk = 1:numel(Lmk)
+        
+        FldFig.Lmk(lmk,k) = createLmkGraphics(Lmk(lmk),FigOpt.map.colors.label,FldFig.axes(k));
+        
+    end
     
     % SIMULATED OBJECTS
     if ~isempty(SimRob)

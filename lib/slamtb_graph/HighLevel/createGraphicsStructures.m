@@ -35,7 +35,7 @@ MapFig = createMapFig(Rob,Sen,Lmk, Trj, Frm, Fac,SimRob,SimSen,SimLmk,FigOpt);
 SenFig = createSenFig(Sen,Obs,SimLmk,FigOpt);
 
 % Init Gaussian field figure
-FldFig = createFldFig(Rob,SimRob,X_test,FigOpt);
+FldFig = createFldFig(Rob,Lmk,SimRob,X_test,FigOpt);
 
 % ========== End of function - Start GPL license ==========
 

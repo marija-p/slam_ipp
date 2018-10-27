@@ -1,4 +1,4 @@
-function FldFig = drawFldFig(FldFig, Rob, SimRob, ymu, ys)
+function FldFig = drawFldFig(FldFig, Rob, Lmk, SimRob, ymu, ys, FigOpt)
 
 % DRAWFIELDFIG  Redraw the field figure.
 
@@ -8,6 +8,11 @@ hold on
 % FIELD MAP
 FldFig.field_mean.CData = ymu;
 FldFig.field_cov.CData = ys;
+
+% erase non used landmarks
+used  = [Lmk.used];
+drawn = [FldFig.Lmk(:,1).drawn];
+erase = drawn & ~used;
 
 for k = 1:2
     
@@ -23,6 +28,21 @@ for k = 1:2
             drawEllipse(FldFig.Rob(rob,k).ellipse,Rob(rob).frame.x(1:3),2*P);
         end
         
+    end
+    
+    gca;
+    
+    if any(erase)
+        [FldFig.Lmk(erase,k).drawn] = deal(false);
+        set([FldFig.Lmk(erase,k).mean],   'visible','off');
+        set([FldFig.Lmk(erase,k).ellipse],'visible','off');
+        set([FldFig.Lmk(erase,k).label],  'visible','off');
+    end
+    
+    % for each landmark:
+    for lmk=find(used)
+        FldFig.Lmk(lmk,k).drawn = true;
+        drawLmk(FldFig,Lmk(lmk),FigOpt.map);
     end
     
     % SIMULATED OBJECTS
