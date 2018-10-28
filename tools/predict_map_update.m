@@ -1,14 +1,15 @@
-function field_map = predict_map_update(pos, field_map, ...
+function field_map = predict_map_update(pos, Rob, field_map, ...
     training_data, testing_data, map_params, gp_params)
-% Predicts grid map update at an unvisited UAV position using GP
-% regression.
+% Predicts grid map update at an unvisited robot position
+% using GP regression.
 % --
 % Inputs:
-% pos: current [x,y,z] UAV position [m] - env. coordinates
-% grid_map: current grid map (mean + covariance)
+% pos: target [x,y,z] robot position [m] - env. coordinates
+% Rob: robot structure - current state
+% field_map: current GP field map (mean + covariance)
 % ---
 % Outputs:
-% grid map
+% field_map
 % ---
 % M Popovic 2018
 %
@@ -18,10 +19,22 @@ dim_x = map_params.dim_x;
 dim_y = map_params.dim_y;
 dim_z = map_params.dim_z;
 
+%% TODO: estimate robot motion -> predict covariance update. %%
+% Get current robot covariance.
+% r = Rob.state.r(1:3);
+% P = Map.P(r,r);
+%
+% Generate control signals (trajectory/point-based).
+%
+% Estimate motion by integrating odometry.
+% Time-stepping?
+%Rob.con.u = ...
+%    SimRob.con.u + Rob(rob).con.uStd.*randn(size(Rob(rob).con.uStd));
+%Rob = simMotion(Rob,Tim);
+%Rob = integrateMotion(Rob,Tim);
+
 % Update training data.
 training_data.X_train = [training_data.X_train; pos];
-%r = Rob.state.r(1:3);
-%P = Map.P(r,r);
 % Take maximum likelihood measurement based on current field map state.
 training_data.Y_train = [training_data.Y_train; ...
     interp3(reshape(testing_data.X_test(:,1),dim_y,dim_x,dim_z), ...
@@ -39,4 +52,3 @@ field_map.mean = ymu;
 field_map.cov = ys;
 
 end
-
