@@ -30,7 +30,7 @@ planning_params.max_acc = 3;        % [m/s^2]
 % Frequency at which to send commands - simulate motion/covariance update
 planning_params.control_freq = 5;   % [Hz]
 % Frequency at which to take measurements
-planning_params.meas_freq = 2;      % [Hz]
+planning_params.meas_freq = 0.5;      % [Hz]
 
 % Number of control points for a polynomial (start point fixed).
 planning_params.control_points = 1;

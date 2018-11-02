@@ -269,7 +269,8 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
     % 3. SENSING + GP UPDATE
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     if (~isempty(Map.pr) && ...
-            pdist([Rob.state.x(1:3)'; points_meas]) < planning_params.achievement_dist)
+            pdist([Rob.state.x(1:3)'; points_meas(1,:)]) < ...
+            planning_params.achievement_dist)
         
         for rob = [Rob.rob]
             
@@ -282,25 +283,35 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
         refresh_field_fig = 1;
         
         point_prev = Rob.state.x(1:3)';
+        points_meas = points_meas(2:end,:);
+        
         
         % 4. PLANNING
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        [~, max_ind] = max(field_map.cov);
-        [max_i, max_j, max_k] = ...
-            ind2sub([dim_y, dim_x, dim_z], max_ind);
-        points_meas = ...
-            grid_to_env_coordinates([max_j, max_i, max_k], map_params);
-        disp(['Next goal: ', num2str(points_meas)])
-        
-        % Generate trajectory to the goal.
-        trajectory = plan_path_waypoints([point_prev;points_meas], ...
-            planning_params.max_vel, planning_params.max_acc);
-        
-        % Sample trajectory to simulate motion.
-        [times_control, points_control, ~, ~] = ...
-            sample_trajectory(trajectory, 1/planning_params.control_freq);
-        
-        %keyboard
+        if isempty(points_meas)
+            
+            [~, max_ind] = max(field_map.cov);
+            [max_i, max_j, max_k] = ...
+                ind2sub([dim_y, dim_x, dim_z], max_ind);
+            points_meas = ...
+                grid_to_env_coordinates([max_j, max_i, max_k], map_params);
+            disp(['Next goal: ', num2str(points_meas)])
+            
+            % Generate trajectory to the goal.
+            trajectory = plan_path_waypoints([point_prev;points_meas], ...
+                planning_params.max_vel, planning_params.max_acc);
+            
+            % Sample trajectory for simulating motion.
+            [times_control, points_control, ~, ~] = ...
+                sample_trajectory(trajectory, 1/planning_params.control_freq);
+            
+            % Sample trajectory for taking measurements.
+            [times_meas, points_meas, ~, ~] = ...
+               sample_trajectory(trajectory, 1/planning_params.meas_freq);
+            
+            %keyboard
+            
+        end
         
     end
     
