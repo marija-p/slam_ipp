@@ -22,9 +22,6 @@
 %   Copyright Teresa Vidal-Calleja @ ACFR.
 %   See COPYING.TXT for full copyright license.
 
-%% OK we start here
-
-% clear workspace and declare globals
 clear
 global Map    
 
@@ -62,32 +59,27 @@ dim_x = map_params.dim_x;
 dim_y = map_params.dim_y;
 dim_z = map_params.dim_z;
 
+% Planning parameters
+% First measurement at current robot pose
+points_meas = Rob.state.x(1:3)';
+points_control = points_meas;
+
 % Lattice for 3D grid search
 [lattice_env] = create_lattice(map_params, planning_params);
 % GP field map
 field_map = [];
-
-% Number of time frames between each measurement.
-measurement_frame_interval = 5; 
-
-% Planning parameters
-% First measurement, at current robot pose
-goal_pose = Rob.state.x(1:3)';
-points_control = goal_pose;
-
-% Reference speed [m/s]
-speed = 1;
 
 % Graphics handles.
 [MapFig,SenFig,FldFig]          = createGraphicsStructures(...
     Rob, Sen, Lmk, Obs,...      % SLAM data
     Trj, Frm, Fac, ...
     SimRob, SimSen, SimLmk,...  % Simulator data
-    testing_data.X_test, ...       % Field data
+    testing_data.X_test, ...    % Field data
     FigOpt);                    % User-defined graphic options
+refresh_field_fig = 0;
 
 % Clear user data - not needed anymore
-clear Robot Sensor World Time   % clear all user data
+clear Robot Sensor World Time
 
 %% III. Initialize data logging
 % TODO.
@@ -148,15 +140,13 @@ end
 for currentFrame = Tim.firstFrame : Tim.lastFrame
     
     % Generate control commands.
-    dx = points_control(1,1) - SimRob.state.x(1);
-    dy = points_control(1,2) - SimRob.state.x(2);
-    dz = points_control(1,3) - SimRob.state.x(3);
-    theta = atan2(dy,dx);
+    u = points_control(1,:) - SimRob.state.x(1:3)';
+    % For orientation
+    %theta = atan2(u(2),u(1));
+    SimRob.con.u(1:3) = u;
+    Rob.con.u(1:3) = u;
     
-    SimRob.con.u(1:3) = speed*[dx,dy,dz];
-    Rob.con.u(1:3) = speed*[dx,dy,dz];
-    
-    % Remove commanded pose from queue.
+    % Remove target control point from queue.
     points_control = points_control(2:end,:);
     
     % 1. SIMULATION
@@ -279,7 +269,7 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
     % 3. SENSING + GP UPDATE
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     if (~isempty(Map.pr) && ...
-            pdist([Rob.state.x(1:3)'; goal_pose]) < planning_params.achievement_dist)
+            pdist([Rob.state.x(1:3)'; points_meas]) < planning_params.achievement_dist)
         
         for rob = [Rob.rob]
             
@@ -289,19 +279,21 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
             
         end
         
-        prev_pose = Rob.state.x(1:3)';
+        refresh_field_fig = 1;
+        
+        point_prev = Rob.state.x(1:3)';
         
         % 4. PLANNING
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         [~, max_ind] = max(field_map.cov);
         [max_i, max_j, max_k] = ...
             ind2sub([dim_y, dim_x, dim_z], max_ind);
-        goal_pose = ...
+        points_meas = ...
             grid_to_env_coordinates([max_j, max_i, max_k], map_params);
-        disp(['Next goal: ', num2str(goal_pose)])
+        disp(['Next goal: ', num2str(points_meas)])
         
         % Generate trajectory to the goal.
-        trajectory = plan_path_waypoints([prev_pose;goal_pose], ...
+        trajectory = plan_path_waypoints([point_prev;points_meas], ...
             planning_params.max_vel, planning_params.max_acc);
         
         % Sample trajectory to simulate motion.
@@ -329,12 +321,13 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
             FigOpt);
         
         % Figure of the Field:
-        if ~isempty(Map.pr)
+        if (refresh_field_fig)
             FldFig = drawFldFig(FldFig,  ...
                 Rob, Lmk, ...
                 SimRob, ...
                 field_map.mean, field_map.cov, ...
                 FigOpt);
+            refresh_field_fig = 0;
         end
         
         if FigOpt.createVideo
