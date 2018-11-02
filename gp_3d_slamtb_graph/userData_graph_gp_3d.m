@@ -138,7 +138,7 @@ Opt = struct(...
     'lmkSize',        3,...          % Size of landmark state
     'lmkDSize',       3,...          % Size of lmk error state
     'numFrames',      50,...         % number of frames in graph
-    'kfrmPeriod',     20),...        % period between keyframes
+    'kfrmPeriod',     10),...        % period between keyframes
     'solver',           struct(...    % graph solver
     'decomposition',  'QR',...        % Matrix decomposition {'Cholesky', 'QR', 'Schur'}
     'niterations',    100,...           % number of iterations
@@ -197,7 +197,7 @@ SimOpt = struct(...
 %       [r g b]     RGB color vector. [0 0 0] is black, [1 1 1] is white.
 FigOpt = struct(...
     'renderer',       'zbuffer',...    % renderer
-    'rendPeriod',     5,...           % frames to skip for faster processing
+    'rendPeriod',     1,...           % frames to skip for faster processing
     'createVideo',    false,...       % create video sequences?
     'map',            struct(...      % map figure options
     'size',         [320 240],...   % map figure size

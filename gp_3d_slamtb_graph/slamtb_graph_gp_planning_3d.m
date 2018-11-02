@@ -73,8 +73,10 @@ measurement_frame_interval = 5;
 % Planning parameters
 % First measurement, at current robot pose
 goal_pose = Rob.state.x(1:3)';
+points_control = goal_pose;
+
 % Reference speed [m/s]
-speed = 0.1;
+speed = 1;
 
 % Graphics handles.
 [MapFig,SenFig,FldFig]          = createGraphicsStructures(...
@@ -145,16 +147,17 @@ end
 %% V. Main loop
 for currentFrame = Tim.firstFrame : Tim.lastFrame
     
-    dy = goal_pose(2) - SimRob.state.x(2);
-    dx = goal_pose(1) - SimRob.state.x(1);
-    dz = goal_pose(3) - SimRob.state.x(3);
-    
+    % Generate control commands.
+    dx = points_control(1,1) - SimRob.state.x(1);
+    dy = points_control(1,2) - SimRob.state.x(2);
+    dz = points_control(1,3) - SimRob.state.x(3);
     theta = atan2(dy,dx);
-
-    %SimRob.con.u(1:3) = speed*[cos(theta), sin(theta), 0];
-    %Rob.con.u(1:3) = speed*[cos(theta), sin(theta), 0];
+    
     SimRob.con.u(1:3) = speed*[dx,dy,dz];
     Rob.con.u(1:3) = speed*[dx,dy,dz];
+    
+    % Remove commanded pose from queue.
+    points_control = points_control(2:end,:);
     
     % 1. SIMULATION
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -175,12 +178,10 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
 
     end % end process robots
 
-    
-
     % 2. ESTIMATION
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    % 2.a. Robot motion prediction
+    %% 2.a. Robot motion prediction
 
     % Process robots
     for rob = [Rob.rob]
@@ -201,10 +202,11 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
     Map.t = Map.t + Tim.dt;
     
     
-    % 2.b. Graph construction and solving
+    %% 2.b. Graph construction and solving
     
-    if mod(currentFrame - Tim.firstFrame + 1, Opt.map.kfrmPeriod) == 0
-            
+    if mod(currentFrame - Tim.firstFrame + 1, Opt.map.kfrmPeriod) == 0 || ...
+            isempty(points_control)
+        
         % Process robots
         for rob = [Rob.rob]
             
@@ -236,7 +238,7 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
                 % Initialize new landmarks
                 ninits = Opt.init.nbrInits(1 + (currentFrame ~= Tim.firstFrame));
                 for i = 1:ninits
-
+                    
                     % Init new lmk
                     [Lmk,Obs(sen,:),Frm(rob,Trj(rob).head),Fac,lmk] = initNewLmk(...
                         Rob(rob),   ...
@@ -276,8 +278,7 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
     
     % 3. SENSING + GP UPDATE
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    if (mod(currentFrame,measurement_frame_interval) == 0 && ...
-            ~isempty(Map.pr) && ...
+    if (~isempty(Map.pr) && ...
             pdist([Rob.state.x(1:3)'; goal_pose]) < planning_params.achievement_dist)
         
         for rob = [Rob.rob]
@@ -288,6 +289,8 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
             
         end
         
+        prev_pose = Rob.state.x(1:3)';
+        
         % 4. PLANNING
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         [~, max_ind] = max(field_map.cov);
@@ -296,6 +299,16 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
         goal_pose = ...
             grid_to_env_coordinates([max_j, max_i, max_k], map_params);
         disp(['Next goal: ', num2str(goal_pose)])
+        
+        % Generate trajectory to the goal.
+        trajectory = plan_path_waypoints([prev_pose;goal_pose], ...
+            planning_params.max_vel, planning_params.max_acc);
+        
+        % Sample trajectory to simulate motion.
+        [times_control, points_control, ~, ~] = ...
+            sample_trajectory(trajectory, 1/planning_params.control_freq);
+        
+        %keyboard
         
     end
     
@@ -316,7 +329,7 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
             FigOpt);
         
         % Figure of the Field:
-        if mod(currentFrame,measurement_frame_interval) == 0 && ~isempty(Map.pr)
+        if ~isempty(Map.pr)
             FldFig = drawFldFig(FldFig,  ...
                 Rob, Lmk, ...
                 SimRob, ...

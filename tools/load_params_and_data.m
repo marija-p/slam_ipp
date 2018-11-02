@@ -23,6 +23,15 @@ planning_params.lattice_points_x = 3;
 planning_params.lattice_points_y = 3;
 planning_params.lattice_points_z = 3;
 
+% Trajectory optimization references
+planning_params.max_vel = 3;        % [m/s]
+planning_params.max_acc = 3;        % [m/s^2]
+
+% Frequency at which to send commands - simulate motion/covariance update
+planning_params.control_freq = 5;   % [Hz]
+% Frequency at which to take measurements
+planning_params.meas_freq = 2;      % [Hz]
+
 % Number of control points for a polynomial (start point fixed).
 planning_params.control_points = 1;
 
