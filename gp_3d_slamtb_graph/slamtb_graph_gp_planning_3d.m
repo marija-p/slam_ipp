@@ -23,7 +23,7 @@
 %   See COPYING.TXT for full copyright license.
 
 clear
-global Map    
+global Map
 
 % UAV workspace dimensions [m]
 dim_x_env = 12;
@@ -63,8 +63,10 @@ dim_z = map_params.dim_z;
 % NB: - First measurement at current robot pose
 points_control = Rob.state.x(1:3)';
 do_first_meas = 1;
-% Number of (control) time-frames along current trajectory
+% Number of time-frames along current trajectory
 num_control_frames = 0;
+% Number of time-frames between each measurement
+meas_frame_interval = planning_params.control_freq/planning_params.meas_freq;
 % Simulation time increment [s] = 1/control simulation frequency [Hz]
 Tim.dt = 1/planning_params.control_freq;
 
@@ -73,7 +75,7 @@ Tim.dt = 1/planning_params.control_freq;
 % GP field map
 field_map = [];
 
-% Graphics handles.
+% Graphics handles
 [MapFig,SenFig,FldFig]          = createGraphicsStructures(...
     Rob, Sen, Lmk, Obs,...      % SLAM data
     Trj, Frm, Fac, ...
@@ -82,13 +84,13 @@ field_map = [];
     FigOpt);                    % User-defined graphic options
 refresh_field_fig = 0;
 
-% Clear user data - not needed anymore
+% Clear user data
 clear Robot Sensor World Time
 
 %% III. Initialize data logging
 % TODO.
 
-%% IV. Startup 
+%% IV. Startup
 % TODO: Possibly put in initRobots and createFrames, createFactors, createTrj...
 for rob = [Rob.rob]
     
@@ -157,31 +159,31 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
     
     % 1. SIMULATION
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+    
     % Simulate robots
     for rob = [SimRob.rob]
-
+        
         % Robot motion
         SimRob(rob) = simMotion(SimRob(rob),Tim);
         
         % Simulate sensor observations
         for sen = SimRob(rob).sensors
-
+            
             % Observe simulated landmarks
             Raw(sen) = simObservation(SimRob(rob), SimSen(sen), SimLmk, SimOpt) ;
-
+            
         end % end process sensors
-
+        
     end % end process robots
-
+    
     % 2. ESTIMATION
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     %% 2.a. Robot motion prediction
-
+    
     % Process robots
     for rob = [Rob.rob]
-
+        
         % Robot motion
         Rob(rob).con.u = ...
             SimRob(rob).con.u + Rob(rob).con.uStd.*randn(size(Rob(rob).con.uStd));
@@ -274,8 +276,7 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
     
     % 3. SENSING + GP UPDATE
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    if (~isempty(Map.pr) && ...
-            mod(num_control_frames, 10) == 0) || (do_first_meas)
+    if (mod(num_control_frames-1, meas_frame_interval) == 0) || (do_first_meas)
         
         for rob = [Rob.rob]
             
@@ -292,7 +293,7 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
     
     % 4. PLANNING
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    if isempty(points_control) && ~isempty(Map.pr)
+    if isempty(points_control)
         
         [~, max_ind] = max(field_map.cov);
         [max_i, max_j, max_k] = ...
@@ -303,8 +304,7 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
         
         % Generate trajectory to the goal.
         trajectory = plan_path_waypoints([Rob.state.x(1:3)';point_goal], ...
-            planning_params.max_vel, planning_params.max_acc);
-        
+            planning_params.max_vel, planning_params.max_acc);       
         % Sample trajectory for motion simulation.
         [times_control, points_control, ~, ~] = ...
             sample_trajectory(trajectory, 1/planning_params.control_freq);
@@ -316,12 +316,12 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
     
     % 5. VISUALIZATION
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+    
     if currentFrame == Tim.firstFrame ...
             || currentFrame == Tim.lastFrame ...
             || mod(currentFrame,FigOpt.rendPeriod) == 0
-
-
+        
+        
         % Figure of the Map:
         MapFig = drawMapFig(MapFig,  ...
             Rob, Sen, Lmk,  ...
@@ -358,7 +358,7 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
             end
             
         end
-
+        
         % Do draw all objects
         drawnow;
         
@@ -366,10 +366,7 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
     
     % 5. DATA LOGGING
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % TODO: do something here to collect data for post-processing or
-    % plotting. Think about collecting data in files using fopen, fwrite,
-    % etc., instead of creating large Matlab variables for data logging.
-
+    
 end
 
 %% VI. Post-processing
@@ -406,7 +403,7 @@ end
 %   Copyright (c) 2008-2010, Joan Sola @ LAAS-CNRS,
 %   Copyright (c) 2010-2013, Joan Sola,
 %   Copyright (c) 2014-2015, Joan Sola @ IRI-UPC-CSIC,
-%   SLAMTB is Copyright 2009 
+%   SLAMTB is Copyright 2009
 %   by Joan Sola, Teresa Vidal-Calleja, David Marquez and Jean Marie Codol
 %   @ LAAS-CNRS.
 %   See on top of this file for its particular copyright.
