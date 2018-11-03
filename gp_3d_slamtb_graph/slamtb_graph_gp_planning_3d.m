@@ -60,9 +60,13 @@ dim_y = map_params.dim_y;
 dim_z = map_params.dim_z;
 
 % Planning parameters
-% First measurement at current robot pose
-points_meas = Rob.state.x(1:3)';
-points_control = points_meas;
+% NB: - First measurement at current robot pose
+points_control = Rob.state.x(1:3)';
+do_first_meas = 1;
+% Number of (control) time-frames along current trajectory
+num_control_frames = 0;
+% Simulation time increment [s] = 1/control simulation frequency [Hz]
+Tim.dt = 1/planning_params.control_freq;
 
 % Lattice for 3D grid search
 [lattice_env] = create_lattice(map_params, planning_params);
@@ -136,6 +140,7 @@ for rob = [Rob.rob]
     
 end
 
+
 %% V. Main loop
 for currentFrame = Tim.firstFrame : Tim.lastFrame
     
@@ -148,6 +153,7 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
     
     % Remove target control point from queue.
     points_control = points_control(2:end,:);
+    num_control_frames = num_control_frames + 1;
     
     % 1. SIMULATION
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -261,7 +267,7 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
             
             % Reset motion robot
             factorRob(rob) = resetMotion(Rob(rob));
-      
+            
         end
         
     end
@@ -269,8 +275,7 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
     % 3. SENSING + GP UPDATE
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     if (~isempty(Map.pr) && ...
-            pdist([Rob.state.x(1:3)'; points_meas(1,:)]) < ...
-            planning_params.achievement_dist)
+            mod(num_control_frames, 10) == 0) || (do_first_meas)
         
         for rob = [Rob.rob]
             
@@ -281,37 +286,30 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
         end
         
         refresh_field_fig = 1;
+        do_first_meas = 0;
         
-        point_prev = Rob.state.x(1:3)';
-        points_meas = points_meas(2:end,:);
+    end
+    
+    % 4. PLANNING
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    if isempty(points_control) && ~isempty(Map.pr)
         
+        [~, max_ind] = max(field_map.cov);
+        [max_i, max_j, max_k] = ...
+            ind2sub([dim_y, dim_x, dim_z], max_ind);
+        point_goal = ...
+            grid_to_env_coordinates([max_j, max_i, max_k], map_params);
+        disp(['Next goal: ', num2str(point_goal)])
         
-        % 4. PLANNING
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        if isempty(points_meas)
-            
-            [~, max_ind] = max(field_map.cov);
-            [max_i, max_j, max_k] = ...
-                ind2sub([dim_y, dim_x, dim_z], max_ind);
-            points_meas = ...
-                grid_to_env_coordinates([max_j, max_i, max_k], map_params);
-            disp(['Next goal: ', num2str(points_meas)])
-            
-            % Generate trajectory to the goal.
-            trajectory = plan_path_waypoints([point_prev;points_meas], ...
-                planning_params.max_vel, planning_params.max_acc);
-            
-            % Sample trajectory for simulating motion.
-            [times_control, points_control, ~, ~] = ...
-                sample_trajectory(trajectory, 1/planning_params.control_freq);
-            
-            % Sample trajectory for taking measurements.
-            [times_meas, points_meas, ~, ~] = ...
-               sample_trajectory(trajectory, 1/planning_params.meas_freq);
-            
-            %keyboard
-            
-        end
+        % Generate trajectory to the goal.
+        trajectory = plan_path_waypoints([Rob.state.x(1:3)';point_goal], ...
+            planning_params.max_vel, planning_params.max_acc);
+        
+        % Sample trajectory for motion simulation.
+        [times_control, points_control, ~, ~] = ...
+            sample_trajectory(trajectory, 1/planning_params.control_freq);
+        
+        num_control_frames = 0;
         
     end
     

@@ -31,9 +31,9 @@
 % Time variables
 %   - sampling time, first and last frames
 Time = struct(...
-    'dt',                   .1,...          % sampling time, seconds
+    'dt',                   0.2,...         % (control) sampling time [s]
     'firstFrame',           1,...           % first frame #
-    'lastFrame',            1200);           % last frame #
+    'lastFrame',            1200);          % last frame #
 
 % Simulated world
 %   - Simulation landmark sets, playground dimensions
