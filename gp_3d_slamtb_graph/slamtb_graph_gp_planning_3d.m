@@ -115,7 +115,7 @@ for rob = [Rob.rob]
         for i = 1:ninits
             
             % Observe simulated landmarks
-            Raw(sen) = simObservation(SimRob(rob), SimSen(sen), SimLmk, SimOpt) ;
+            Raw(sen) = simObservation(SimRob(rob), SimSen(sen), SimLmk, SimOpt);
             
             % Init new lmk
             fac = find([Fac.used] == false, 1, 'first');

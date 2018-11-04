@@ -1,5 +1,6 @@
 function path = search_lattice(Rob_init, lattice, field_map, ...
-    Tim, training_data, testing_data, map_params, planning_params, gp_params)
+    Tim, SimRob, SimSen, SimLmk, SimOpt, ...
+    training_data, testing_data, map_params, planning_params, gp_params)
 % Performs a greedy grid search over a list of candidates to identify
 % most promising points to visit based on an informative objective.
 % Starting point is fixed (no measurement taken here)
@@ -61,16 +62,19 @@ while (planning_params.control_points > size(path, 1))
         % Simulate covariance propagation assuming constant velocity.
         if ~isempty(points_control)
             
+            % 1. Motion
             % Generate control commands.
             u = points_control(1,:) - Rob_eval.state.x(1:3)';
             Rob_eval.con.u = ...
                 [u';0;0;0] + Rob_eval.con.uStd.*randn(size(Rob_eval.con.uStd));
-            
             % Propagate motion uncertainty.
             Rob_eval = integrateMotion(Rob_eval, Tim);
-            
             % Pop target control point from queue.
             points_control = points_control(2:end,:);
+            
+            % Observation.
+            % Observe simulated landmarks using sensor.
+            Raw = simObservation(SimRob, SimSen, SimLmk, SimOpt) ;
             
         end
         
