@@ -1,5 +1,5 @@
 function path = search_lattice(Rob_init, lattice, field_map, ...
-    Tim, SimRob, SimSen, SimLmk, SimOpt, ...
+    SimRob, SimSen, SimLmk, SimOpt, Sen, Lmk, Obs, Frm, Tim, Opt, ...
     training_data, testing_data, map_params, planning_params, gp_params)
 % Performs a greedy grid search over a list of candidates to identify
 % most promising points to visit based on an informative objective.
@@ -76,6 +76,10 @@ while (planning_params.control_points > size(path, 1))
             % Observe simulated landmarks using sensor.
             Raw = simObservation(SimRob, SimSen, SimLmk, SimOpt) ;
             
+            % Predict EKF update for known landmarks.
+            [Rob_eval, Sen, Lmk, Obs] = ...
+                predictKnownLmkCorr(Rob_eval, Sen, Raw, Lmk, Obs, Frm, Opt);
+
         end
         
         disp('Final pose cov.: ')
