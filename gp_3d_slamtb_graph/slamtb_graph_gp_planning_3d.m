@@ -153,7 +153,7 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
     SimRob.con.u(1:3) = u;
     Rob.con.u(1:3) = u;
     
-    % Remove target control point from queue.
+    % Pop target control point from queue.
     points_control = points_control(2:end,:);
     num_control_frames = num_control_frames + 1;
     
