@@ -71,7 +71,7 @@ meas_frame_interval = planning_params.control_freq/planning_params.meas_freq;
 Tim.dt = 1/planning_params.control_freq;
 
 % Lattice for 3D grid search
-[lattice_env] = create_lattice(map_params, planning_params);
+lattice = create_lattice(map_params, planning_params);
 % GP field map
 field_map = [];
 
@@ -301,6 +301,8 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
         point_goal = ...
             grid_to_env_coordinates([max_j, max_i, max_k], map_params);
         disp(['Next goal: ', num2str(point_goal)])
+        
+        keyboard
         
         % Generate trajectory to the goal.
         trajectory = plan_path_waypoints([Rob.state.x(1:3)';point_goal], ...

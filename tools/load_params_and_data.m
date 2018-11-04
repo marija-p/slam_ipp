@@ -33,7 +33,7 @@ planning_params.control_freq = 5;   % [Hz]
 planning_params.meas_freq = 0.5;      % [Hz]
 
 % Number of control points for a polynomial (start point fixed).
-planning_params.control_points = 1;
+planning_params.control_points = 2;
 
 % Distance before a waypoint is considered "reached" [m]
 planning_params.achievement_dist = 0.4;
