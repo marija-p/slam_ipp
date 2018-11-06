@@ -302,8 +302,6 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
             grid_to_env_coordinates([max_j, max_i, max_k], map_params);
         disp(['Next goal: ', num2str(point_goal)])
         
-        keyboard
-        
         % Generate trajectory to the goal.
         trajectory = plan_path_waypoints([Rob.state.x(1:3)';point_goal], ...
             planning_params.max_vel, planning_params.max_acc);       

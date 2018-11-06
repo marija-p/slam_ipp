@@ -93,12 +93,11 @@ while (planning_params.control_points > size(path, 1))
             Raw = simObservation(SimRob, SimSen, SimLmk, SimOpt);
             
             % Simulate control for this time-step.
-            %Rob_eval.con.u = ...
-            %    [u';0;0;0] + Rob_eval.con.uStd.*randn(size(Rob_eval.con.uStd));
-            %Rob_eval = simMotion(Rob_eval,Tim);
-            % Integrate odometry for relative motion factors.
-            factorRob.con.u = ...
+            Rob_eval.con.u = ...
                 [u';0;0;0] + Rob_eval.con.uStd.*randn(size(Rob_eval.con.uStd));
+            Rob_eval = simMotion(Rob_eval,Tim);
+            % Integrate odometry for relative motion factors.
+            factorRob.con.u = Rob_eval.con.u;
             factorRob = integrateMotion(factorRob, Tim);
             
             % Pop target control point from queue.
@@ -126,7 +125,7 @@ while (planning_params.control_points > size(path, 1))
         Rob_P = Map.P(r,r);
         disp(Rob_P)
         
-        field_map_eval = predict_map_update(point_eval, Rob_eval, field_map, ...
+        field_map_eval = predict_map_update(point_eval, Rob_P, field_map, ...
             training_data, testing_data, map_params, gp_params);
         P_trace = sum(field_map_eval.cov);
         
