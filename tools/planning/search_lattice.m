@@ -1,5 +1,5 @@
 function path = search_lattice(Rob_init, lattice, field_map, ...
-    SimRob, SimSen, SimLmk, SimOpt, Sen, Lmk, Obs, Frm, Tim, Opt, ...
+    SimRob, SimSen, SimLmk, SimOpt, Sen, Lmk, Obs, Trj, Frm, Fac, factorRob, Tim, Opt, ...
     training_data, testing_data, map_params, planning_params, gp_params)
 % Performs a greedy grid search over a list of candidates to identify
 % most promising points to visit based on an informative objective.
@@ -16,18 +16,26 @@ function path = search_lattice(Rob_init, lattice, field_map, ...
 % M Popovic 2018
 %
 
-% Read robot covariance from the graphSLAM map.
+lattice = [5,5,5];
+
 global Map
+
+%% EKF (7-pose) approach.
+% Read robot covariance from the graphSLAM map.
+%v_pose = qpose2vpose(Rob_init.state.x); % (7-pose -> 6-pose) Transform current robot pose.
+%[~, V_x] = vpose2qpose(v_pose);         % (6-pose -> 7-pose) Get Jacobian.
+%r = Rob_init.state.r;
+%Rob_init.state.P = V_x*Map.P(r,r)*V_x'; % (6-pose -> 7-pose) Transform covariance from graphSLAM map result.
+%% Graph-based (6-pose) approach.
 r = Rob_init.state.r(1:3);
-Rob_init.state.P(1:3,1:3) = Map.P(r,r);
+Rob_P = Map.P(r,r);
 
 P_trace_prev = sum(field_map.cov);
 point_prev = Rob_init.state.x(1:3)';
 path = Rob_init.state.x(1:3)';
 Rob_prev = Rob_init;
 
-num_lattice_points = size(lattice,1);
-
+% num_lattice_points = size(lattice,1);
 % figure;
 % scatter3(testing_data.X_test(:,1), testing_data.X_test(:,2), ...
 %     testing_data.X_test(:,3), 80, field_map.cov(:));
@@ -57,33 +65,66 @@ while (planning_params.control_points > size(path, 1))
             linspace(point_prev(3),point_eval(3), num_points)'];
         
         disp('Initial pose cov.: ')
-        disp(Rob_eval.state.P(1:3,1:3))
+        disp(Rob_P)
         
         % Simulate covariance propagation assuming constant velocity.
         if ~isempty(points_control)
             
-            % 1. Motion
             % Generate control commands.
             u = points_control(1,:) - Rob_eval.state.x(1:3)';
-            Rob_eval.con.u = ...
+            
+            %% EKF (7-pose) approach.
+            % % 1. Motion
+            % Rob_eval.con.u = ...
+            % [u';0;0;0] + Rob_eval.con.uStd.*randn(size(Rob_eval.con.uStd));
+            % % Propagate motion uncertainty.
+            % Rob_eval = integrateMotion(Rob_eval, Tim);
+            %
+            % % 2. Observation.
+            % % Observe simulated landmarks using sensor.
+            %  Raw = simObservation(SimRob, SimSen, SimLmk, SimOpt) ;
+            
+            % Predict EKF update for known landmarks.
+            % [Rob_eval, Sen, Lmk, Obs] = ...
+            %    predictKnownLmkCorr(Rob_eval, Sen, Raw, Lmk, Obs, Frm, Opt);
+            
+            %% Graph-based (6-pose) approach.
+            % Observe simulated landmarks using sensor.
+            Raw = simObservation(SimRob, SimSen, SimLmk, SimOpt);
+            
+            % Simulate control for this time-step.
+            %Rob_eval.con.u = ...
+            %    [u';0;0;0] + Rob_eval.con.uStd.*randn(size(Rob_eval.con.uStd));
+            %Rob_eval = simMotion(Rob_eval,Tim);
+            % Integrate odometry for relative motion factors.
+            factorRob.con.u = ...
                 [u';0;0;0] + Rob_eval.con.uStd.*randn(size(Rob_eval.con.uStd));
-            % Propagate motion uncertainty.
-            Rob_eval = integrateMotion(Rob_eval, Tim);
+            factorRob = integrateMotion(factorRob, Tim);
+            
             % Pop target control point from queue.
             points_control = points_control(2:end,:);
             
-            % Observation.
-            % Observe simulated landmarks using sensor.
-            Raw = simObservation(SimRob, SimSen, SimLmk, SimOpt) ;
-            
-            % Predict EKF update for known landmarks.
-            [Rob_eval, Sen, Lmk, Obs] = ...
-                predictKnownLmkCorr(Rob_eval, Sen, Raw, Lmk, Obs, Frm, Opt);
-
         end
         
+        % Add motion factor - odometry constraint.
+        [Rob_eval, Lmk, Trj, Frm, Fac] = ...
+            addKeyFrame(Rob_eval, Lmk, Trj ,Frm, Fac, factorRob, 'motion');
+        
+        % Add measurement factors - observation constraints.
+        % Observe known landmarks.
+        [Rob_eval, Sen, Lmk, Obs, Frm(1,Trj.head), Fac] = ...
+            addKnownLmkFactors(Rob_eval, Sen, Raw, ...
+            Lmk, Obs, Frm(:,Trj.head), Fac, Opt);
+        
+        % graphSLAM optimisation.
+        % Set-up and solve the  problem.
+        [Rob_eval, Sen, Lmk, Obs, Frm, Fac] = ...
+            solveGraph(Rob_eval, Sen, Lmk, Obs, Frm, Fac, Opt);
+        
         disp('Final pose cov.: ')
-        disp(Rob_eval.state.P(1:3,1:3))
+        r = Rob_eval.state.r(1:3);
+        Rob_P = Map.P(r,r);
+        disp(Rob_P)
         
         field_map_eval = predict_map_update(point_eval, Rob_eval, field_map, ...
             training_data, testing_data, map_params, gp_params);
