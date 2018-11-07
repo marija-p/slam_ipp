@@ -362,9 +362,11 @@ if strcmp(Map.type,'ekf')
     
     % Expectation covariances matrix
     E = E_rsl*Map.P(rslr,rslr)*E_rsl' ;
-
+    
 else
+    
     E = [];
+    
 end
 
 % Other parameters
