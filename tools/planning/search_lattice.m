@@ -1,5 +1,5 @@
 function path = search_lattice(Rob_init, lattice, field_map, ...
-    SimSen, SimLmk, SimOpt, Sen, Lmk, Obs, Trj, Frm, Fac, factorRob, Tim, Opt, ...
+    SimLmk, Sen, Lmk, Obs, Trj, Frm, Fac, factorRob, Opt, ...
     training_data, testing_data, map_params, planning_params, gp_params)
 % Performs a greedy grid search over a list of candidates to identify
 % most promising points to visit based on an informative objective.
@@ -61,17 +61,17 @@ while (planning_params.control_points > size(path, 1))
             % Pop target control point from queue.
             points_control = points_control(2:end,:);
 
-            
             % Simulate control for this time-step.
             Rob_eval.con.u = ...
                 Rob.con.u + Rob_eval.con.uStd.*randn(size(Rob_eval.con.uStd));
-            Raw = simObservation(Rob_eval, SimSen, SimLmk, SimOpt);
-            Rob_eval = simMotion(Rob_eval,Tim);
+            Raw = simObservation(Rob_eval, Sen, SimLmk, Opt);
+            Rob_eval = simMotion(Rob_eval,[]);
             % Integrate odometry for relative motion factors.
             factorRob.con.u = Rob_eval.con.u;
-            factorRob = integrateMotion(factorRob, Tim);
+            factorRob = integrateMotion(factorRob, []);
             
-            if mod(current_frame, Opt.map.kfrmPeriod) == 0 || isempty(points_control)
+            if (mod(current_frame, Opt.map.kfrmPeriod) == 0) || ...
+                    isempty(points_control)
                 
                 % Add motion factor - odometry constraint.
                 [Rob_eval, Lmk, Trj, Frm, Fac] = ...
@@ -83,14 +83,12 @@ while (planning_params.control_points > size(path, 1))
                     addKnownLmkFactors(Rob_eval, Sen, Raw, Lmk, Obs, ...
                     Frm(:,Trj.head), Fac, Opt);
                 
-                % graphSLAM optimisation.
-                % Set-up and solve the problem.
+                % graphSLAM optimisation - set-up and solve the problem.
                 [Rob_eval, Sen, Lmk, Obs, Frm, Fac] = ...
                     solveGraph(Rob_eval, Sen, Lmk, Obs, Frm, Fac, Opt);
                 
-                % Update robots with Frm info
-                Rob_eval = frm2rob(Rob_eval, Frm(:,Trj.head));
-                
+                % Update robots with Frm info.
+                Rob_eval = frm2rob(Rob_eval, Frm(:,Trj.head));                
                 % Reset motion robot
                 factorRob = resetMotion(Rob_eval);
                 
