@@ -1,5 +1,5 @@
 function path = search_lattice(Rob_init, lattice, field_map, ...
-    SimLmk, Sen, Lmk, Obs, Trj, Frm, Fac, factorRob, Opt, ...
+    SimLmk, Sen_init, Lmk_init, Obs_init, Trj_init, Frm_init, Fac_init, factorRob_init, Opt, ...
     training_data, testing_data, map_params, planning_params, gp_params)
 % Performs a greedy grid search over a list of candidates to identify
 % most promising points to visit based on an informative objective.
@@ -18,15 +18,20 @@ function path = search_lattice(Rob_init, lattice, field_map, ...
 
 % Testing stuff.
 load('testing_data.mat')
-lattice = [5.75, 5.75, 5];
+lattice = [0, 0, 5; 5.75, 5.75, 5; 0, 0, 5];
 
 global Map
+Map_init = Map;
 
 P_trace_prev = sum(field_map.cov);
 point_prev = Rob_init.state.x(1:3)';
 path = Rob_init.state.x(1:3)';
-Rob_prev = Rob_init;
-current_frame = 1;
+
+[Rob_prev, Sen_prev, Lmk_prev, Obs_prev, ...
+    Trj_prev, Frm_prev, Fac_prev, factorRob_prev] = ...
+    copy_graphslam_vars(Rob_init, Sen_init, Lmk_init, Obs_init, ...
+    Trj_init, Frm_init, Fac_init, factorRob_init);
+Map_prev = Map;
 
 r = Rob_init.state.r(1:3);
 Rob_P = Map.P(r,r);
@@ -42,7 +47,11 @@ while (planning_params.control_points > size(path, 1))
     for i = 1:size(lattice, 1)
         
         point_eval = lattice(i, :);
-        Rob_eval = Rob_prev;
+        [Rob_eval, Sen_eval, Lmk_eval, Obs_eval, ...
+            Trj_eval, Frm_eval, Fac_eval, factorRob_eval] = ...
+            copy_graphslam_vars(Rob_prev, Sen_prev, Lmk_prev, Obs_prev, ...
+            Trj_prev, Frm_prev, Fac_prev, factorRob_prev);
+        Map = Map_prev;
         
         % Create simple trajectory to candidate point assuming constant velocity.
         travel_time = pdist([point_prev; point_eval])/(planning_params.max_vel);
@@ -52,54 +61,15 @@ while (planning_params.control_points > size(path, 1))
             linspace(point_prev(2),point_eval(2), num_points)', ...
             linspace(point_prev(3),point_eval(3), num_points)'];
         
-        % Simulate covariance propagation assuming constant velocity.
-        while ~isempty(points_control)
-            
-            % Generate control commands.
-            u = points_control(1,:) - Rob_eval.state.x(1:3)';
-            Rob.con.u(1:3) = u;
-            % Pop target control point from queue.
-            points_control = points_control(2:end,:);
-
-            % Simulate control for this time-step.
-            Rob_eval.con.u = ...
-                Rob.con.u + Rob_eval.con.uStd.*randn(size(Rob_eval.con.uStd));
-            Raw = simObservation(Rob_eval, Sen, SimLmk, Opt);
-            Rob_eval = simMotion(Rob_eval,[]);
-            % Integrate odometry for relative motion factors.
-            factorRob.con.u = Rob_eval.con.u;
-            factorRob = integrateMotion(factorRob, []);
-            
-            if (mod(current_frame, Opt.map.kfrmPeriod) == 0) || ...
-                    isempty(points_control)
-                
-                % Add motion factor - odometry constraint.
-                [Rob_eval, Lmk, Trj, Frm, Fac] = ...
-                    addKeyFrame(Rob_eval, Lmk, Trj, Frm, Fac, factorRob, 'motion');
-                
-                % Add measurement factors - observation constraints.
-                % Observe known landmarks.
-                [Rob_eval, Sen, Lmk, Obs, Frm(:,Trj.head), Fac] = ...
-                    addKnownLmkFactors(Rob_eval, Sen, Raw, Lmk, Obs, ...
-                    Frm(:,Trj.head), Fac, Opt);
-                
-                % graphSLAM optimisation - set-up and solve the problem.
-                [Rob_eval, Sen, Lmk, Obs, Frm, Fac] = ...
-                    solveGraph(Rob_eval, Sen, Lmk, Obs, Frm, Fac, Opt);
-                
-                % Update robots with Frm info.
-                Rob_eval = frm2rob(Rob_eval, Frm(:,Trj.head));                
-                % Reset motion robot
-                factorRob = resetMotion(Rob_eval);
-                
-            end
-            
-            current_frame = current_frame + 1;
-            
-        end
+        % Propagate robot uncertainty using graphSLAM.
+        [Rob_eval, Sen_eval, Lmk_eval, Trj_eval, ...
+            Frm_eval, Fac_eval, factorRob_eval, Map_eval] = ...
+            propagate_uncertainty(points_control, ...
+            Rob_eval, Sen_eval, SimLmk, Lmk_eval, Obs_eval, ...
+            Trj_eval, Frm_eval, Fac_eval, factorRob_eval, Opt);
         
         r = Rob_eval.state.r(1:3);
-        Rob_P = Map.P(r,r);
+        Rob_P = Map_eval.P(r,r);
         disp('Final pose cov.: ')
         disp(Rob_P)
         
@@ -118,25 +88,41 @@ while (planning_params.control_points > size(path, 1))
         
         % Update best solution.
         if (obj < obj_min)
+            
             obj_min = obj;
+            
+            r = Rob_eval.state.r(1:3);
+            Rob_P_best = Map_eval.P(r,r);
+            
             point_best = point_eval;
-            Rob_best = Rob_eval;
+            [Rob_best, Sen_best, Lmk_best, Obs_best, ...
+                Trj_best, Frm_best, Fac_best, factorRob_best] = ...
+                copy_graphslam_vars(Rob_eval, Sen_eval, Lmk_eval, Obs_eval, ...
+                Trj_eval, Frm_eval, Fac_eval, factorRob_eval);
+            Map_best = Map_eval;
+            
         end
         
-    end
+    end % end lattice candidates evaluation
     
     % Update the map with measurement at best point.
-    %field_map = predict_map_update(point_best, field_map, ...
-    %    map_params, planning_params);
+    field_map = predict_map_update(point_best, Rob_P_best, field_map, ...
+        training_data, testing_data, map_params, gp_params);
     %disp(['Point ', num2str(size(path,1)+1), ' at: ', num2str(point_best)]);
     %disp(['Trace of P: ', num2str(trace(field_map.P))]);
-    %disp(['Objective: ', num2str(obj_min)]);
     path = [path; point_best];
     
-    %P_trace_prev = trace(field_map.P);
+    P_trace_prev = sum(field_map.cov);
     point_prev = point_best;
-    Rob_prev = Rob_eval;
+    [Rob_prev, Sen_prev, Lmk_prev, Obs_prev, ...
+        Trj_prev, Frm_prev, Fac_prev, factorRob_prev] = ...
+        copy_graphslam_vars(Rob_best, Sen_best, Lmk_best, Obs_best, ...
+        Trj_best, Frm_best, Fac_best, factorRob_best);
+    Map_prev = Map_best;
     
 end
+
+% Important: restore global variable!
+Map = Map_init;
 
 end

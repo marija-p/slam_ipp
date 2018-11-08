@@ -1,8 +1,19 @@
 function [Rob, Sen, Lmk, Trj, Frm, Fac, factorRob, Map_final] = ...
     propagate_uncertainty(points_control, ...
-    Rob, SimLmk, Sen, Lmk, Obs, Trj, Frm, Fac, factorRob, Opt)
-%PROPAGATE_UNCERTAINTY Simulate covariance propagation along a candidate
-%path.
+    Rob, Sen, SimLmk, Lmk, Obs, Trj, Frm, Fac, factorRob, Opt)
+% Simulates covariance propagation along a candidate path.
+% Assumes no new landmark observations.
+% ---
+% Inputs:
+% points_control: path points (sub-sampled for control simulation)
+% graphSLAM structures
+% ---
+% Output:
+% graphSLAM structures
+% Map_final: final optimized graphSLAM map
+% ---
+% M Popovic 2018
+%
 
 global Map
 
