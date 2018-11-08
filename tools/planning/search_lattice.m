@@ -16,12 +16,16 @@ function path = search_lattice(Rob_init, lattice, field_map, ...
 % M Popovic 2018
 %
 
-% Testing stuff.
+%% Testing stuff.
 load('testing_data.mat')
-lattice = [0, 0, 5; 5.75, 5.75, 5; 0, 0, 5];
+planning_params.control_points = 3;
+%lattice = [0, 0, 5; 5.75, 5.75, 5; 0, 0, 5];
 
+% Important: remember global variable to replace later.
 global Map
 Map_init = Map;
+
+%% Prepare variables.
 
 P_trace_prev = sum(field_map.cov);
 point_prev = Rob_init.state.x(1:3)';
@@ -38,12 +42,15 @@ Rob_P = Map.P(r,r);
 disp('Initial pose cov.: ')
 disp(Rob_P)
 
+keyboard
+
 while (planning_params.control_points > size(path, 1))
     
     % Initialise best solution so far.
     obj_min = Inf;
     point_best = -Inf;
     
+    %% Lattice candidate evaluation.
     for i = 1:size(lattice, 1)
         
         point_eval = lattice(i, :);
@@ -67,11 +74,8 @@ while (planning_params.control_points > size(path, 1))
             propagate_uncertainty(points_control, ...
             Rob_eval, Sen_eval, SimLmk, Lmk_eval, Obs_eval, ...
             Trj_eval, Frm_eval, Fac_eval, factorRob_eval, Opt);
-        
         r = Rob_eval.state.r(1:3);
         Rob_P = Map_eval.P(r,r);
-        disp('Final pose cov.: ')
-        disp(Rob_P)
         
         field_map_eval = predict_map_update(point_eval, Rob_P, field_map, ...
             training_data, testing_data, map_params, gp_params);
@@ -81,18 +85,20 @@ while (planning_params.control_points > size(path, 1))
         cost = max(travel_time, 1/planning_params.meas_freq);
         obj = -gain/cost;
         
-        %disp(['Point: ', num2str(point_eval)]);
-        %disp(['Gain: ', num2str(gain)])
-        %disp(['Cost: ', num2str(cost)])
-        %disp(['Objective: ', num2str(obj)]);
+        disp(['Point: ', num2str(point_eval)]);
+        disp(['Gain: ', num2str(gain)])
+        disp(['Cost: ', num2str(cost)])
+        disp(['Objective: ', num2str(obj)]);
+        disp('Final pose cov.: ')
+        disp(Rob_P)
+        disp('-----------')
         
-        % Update best solution.
+        %% Update best solution.
         if (obj < obj_min)
             
             obj_min = obj;
             
-            r = Rob_eval.state.r(1:3);
-            Rob_P_best = Map_eval.P(r,r);
+            Rob_P_best = Rob_P;
             
             point_best = point_eval;
             [Rob_best, Sen_best, Lmk_best, Obs_best, ...
@@ -103,13 +109,24 @@ while (planning_params.control_points > size(path, 1))
             
         end
         
-    end % end lattice candidates evaluation
+    end
+    
+    %% Simulate measurement.
     
     % Update the map with measurement at best point.
     field_map = predict_map_update(point_best, Rob_P_best, field_map, ...
         training_data, testing_data, map_params, gp_params);
-    %disp(['Point ', num2str(size(path,1)+1), ' at: ', num2str(point_best)]);
-    %disp(['Trace of P: ', num2str(trace(field_map.P))]);
+    % Update training data.
+    training_data.X_train = [training_data.X_train; point_best];
+    % Take maximum likelihood measurement based on current field map state.
+    training_data.Y_train = [training_data.Y_train; ...
+        interp3(reshape(testing_data.X_test(:,1),dim_y,dim_x,dim_z), ...
+        reshape(testing_data.X_test(:,2),dim_y,dim_x,dim_z), ...
+        reshape(testing_data.X_test(:,3),dim_y,dim_x,dim_z), ...
+        reshape(field_map.mean,dim_y,dim_x,dim_z), ...
+        point_best(1), point_best(2), point_best(3), 'spline')];
+    
+    %% Write variables for next lattice pass.
     path = [path; point_best];
     
     P_trace_prev = sum(field_map.cov);
@@ -119,6 +136,11 @@ while (planning_params.control_points > size(path, 1))
         copy_graphslam_vars(Rob_best, Sen_best, Lmk_best, Obs_best, ...
         Trj_best, Frm_best, Fac_best, factorRob_best);
     Map_prev = Map_best;
+    
+    %scatter3(testing_data.X_test(:,1), testing_data.X_test(:,2), ...
+    %    testing_data.X_test(:,3), 60, field_map.cov(:),'filled')
+    
+    keyboard
     
 end
 
