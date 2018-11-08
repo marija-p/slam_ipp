@@ -41,6 +41,14 @@ planning_params.control_points = 3;
 % Distance before a waypoint is considered "reached" [m]
 planning_params.achievement_dist = 0.4;
 
+% Optimization/CMA-ES related parameters
+opt_params.max_iters = 45;
+opt_params.opt_method = 'none'; % 'fmc'/cmaes'/'none'/'bo'
+% Covariances in each search dimension
+opt_params.cov_x = 3;
+opt_params.cov_y = 3;
+opt_params.cov_z = 4;
+
 % GP-related parameters
 gp_params.hyp_trained = hyp_trained;
 gp_params.N_gauss = 5; %N_gauss;

@@ -308,7 +308,7 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
         disp('Next path: ')
         disp(points_path)
         
-        % Generate trajectory.
+        % Create polynomial path through the control points.
         trajectory = plan_path_waypoints(points_path, planning_params.max_vel, ...
             planning_params.max_acc);       
         % Sample trajectory for motion simulation.
@@ -317,7 +317,7 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
         
         metrics.path_travelled = [metrics.path_travelled; points_path];
         
-        keyboard
+        %keyboard
         
         num_control_frames = 0;
         
