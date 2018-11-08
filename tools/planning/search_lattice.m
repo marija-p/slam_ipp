@@ -1,5 +1,5 @@
 function path = search_lattice(Rob_init, lattice, field_map, ...
-    SimLmk, Sen_init, Lmk_init, Obs_init, Trj_init, Frm_init, Fac_init, factorRob_init, Opt, ...
+    SimLmk, Sen_init, Lmk_init, Obs, Trj_init, Frm_init, Fac_init, factorRob_init, Opt, ...
     training_data, testing_data, map_params, planning_params, gp_params)
 % Performs a greedy grid search over a list of candidates to identify
 % most promising points to visit based on an informative objective.
@@ -17,24 +17,21 @@ function path = search_lattice(Rob_init, lattice, field_map, ...
 %
 
 %% Testing stuff.
-load('testing_data.mat')
-planning_params.control_points = 3;
-%lattice = [0, 0, 5; 5.75, 5.75, 5; 0, 0, 5];
+%load('testing_data.mat')
+%planning_params.control_points = 3;
+%lattice = [0, 0, 5; 5.75, 5.75, 5];
 
-% Important: remember global variable to replace later.
+% Important: remember global variable to restore later.
 global Map
 Map_init = Map;
 
 %% Prepare variables.
-
 P_trace_prev = sum(field_map.cov);
 point_prev = Rob_init.state.x(1:3)';
 path = Rob_init.state.x(1:3)';
 
-[Rob_prev, Sen_prev, Lmk_prev, Obs_prev, ...
-    Trj_prev, Frm_prev, Fac_prev, factorRob_prev] = ...
-    copy_graphslam_vars(Rob_init, Sen_init, Lmk_init, Obs_init, ...
-    Trj_init, Frm_init, Fac_init, factorRob_init);
+[Rob_prev, Sen_prev, Lmk_prev, Trj_prev, Frm_prev, Fac_prev, factorRob_prev] = ...
+    copy_graphslam_vars(Rob_init, Sen_init, Lmk_init, Trj_init, Frm_init, Fac_init, factorRob_init);
 Map_prev = Map;
 
 r = Rob_init.state.r(1:3);
@@ -43,6 +40,7 @@ disp('Initial pose cov.: ')
 disp(Rob_P)
 
 keyboard
+tic
 
 while (planning_params.control_points > size(path, 1))
     
@@ -54,10 +52,8 @@ while (planning_params.control_points > size(path, 1))
     for i = 1:size(lattice, 1)
         
         point_eval = lattice(i, :);
-        [Rob_eval, Sen_eval, Lmk_eval, Obs_eval, ...
-            Trj_eval, Frm_eval, Fac_eval, factorRob_eval] = ...
-            copy_graphslam_vars(Rob_prev, Sen_prev, Lmk_prev, Obs_prev, ...
-            Trj_prev, Frm_prev, Fac_prev, factorRob_prev);
+        [Rob_eval, Sen_eval, Lmk_eval, Trj_eval, Frm_eval, Fac_eval, factorRob_eval] = ...
+            copy_graphslam_vars(Rob_prev, Sen_prev, Lmk_prev, Trj_prev, Frm_prev, Fac_prev, factorRob_prev);
         Map = Map_prev;
         
         % Create simple trajectory to candidate point assuming constant velocity.
@@ -72,11 +68,12 @@ while (planning_params.control_points > size(path, 1))
         [Rob_eval, Sen_eval, Lmk_eval, Trj_eval, ...
             Frm_eval, Fac_eval, factorRob_eval, Map_eval] = ...
             propagate_uncertainty(points_control, ...
-            Rob_eval, Sen_eval, SimLmk, Lmk_eval, Obs_eval, ...
+            Rob_eval, Sen_eval, SimLmk, Lmk_eval, Obs, ...
             Trj_eval, Frm_eval, Fac_eval, factorRob_eval, Opt);
         r = Rob_eval.state.r(1:3);
         Rob_P = Map_eval.P(r,r);
         
+        % Predict map update at target location.
         field_map_eval = predict_map_update(point_eval, Rob_P, field_map, ...
             training_data, testing_data, map_params, gp_params);
         P_trace = sum(field_map_eval.cov);
@@ -86,8 +83,7 @@ while (planning_params.control_points > size(path, 1))
         obj = -gain/cost;
         
         disp(['Point: ', num2str(point_eval)]);
-        disp(['Gain: ', num2str(gain)])
-        disp(['Cost: ', num2str(cost)])
+        disp(['Gain: ', num2str(gain), '. Cost: ', num2str(cost), '.'])
         disp(['Objective: ', num2str(obj)]);
         disp('Final pose cov.: ')
         disp(Rob_P)
@@ -95,27 +91,17 @@ while (planning_params.control_points > size(path, 1))
         
         %% Update best solution.
         if (obj < obj_min)
-            
             obj_min = obj;
-            
-            Rob_P_best = Rob_P;
-            
             point_best = point_eval;
-            [Rob_best, Sen_best, Lmk_best, Obs_best, ...
-                Trj_best, Frm_best, Fac_best, factorRob_best] = ...
-                copy_graphslam_vars(Rob_eval, Sen_eval, Lmk_eval, Obs_eval, ...
-                Trj_eval, Frm_eval, Fac_eval, factorRob_eval);
+            [Rob_best, Sen_best, Lmk_best, Trj_best, Frm_best, Fac_best, factorRob_best] = ...
+                copy_graphslam_vars(Rob_eval, Sen_eval, Lmk_eval, Trj_eval, Frm_eval, Fac_eval, factorRob_eval);
             Map_best = Map_eval;
-            
+            field_map_best = field_map_eval;
         end
         
     end
     
     %% Simulate measurement.
-    
-    % Update the map with measurement at best point.
-    field_map = predict_map_update(point_best, Rob_P_best, field_map, ...
-        training_data, testing_data, map_params, gp_params);
     % Update training data.
     training_data.X_train = [training_data.X_train; point_best];
     % Take maximum likelihood measurement based on current field map state.
@@ -125,21 +111,21 @@ while (planning_params.control_points > size(path, 1))
         reshape(testing_data.X_test(:,3),dim_y,dim_x,dim_z), ...
         reshape(field_map.mean,dim_y,dim_x,dim_z), ...
         point_best(1), point_best(2), point_best(3), 'spline')];
+    field_map = field_map_best;
     
-    %% Write variables for next lattice pass.
+    %% Write variables for next lattice evaluation.
     path = [path; point_best];
     
     P_trace_prev = sum(field_map.cov);
     point_prev = point_best;
-    [Rob_prev, Sen_prev, Lmk_prev, Obs_prev, ...
-        Trj_prev, Frm_prev, Fac_prev, factorRob_prev] = ...
-        copy_graphslam_vars(Rob_best, Sen_best, Lmk_best, Obs_best, ...
-        Trj_best, Frm_best, Fac_best, factorRob_best);
+    [Rob_prev, Sen_prev, Lmk_prev, Trj_prev, Frm_prev, Fac_prev, factorRob_prev] = ...
+        copy_graphslam_vars(Rob_best, Sen_best, Lmk_best, Trj_best, Frm_best, Fac_best, factorRob_best);
     Map_prev = Map_best;
     
     %scatter3(testing_data.X_test(:,1), testing_data.X_test(:,2), ...
     %    testing_data.X_test(:,3), 60, field_map.cov(:),'filled')
     
+    disp(toc)
     keyboard
     
 end
