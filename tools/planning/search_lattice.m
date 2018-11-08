@@ -18,6 +18,7 @@ function path = search_lattice(Rob_init, lattice, field_map, ...
 
 %% Testing stuff.
 %load('testing_data.mat')
+%gp_params.N_gauss = 5;
 %planning_params.control_points = 3;
 %lattice = [0, 0, 5; 5.75, 5.75, 5];
 
@@ -70,7 +71,8 @@ while (planning_params.control_points > size(path, 1))
             Frm_eval, Fac_eval, factorRob_eval, Map_eval] = ...
             propagate_uncertainty(points_control, ...
             Rob_eval, Sen_eval, SimLmk, Lmk_eval, Obs, ...
-            Trj_eval, Frm_eval, Fac_eval, factorRob_eval, Opt);
+            Trj_eval, Frm_eval, Fac_eval, factorRob_eval, Opt, ...
+            planning_params);
         r = Rob_eval.state.r(1:3);
         Rob_P = Map_eval.P(r,r);
         

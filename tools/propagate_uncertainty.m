@@ -1,6 +1,7 @@
 function [Rob, Sen, Lmk, Trj, Frm, Fac, factorRob, Map_final] = ...
     propagate_uncertainty(points_control, ...
-    Rob, Sen, SimLmk, Lmk, Obs, Trj, Frm, Fac, factorRob, Opt)
+    Rob, Sen, SimLmk, Lmk, Obs, Trj, Frm, Fac, factorRob, Opt, ...
+    planning_params)
 % Simulates covariance propagation along a candidate path.
 % Assumes no new landmark observations.
 % ---
@@ -36,7 +37,7 @@ while ~isempty(points_control)
     factorRob.con.u = Rob.con.u;
     factorRob = integrateMotion(factorRob, []);
     
-    if (mod(current_frame, Opt.map.kfrmPeriod) == 0) || ...
+    if (mod(current_frame, Opt.map.kfrmPeriod*planning_params.keyframe_predict_factor) == 0) || ...
             isempty(points_control)
         
         % Add motion factor - odometry constraint.

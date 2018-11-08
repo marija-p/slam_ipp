@@ -30,10 +30,13 @@ planning_params.max_acc = 3;        % [m/s^2]
 % Frequency at which to send commands - simulate motion/covariance update
 planning_params.control_freq = 5;   % [Hz]
 % Frequency at which to take measurements
-planning_params.meas_freq = 0.5;      % [Hz]
+planning_params.meas_freq = 0.5;    % [Hz]
+% Factor by which to divide keyframe/graph optimisation frequency
+% (Opt.map.kfrmPeriod).
+planning_params.keyframe_predict_factor = 1.5;
 
 % Number of control points for a polynomial (start point fixed).
-planning_params.control_points = 2;
+planning_params.control_points = 3;
 
 % Distance before a waypoint is considered "reached" [m]
 planning_params.achievement_dist = 0.4;
