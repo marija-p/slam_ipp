@@ -21,6 +21,10 @@ function path = search_lattice(Rob_init, lattice, field_map, ...
 %planning_params.control_points = 3;
 %lattice = [0, 0, 5; 5.75, 5.75, 5];
 
+dim_x = map_params.dim_x;
+dim_y = map_params.dim_y;
+dim_z = map_params.dim_z;
+
 % Important: remember global variable to restore later.
 global Map
 Map_init = Map;
@@ -34,13 +38,10 @@ path = Rob_init.state.x(1:3)';
     copy_graphslam_vars(Rob_init, Sen_init, Lmk_init, Trj_init, Frm_init, Fac_init, factorRob_init);
 Map_prev = Map;
 
-r = Rob_init.state.r(1:3);
-Rob_P = Map.P(r,r);
-disp('Initial pose cov.: ')
-disp(Rob_P)
-
-keyboard
-tic
+%r = Rob_init.state.r(1:3);
+%Rob_P = Map.P(r,r);
+%disp('Initial pose cov.: ')
+%disp(Rob_P)
 
 while (planning_params.control_points > size(path, 1))
     
@@ -82,12 +83,12 @@ while (planning_params.control_points > size(path, 1))
         cost = max(travel_time, 1/planning_params.meas_freq);
         obj = -gain/cost;
         
-        disp(['Point: ', num2str(point_eval)]);
-        disp(['Gain: ', num2str(gain), '. Cost: ', num2str(cost), '.'])
-        disp(['Objective: ', num2str(obj)]);
-        disp('Final pose cov.: ')
-        disp(Rob_P)
-        disp('-----------')
+        %disp(['Point: ', num2str(point_eval)]);
+        %disp(['Gain: ', num2str(gain), '. Cost: ', num2str(cost), '.'])
+        %disp(['Objective: ', num2str(obj)]);
+        %disp('Final pose cov.: ')
+        %disp(Rob_P)
+        %disp('-----------')
         
         %% Update best solution.
         if (obj < obj_min)
@@ -124,9 +125,6 @@ while (planning_params.control_points > size(path, 1))
     
     %scatter3(testing_data.X_test(:,1), testing_data.X_test(:,2), ...
     %    testing_data.X_test(:,3), 60, field_map.cov(:),'filled')
-    
-    disp(toc)
-    keyboard
     
 end
 
