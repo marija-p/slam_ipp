@@ -116,7 +116,6 @@ while (planning_params.control_points > size(path, 1))
     
     %% Write variables for next lattice evaluation.
     path = [path; point_best];
-    
     P_trace_prev = sum(field_map.cov);
     point_prev = point_best;
     [Rob_prev, Sen_prev, Lmk_prev, Trj_prev, Frm_prev, Fac_prev, factorRob_prev] = ...

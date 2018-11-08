@@ -88,7 +88,7 @@ refresh_field_fig = 0;
 clear Robot Sensor World Time
 
 %% III. Initialize data logging
-% TODO.
+metrics = initialize_metrics();
 
 %% IV. Startup
 % TODO: Possibly put in initRobots and createFrames, createFactors, createTrj...
@@ -142,7 +142,6 @@ for rob = [Rob.rob]
     
 end
 
-
 %% V. Main loop
 for currentFrame = Tim.firstFrame : Tim.lastFrame
     
@@ -180,7 +179,6 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     %% 2.a. Robot motion prediction
-    
     % Process robots
     for rob = [Rob.rob]
         
@@ -201,7 +199,6 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
     
     
     %% 2.b. Graph construction and solving
-    
     if mod(currentFrame - Tim.firstFrame + 1, Opt.map.kfrmPeriod) == 0 || ...
             isempty(points_control)
         
@@ -286,6 +283,7 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
             
         end
         
+        metrics.points_meas = [metrics.points_meas; Rob(rob).state.x(1:3)'];
         refresh_field_fig = 1;
         do_first_meas = 0;
         
@@ -295,19 +293,31 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     if isempty(points_control)
         
-        [~, max_ind] = max(field_map.cov);
-        [max_i, max_j, max_k] = ...
-            ind2sub([dim_y, dim_x, dim_z], max_ind);
-        point_goal = ...
-            grid_to_env_coordinates([max_j, max_i, max_k], map_params);
-        disp(['Next goal: ', num2str(point_goal)])
+        % Greedy planner.
+        %[~, max_ind] = max(field_map.cov);
+        %[max_i, max_j, max_k] = ...
+        %    ind2sub([dim_y, dim_x, dim_z], max_ind);
+        %point_goal = ...
+        %    grid_to_env_coordinates([max_j, max_i, max_k], map_params);
+        %disp(['Next goal: ', num2str(point_goal)])
         
-        % Generate trajectory to the goal.
-        trajectory = plan_path_waypoints([Rob.state.x(1:3)';point_goal], ...
-            planning_params.max_vel, planning_params.max_acc);       
+        % I. Grid search.
+        points_path = search_lattice(Rob, lattice, field_map, ...
+            SimLmk, Sen, Lmk, Obs, Trj, Frm, Fac, factorRob, Opt, ...
+            training_data, testing_data, map_params, planning_params, gp_params);
+        disp('Next path: ')
+        disp(points_path)
+        
+        % Generate trajectory.
+        trajectory = plan_path_waypoints(points_path, planning_params.max_vel, ...
+            planning_params.max_acc);       
         % Sample trajectory for motion simulation.
         [times_control, points_control, ~, ~] = ...
             sample_trajectory(trajectory, 1/planning_params.control_freq);
+        
+        metrics.path_travelled = [metrics.path_travelled; points_path];
+        
+        keyboard
         
         num_control_frames = 0;
         
