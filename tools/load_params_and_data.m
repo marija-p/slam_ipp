@@ -40,7 +40,7 @@ planning_params.achievement_dist = 0.4;
 
 % GP-related parameters
 gp_params.hyp_trained = hyp_trained;
-gp_params.N_gauss = N_gauss;
+gp_params.N_gauss = 5; %N_gauss;
 gp_params.inf_func = inf_func;
 gp_params.mean_func = mean_func;
 gp_params.inf_func = inf_func;
