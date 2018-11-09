@@ -281,9 +281,17 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
                 take_measurement_at_point(Rob(rob), SimRob(rob), field_map, .....
                 training_data, gt_data, testing_data, gp_params, map_params);
             
+            metrics.times = [metrics.times; Map.t];
+            metrics.points_meas = [metrics.points_meas; Rob(rob).state.x(1:3)'];
+            metrics.P_traces = [metrics.P_traces; sum(field_map.cov)];
+            metrics.rmses = [metrics.rmses; compute_rmse(field_map.mean, gt_data.Y_gt)];
+            metrics.mlls = [metrics.mlls; compute_mll(field_map, gt_data.Y_gt)];
+            r = Rob(rob).state.r(1:3);
+            P = Map.P(r,r);
+            metrics.Rob_Ps(:,:,size(metrics.times,1)) = P;
+            
         end
         
-        metrics.points_meas = [metrics.points_meas; Rob(rob).state.x(1:3)'];
         refresh_field_fig = 1;
         do_first_meas = 0;
         
@@ -316,7 +324,7 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
         end
         
         disp('Next path: ')
-        disp(path_points)
+        disp(path_optimized)
         
         % Create polynomial path through the control points.
         trajectory = plan_path_waypoints(path_optimized, planning_params.max_vel, ...
@@ -327,7 +335,7 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
         
         metrics.path_travelled = [metrics.path_travelled; path_optimized];
         
-        keyboard
+        %keyboard
         
         num_control_frames = 0;
         
