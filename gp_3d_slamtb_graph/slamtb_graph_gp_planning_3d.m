@@ -305,20 +305,27 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
         path_points = search_lattice(Rob, lattice, field_map, ...
             SimLmk, Sen, Lmk, Obs, Trj, Frm, Fac, factorRob, Opt, ...
             training_data, testing_data, map_params, planning_params, gp_params);
+        
+        % II. Trajectory optimization.
+        if (strcmp(opt_params.opt_method, 'cmaes'))
+            path_optimized = optimize_with_cmaes(path_points, field_map, ...
+                Rob, Sen, SimLmk, Lmk, Obs, Trj, Frm, Fac, factorRob, Opt, ...
+                training_data, testing_data, map_params, planning_params, opt_params, gp_params);
+        else
+            path_optimized = path_points;
+        end
+        
         disp('Next path: ')
         disp(path_points)
         
-        % II. Trajectory optimization.
-        
-        
         % Create polynomial path through the control points.
-        trajectory = plan_path_waypoints(path_points, planning_params.max_vel, ...
-            planning_params.max_acc);       
+        trajectory = plan_path_waypoints(path_optimized, planning_params.max_vel, ...
+            planning_params.max_acc);
         % Sample trajectory for motion simulation.
         [~, points_control, ~, ~] = ...
             sample_trajectory(trajectory, 1/planning_params.control_freq);
         
-        metrics.path_travelled = [metrics.path_travelled; path_points];
+        metrics.path_travelled = [metrics.path_travelled; path_optimized];
         
         keyboard
         

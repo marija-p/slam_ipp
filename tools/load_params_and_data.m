@@ -28,7 +28,7 @@ planning_params.max_vel = 3;        % [m/s]
 planning_params.max_acc = 3;        % [m/s^2]
 
 % Frequency at which to send commands - simulate motion/covariance update
-planning_params.control_freq = 5;   % [Hz]
+planning_params.control_freq = 3;   % [Hz]
 % Frequency at which to take measurements
 planning_params.meas_freq = 0.5;    % [Hz]
 % Factor by which to divide keyframe/graph optimisation frequency
@@ -43,15 +43,15 @@ planning_params.achievement_dist = 0.4;
 
 % Optimization/CMA-ES related parameters
 opt_params.max_iters = 15;
-opt_params.opt_method = 'none'; % 'fmc'/cmaes'/'none'/'bo'
+opt_params.opt_method = 'cmaes'; % 'fmc'/cmaes'/'none'/'bo'
 % Covariances in each search dimension
-opt_params.cov_x = 3;
-opt_params.cov_y = 3;
-opt_params.cov_z = 4;
+opt_params.cov_x = 4;
+opt_params.cov_y = 4;
+opt_params.cov_z = 1.5;
 
 % GP-related parameters
 gp_params.hyp_trained = hyp_trained;
-gp_params.N_gauss = 5; %N_gauss;
+gp_params.N_gauss = 4; %N_gauss;
 gp_params.inf_func = inf_func;
 gp_params.mean_func = mean_func;
 gp_params.inf_func = inf_func;
