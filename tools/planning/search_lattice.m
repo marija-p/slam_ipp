@@ -1,4 +1,4 @@
-function points_path = search_lattice(Rob_init, lattice, field_map, ...
+function path_points = search_lattice(Rob_init, lattice, field_map, ...
     SimLmk, Sen_init, Lmk_init, Obs, Trj_init, Frm_init, Fac_init, factorRob_init, Opt, ...
     training_data, testing_data, map_params, planning_params, gp_params)
 % Performs a greedy grid search over a list of candidates to identify
@@ -11,7 +11,7 @@ function points_path = search_lattice(Rob_init, lattice, field_map, ...
 % field_map: current GP map (mean + covariance)
 % ---
 % Output:
-% points_path: grid search result
+% path_points: grid search result
 % ---
 % M Popovic 2018
 %
@@ -33,7 +33,7 @@ Map_init = Map;
 %% Prepare variables.
 P_trace_prev = sum(field_map.cov);
 point_prev = Rob_init.state.x(1:3)';
-points_path = Rob_init.state.x(1:3)';
+path_points = Rob_init.state.x(1:3)';
 
 [Rob_prev, Sen_prev, Lmk_prev, Trj_prev, Frm_prev, Fac_prev, factorRob_prev] = ...
     copy_graphslam_vars(Rob_init, Sen_init, Lmk_init, Trj_init, Frm_init, Fac_init, factorRob_init);
@@ -44,7 +44,7 @@ Map_prev = Map;
 %disp('Initial pose cov.: ')
 %disp(Rob_P)
 
-while (planning_params.control_points > size(points_path, 1))
+while (planning_params.control_points > size(path_points, 1))
     
     % Initialise best solution so far.
     obj_min = Inf;
@@ -117,15 +117,12 @@ while (planning_params.control_points > size(points_path, 1))
     field_map = field_map_best;
     
     %% Write variables for next lattice evaluation.
-    points_path = [points_path; point_best];
+    path_points = [path_points; point_best];
     P_trace_prev = sum(field_map.cov);
     point_prev = point_best;
     [Rob_prev, Sen_prev, Lmk_prev, Trj_prev, Frm_prev, Fac_prev, factorRob_prev] = ...
         copy_graphslam_vars(Rob_best, Sen_best, Lmk_best, Trj_best, Frm_best, Fac_best, factorRob_best);
     Map_prev = Map_best;
-    
-    %scatter3(testing_data.X_test(:,1), testing_data.X_test(:,2), ...
-    %    testing_data.X_test(:,3), 60, field_map.cov(:),'filled')
     
 end
 

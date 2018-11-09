@@ -13,16 +13,14 @@ function obj = compute_objective(control_points, field_map, ...
 % M Popovic 2017
 %
 
+global Map
+
 dim_x = map_params.dim_x;
 dim_y = map_params.dim_y;
 dim_z = map_params.dim_z;
 dim_x_env = map_params.dim_x*map_params.res_x;
 dim_y_env = map_params.dim_y*map_params.res_y;
 dim_z_env = map_params.dim_y*map_params.res_z;
-
-% Important: remember global variable to restore later.
-global Map
-Map_init = Map;
 
 P_i = sum(field_map.cov);
 
@@ -48,6 +46,7 @@ if (size(points_meas,1) > 10)
     return;
 end
 
+% Discard path if measurements are out of environment bounds.
 if (any(points_meas(:,1) > map_params.pos_x+dim_x_env) || ...
         any(points_meas(:,2) > map_params.pos_y+dim_y_env) || ...
         any(points_meas(:,1) < map_params.pos_x) || ...
@@ -114,17 +113,17 @@ while ~isempty(points_control)
             reshape(testing_data.X_test(:,3),dim_y,dim_x,dim_z), ...
             reshape(field_map.mean,dim_y,dim_x,dim_z), ...
             Rob.state.x(1), Rob.state.x(2), Rob.state.x(3), 'spline')];
-        
-        r = Rob.state.r(1:3);
-        Rob_P = Map.P(r,r);
-        field_map = predict_map_update(Rob.state.x(1:3)', Rob_P, field_map, ...
-            training_data, testing_data, map_params, gp_params);
-        
+       
     end
     
     current_frame = current_frame + 1;
     
 end
+
+r = Rob.state.r(1:3);
+Rob_P = Map.P(r,r);
+field_map = predict_map_update(Rob.state.x(1:3)', Rob_P, field_map, ...
+    training_data, testing_data, map_params, gp_params);
 
 P_f = sum(field_map.cov);
 
@@ -133,11 +132,8 @@ gain = P_i - P_f;
 cost = max(get_trajectory_total_time(trajectory), 1/planning_params.meas_freq);
 obj = -gain/cost;
 
-%disp(['Measurements = ', num2str(i)])
-disp(['Gain = ', num2str(gain)])
-disp(['Cost = ', num2str(cost)])
-disp(['Objective = ', num2str(obj)])
-
-Map = Map_init;
+%disp(['Gain = ', num2str(gain)])
+%disp(['Cost = ', num2str(cost)])
+%disp(['Objective = ', num2str(obj)])
 
 end

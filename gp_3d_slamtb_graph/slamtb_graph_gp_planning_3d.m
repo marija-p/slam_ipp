@@ -302,20 +302,23 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
         %disp(['Next goal: ', num2str(point_goal)])
         
         % I. Grid search.
-        points_path = search_lattice(Rob, lattice, field_map, ...
+        path_points = search_lattice(Rob, lattice, field_map, ...
             SimLmk, Sen, Lmk, Obs, Trj, Frm, Fac, factorRob, Opt, ...
             training_data, testing_data, map_params, planning_params, gp_params);
         disp('Next path: ')
-        disp(points_path)
+        disp(path_points)
+        
+        % II. Trajectory optimization.
+        
         
         % Create polynomial path through the control points.
-        trajectory = plan_path_waypoints(points_path, planning_params.max_vel, ...
+        trajectory = plan_path_waypoints(path_points, planning_params.max_vel, ...
             planning_params.max_acc);       
         % Sample trajectory for motion simulation.
-        [times_control, points_control, ~, ~] = ...
+        [~, points_control, ~, ~] = ...
             sample_trajectory(trajectory, 1/planning_params.control_freq);
         
-        metrics.path_travelled = [metrics.path_travelled; points_path];
+        metrics.path_travelled = [metrics.path_travelled; path_points];
         
         keyboard
         
