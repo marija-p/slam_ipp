@@ -1,11 +1,11 @@
 function obj = compute_objective(control_points, field_map, ...
     Rob, Sen, SimLmk, Lmk, Obs, Trj, Frm, Fac, factorRob, Opt, ...
-    map_params, planning_params)
+    training_data, testing_data, map_params, planning_params, gp_params)
 % Calculates the expected informative objective for a polynomial path.
 % ---
 % Inputs:
 % control_points: list of waypoints defining the polynomial
-% grid_map: current map
+% field_map: current GP field map
 % ---
 % Output:
 % obj: informative objective value (to be minimized)
@@ -13,8 +13,12 @@ function obj = compute_objective(control_points, field_map, ...
 % M Popovic 2017
 %
 
+dim_x = map_params.dim_x;
+dim_y = map_params.dim_y;
+dim_z = map_params.dim_z;
 dim_x_env = map_params.dim_x*map_params.res_x;
 dim_y_env = map_params.dim_y*map_params.res_y;
+dim_z_env = map_params.dim_y*map_params.res_z;
 
 % Important: remember global variable to restore later.
 global Map
@@ -44,12 +48,12 @@ if (size(points_meas,1) > 10)
     return;
 end
 
-if (any(points_meas(:,1) > dim_x_env/2) || ...
-        any(points_meas(:,2) > dim_y_env/2) || ...
-        any(points_meas(:,1) < -dim_x_env/2) || ...
-        any(points_meas(:,2) < -dim_y_env/2) || ...
-        any(points_meas(:,3) < planning_params.min_height) || ...
-        any(points_meas(:,3) > planning_params.max_height))
+if (any(points_meas(:,1) > map_params.pos_x+dim_x_env) || ...
+        any(points_meas(:,2) > map_params.pos_y+dim_y_env) || ...
+        any(points_meas(:,1) < map_params.pos_x) || ...
+        any(points_meas(:,2) < map_params.pos_y) || ...
+        any(points_meas(:,3) < map_params.pos_z) || ...
+        any(points_meas(:,3) > map_params.pos_z+dim_z_env))
     obj = Inf;
     return;
 end
@@ -110,6 +114,9 @@ while ~isempty(points_control)
             reshape(testing_data.X_test(:,3),dim_y,dim_x,dim_z), ...
             reshape(field_map.mean,dim_y,dim_x,dim_z), ...
             Rob.state.x(1), Rob.state.x(2), Rob.state.x(3), 'spline')];
+        
+        r = Rob.state.r(1:3);
+        Rob_P = Map.P(r,r);
         field_map = predict_map_update(Rob.state.x(1:3)', Rob_P, field_map, ...
             training_data, testing_data, map_params, gp_params);
         
@@ -123,7 +130,7 @@ P_f = sum(field_map.cov);
 
 % Formulate objective.
 gain = P_i - P_f;
-cost = max(get_trajectory_total_time(trajectory), 1/planning_params.measurement_frequency);
+cost = max(get_trajectory_total_time(trajectory), 1/planning_params.meas_freq);
 obj = -gain/cost;
 
 %disp(['Measurements = ', num2str(i)])

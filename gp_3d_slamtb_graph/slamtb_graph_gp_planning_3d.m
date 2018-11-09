@@ -52,7 +52,7 @@ factorRob = Rob;
     SimOpt);
 
 % Field mapping data and parameters
-[planning_params, map_params, gp_params, ...
+[map_params, planning_params, opt_params, gp_params, ...
     training_data, gt_data, testing_data] = ...
     load_params_and_data(dim_x_env,dim_y_env,dim_z_env);
 dim_x = map_params.dim_x;
@@ -317,7 +317,7 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
         
         metrics.path_travelled = [metrics.path_travelled; points_path];
         
-        %keyboard
+        keyboard
         
         num_control_frames = 0;
         
