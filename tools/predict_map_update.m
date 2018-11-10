@@ -29,9 +29,11 @@ training_data.Y_train = [training_data.Y_train; ...
     pos(1), pos(2), pos(3), 'spline')];
 
 % Do GP regression and update the field map.
-cov_func_UI = {@covUI, gp_params.cov_func, gp_params.N_gauss, Rob_P};
+if (gp_params.use_modified_kernel)
+    gp_params.cov_func = {@covUI, gp_params.cov_func, gp_params.N_gauss, Rob_P};
+end
 [ymu, ys, ~, ~, ~ , ~] = gp(gp_params.hyp_trained, ...
-    gp_params.inf_func, gp_params.mean_func, cov_func_UI, gp_params.lik_func, ...
+    gp_params.inf_func, gp_params.mean_func, gp_params.cov_func, gp_params.lik_func, ...
     training_data.X_train, training_data.Y_train, testing_data.X_test);
 field_map.mean = ymu;
 field_map.cov = ys;

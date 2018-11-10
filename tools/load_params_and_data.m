@@ -54,6 +54,8 @@ gp_params.mean_func = mean_func;
 gp_params.inf_func = inf_func;
 gp_params.cov_func = cov_func;
 gp_params.lik_func = lik_func;
+% Whether to account for robot's localization uncertainty in GP field mapping.
+gp_params.use_modified_kernel = 1;
 
 % Ground truth data - scale for this environment.
 gt_data.X_gt(:,1) = X_gt(:,1) + map_params.pos_x;
