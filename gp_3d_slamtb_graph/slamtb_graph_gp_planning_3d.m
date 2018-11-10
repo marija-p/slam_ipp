@@ -325,6 +325,7 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
         
         disp('Next path: ')
         disp(path_optimized)
+        disp(['Time: ', num2str(Map.t)])
         
         % Create polynomial path through the control points.
         trajectory = plan_path_waypoints(path_optimized, planning_params.max_vel, ...
