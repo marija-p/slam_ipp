@@ -6,3 +6,4 @@ addpath(genpath('gp_2d_slamtb_graph'))
 addpath(genpath('gp_3d_slamtb_graph'))
 
 addpath(genpath('tools'))
+addpath(genpath('evals'))
