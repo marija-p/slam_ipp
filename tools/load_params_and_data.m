@@ -39,7 +39,7 @@ planning_params.keyframe_predict_factor = 1.5;
 planning_params.control_points = 3;
 
 % Optimization/CMA-ES related parameters
-opt_params.max_iters = 15;
+opt_params.max_iters = 10;
 opt_params.opt_method = 'cmaes'; % 'fmc'/cmaes'/'none'/'bo'
 % Covariances in each search dimension
 opt_params.cov_x = 4;
@@ -48,14 +48,14 @@ opt_params.cov_z = 1.5;
 
 % GP-related parameters
 gp_params.hyp_trained = hyp_trained;
-gp_params.N_gauss = 4; %N_gauss;
+gp_params.N_gauss = 9; %N_gauss;
 gp_params.inf_func = inf_func;
 gp_params.mean_func = mean_func;
 gp_params.inf_func = inf_func;
 gp_params.cov_func = cov_func;
 gp_params.lik_func = lik_func;
 % Whether to account for robot's localization uncertainty in GP field mapping.
-gp_params.use_modified_kernel = 1;
+gp_params.use_modified_kernel = 0;
 
 % Ground truth data - scale for this environment.
 gt_data.X_gt(:,1) = X_gt(:,1) + map_params.pos_x;

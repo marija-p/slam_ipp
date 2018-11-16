@@ -62,7 +62,7 @@ Robot{1} = struct(...                  % ODOMETRY EXAMPLE
     'motion',             'odometry',...  % motion model
     'position',           [0;0;2],...     % robot position in map
     'orientationDegrees', [0;0;0],...     % orientation, in degrees, [roll; pitch; yaw].
-    'positionStd',        [0.9;0.9;0],...     % position error, std
+    'positionStd',        [0.4;0.4;0],...     % position error, std
     'orientationStd',     [0;0;0],...     % orient. error, std, in degrees
     'dx',                 [.038;0;0],...     % position increment
     'daDegrees',          [0;0;0],...     % angle increment, degrees

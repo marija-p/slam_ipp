@@ -146,7 +146,7 @@ end
 for currentFrame = Tim.firstFrame : Tim.lastFrame
     
     % Generate control commands.
-    u = points_control(1,:) - SimRob.state.x(1:3)';
+    u = points_control(1,:) - Rob.state.x(1:3)';
     % For orientation
     %theta = atan2(u(2),u(1));
     SimRob.con.u(1:3) = u;
@@ -155,6 +155,9 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
     % Pop target control point from queue.
     points_control = points_control(2:end,:);
     num_control_frames = num_control_frames + 1;
+
+    disp('Distance between real + estimated robot positions: ')
+    disp(num2str(pdist([Rob.state.x(1:3)'; SimRob.state.x(1:3)'])))
     
     % 1. SIMULATION
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -177,16 +180,18 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
     
     % 2. ESTIMATION
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
+     
     %% 2.a. Robot motion prediction
     % Process robots
     for rob = [Rob.rob]
         
         % Robot motion
+        %Rob(rob).con.u = ...
+        %    SimRob(rob).con.u + Rob(rob).con.uStd.*randn(size(Rob(rob).con.uStd));
         Rob(rob).con.u = ...
-            SimRob(rob).con.u + Rob(rob).con.uStd.*randn(size(Rob(rob).con.uStd));
-        
+            SimRob(rob).con.u*1.2;
         Rob(rob) = simMotion(Rob(rob),Tim);
+        disp(SimRob(rob).con.u(1:3))
         
         % Integrate odometry for relative motion factors
         factorRob(rob).con.u = Rob(rob).con.u;
@@ -269,6 +274,8 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
             
         end
         
+        disp('Performed graphSLAM optimisation.')
+        
     end
     
     % 3. SENSING + GP UPDATE
@@ -276,6 +283,8 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
     if (mod(num_control_frames-1, meas_frame_interval) == 0) || (do_first_meas)
         
         for rob = [Rob.rob]
+            
+            %keyboard
             
             [field_map, training_data] = ...
                 take_measurement_at_point(Rob(rob), SimRob(rob), field_map, .....
@@ -319,6 +328,7 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
             path_optimized = optimize_with_cmaes(path_points, field_map, ...
                 Rob, Sen, SimLmk, Lmk, Obs, Trj, Frm, Fac, factorRob, Opt, ...
                 training_data, testing_data, map_params, planning_params, opt_params, gp_params);
+            
         else
             path_optimized = path_points;
         end
