@@ -32,6 +32,7 @@ global Map
 userData_graph_gp_3d;
 Robot{1}.positionStd = planning_params.position_stdev';
 
+
 %% II. Initialize all data structures from user-defined data
 % SLAM data
 [Rob,Sen,Raw,Lmk,Obs,Trj,Frm,Fac,Tim] = createGraphStructures(...
@@ -194,9 +195,12 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
         
     end
     
-    % Advance time
+    % Advance time and check if planning budget exceeded
     Map.t = Map.t + Tim.dt;
-    
+    if (Map.t > planning_params.time_budget)
+        disp('Time budget exceeded!')
+        return;
+    end
     
     %% 2.b. Graph construction and solving
     if mod(currentFrame - Tim.firstFrame + 1, Opt.map.kfrmPeriod) == 0 || ...
