@@ -112,7 +112,7 @@ if (do_plot)
         'LooseInset', max(get(gca,'TightInset'), 0.02));
     
     plot(time_vector, mlls_resampled)
-    axis([0 time_vector(end) 2 6])
+    axis([0 time_vector(end) 0 5])
     h_xlabel = xlabel('Time (s)');
     h_ylabel = ylabel('MLL');
     set([h_xlabel, h_ylabel], ...

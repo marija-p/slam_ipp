@@ -152,8 +152,8 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
     points_control = points_control(2:end,:);
     num_control_frames = num_control_frames + 1;
 
-    disp('Distance between real + estimated robot positions: ')
-    disp(num2str(pdist([Rob.state.x(1:3)'; SimRob.state.x(1:3)'])))
+    %disp('Distance between real + estimated robot positions: ')
+    %disp(num2str(pdist([Rob.state.x(1:3)'; SimRob.state.x(1:3)'])))
     
     % 1. SIMULATION
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -187,7 +187,6 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
         Rob(rob).con.u(1:3) = Rob(rob).con.u(1:3) + ...
             SimRob(rob).con.u(1:3).*rand(3,1).*planning_params.control_noise_percent'./100;
         Rob(rob) = simMotion(Rob(rob),Tim);
-        disp(SimRob(rob).con.u(1:3))
         
         % Integrate odometry for relative motion factors
         factorRob(rob).con.u = Rob(rob).con.u;
@@ -272,8 +271,6 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
             factorRob(rob) = resetMotion(Rob(rob));
             
         end
-        
-        disp('Performed graphSLAM optimisation.')
         
     end
     

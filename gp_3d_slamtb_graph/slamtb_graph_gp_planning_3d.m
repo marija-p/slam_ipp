@@ -189,7 +189,7 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
         %Rob(rob).con.u = ...
         %    SimRob(rob).con.u + Rob(rob).con.uStd.*randn(size(Rob(rob).con.uStd));
         Rob(rob).con.u = ...
-            SimRob(rob).con.u*1.2;
+            SimRob(rob).con.u*1.1;
         Rob(rob) = simMotion(Rob(rob),Tim);
         disp(SimRob(rob).con.u(1:3))
         
