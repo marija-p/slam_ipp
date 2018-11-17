@@ -13,6 +13,8 @@ logger = [];
 
 for t = 1:num_trials
     
+    planning_params.meas_freq = 0.1;
+    
     rng(t, 'twister');
     logger.(['trial', num2str(t)]).num = t;
     
@@ -20,12 +22,12 @@ for t = 1:num_trials
     [metrics] = slam_gp(map_params, planning_params, opt_params, gp_params, ...
         training_data, gt_data, testing_data);
     logger.(['trial', num2str(t)]).('no_UI') = metrics;
+    clear global
     
     planning_params.modified_kernel = 1;
     [metrics] = slam_gp(map_params, planning_params, opt_params, gp_params, ...
         training_data, gt_data, testing_data);
     logger.(['trial', num2str(t)]).('UI') = metrics; 
-    
-    clear;
+    clear global
     
 end
