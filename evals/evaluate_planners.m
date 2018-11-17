@@ -14,4 +14,6 @@ for trial = 1:num_trials
     [metrics] = slam_gp(map_params, planning_params, opt_params, gp_params, ...
         training_data, gt_data, testing_data);
     
+    clear;
+    
 end

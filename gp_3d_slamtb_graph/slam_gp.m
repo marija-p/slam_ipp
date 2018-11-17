@@ -1,4 +1,4 @@
-function [metrics] = slamtb_graph_gp_planning_3d(map_params, planning_params, opt_params, gp_params, ...
+function [metrics] = slam_gp(map_params, planning_params, opt_params, gp_params, ...
     training_data, gt_data, testing_data)
 
 % SLAMTB_GRAPH  A graph-SLAM algorithm with simulator and graphics.
@@ -30,6 +30,7 @@ global Map
 
 %% I. Specify user-defined options
 userData_graph_gp_3d;
+Robot{1}.positionStd = planning_params.position_stdev';
 
 %% II. Initialize all data structures from user-defined data
 % SLAM data
@@ -145,7 +146,6 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
     % For orientation
     %theta = atan2(u(2),u(1));
     SimRob.con.u(1:3) = u;
-    Rob.con.u(1:3) = u;
     
     % Pop target control point from queue.
     points_control = points_control(2:end,:);
@@ -181,10 +181,10 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
     for rob = [Rob.rob]
         
         % Robot motion
-        %Rob(rob).con.u = ...
-        %    SimRob(rob).con.u + Rob(rob).con.uStd.*randn(size(Rob(rob).con.uStd));
         Rob(rob).con.u = ...
-            SimRob(rob).con.u*1.2;
+            SimRob(rob).con.u;
+        Rob(rob).con.u(1:3) = Rob(rob).con.u(1:3) + ...
+            SimRob(rob).con.u(1:3).*rand(3,1).*planning_params.control_noise_percent'./100;
         Rob(rob) = simMotion(Rob(rob),Tim);
         disp(SimRob(rob).con.u(1:3))
         

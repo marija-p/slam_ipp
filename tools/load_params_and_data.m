@@ -27,6 +27,13 @@ planning_params.lattice_points_z = 3;
 planning_params.max_vel = 3;        % [m/s]
 planning_params.max_acc = 3;        % [m/s^2]
 
+% Maximum control noise % percentage added in each co-ordinate [x,y,z].
+planning_params.control_noise_percent = [20, 20, 20];
+% UAV initial position error [standard dev] in each co-ordinate [x,y,z].
+% [Overwrites SLAM data.]
+planning_params.position_stdev = [0.4, 0.4, 0];
+
+
 % Frequency at which to send commands - simulate motion/covariance update
 planning_params.control_freq = 3;   % [Hz]
 % Frequency at which to take measurements
