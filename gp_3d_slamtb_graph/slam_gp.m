@@ -152,8 +152,8 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
     points_control = points_control(2:end,:);
     num_control_frames = num_control_frames + 1;
 
-    %disp('Distance between real + estimated robot positions: ')
-    %disp(num2str(pdist([Rob.state.x(1:3)'; SimRob.state.x(1:3)'])))
+    disp('Distance between real + estimated robot positions: ')
+    disp(num2str(pdist([Rob.state.x(1:3)'; SimRob.state.x(1:3)'])))
     
     % 1. SIMULATION
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -354,9 +354,10 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
     % 5. VISUALIZATION
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    if currentFrame == Tim.firstFrame ...
+    if (currentFrame == Tim.firstFrame ...
             || currentFrame == Tim.lastFrame ...
-            || mod(currentFrame,FigOpt.rendPeriod) == 0
+            || mod(currentFrame,FigOpt.rendPeriod) == 0) ...
+            && FigOpt.drawFigs
         
         
         % Figure of the Map:
