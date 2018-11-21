@@ -87,3 +87,18 @@
     keyframe_predict_factor: 1.5000
              control_points: 3
                 time_budget: 200
+
+20181121-08-32.mat
+
+           lattice_points_x: 3
+           lattice_points_y: 3
+           lattice_points_z: 3
+                    max_vel: 3
+                    max_acc: 3
+      control_noise_percent: [5 5 5]
+             position_stdev: [0.1000 0.1000 0.0500]
+               control_freq: 1
+                  meas_freq: 0.2000
+    keyframe_predict_factor: 1.5000
+             control_points: 3
+                time_budget: 200
