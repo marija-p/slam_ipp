@@ -153,9 +153,6 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
     % Pop target control point from queue.
     points_control = points_control(2:end,:);
     num_control_frames = num_control_frames + 1;
-
-    disp('Distance between real + estimated robot positions: ')
-    disp(num2str(pdist([Rob.state.x(1:3)'; SimRob.state.x(1:3)'])))
     
     % 1. SIMULATION
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -292,7 +289,7 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
             
             metrics.times = [metrics.times; Map.t];
             metrics.points_meas = [metrics.points_meas; Rob(rob).state.x(1:3)'];
-            metrics.points_meas_gt = [metrics.points_meas; SimRob(rob).state.x(1:3)'];
+            metrics.points_meas_gt = [metrics.points_meas_gt; SimRob(rob).state.x(1:3)'];
             metrics.measurements = [metrics.measurements; training_data.Y_train(end)];
             metrics.P_traces = [metrics.P_traces; sum(field_map.cov)];
             metrics.rmses = [metrics.rmses; compute_rmse(field_map.mean, gt_data.Y_gt)];
@@ -300,6 +297,10 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
             r = Rob(rob).state.r(1:3);
             P = Map.P(r,r);
             metrics.Rob_Ps(:,:,size(metrics.times,1)) = P;
+            
+            disp(['Distance between real + estimated robot positions: ', ...
+                num2str(pdist([Rob.state.x(1:3)'; SimRob.state.x(1:3)']))])
+            disp(['Map RMSE = ', num2str(metrics.rmses(end))])
             
         end
         
@@ -350,7 +351,7 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
         
         %keyboard
         
-        num_control_frames = 0;
+        %num_control_frames = 0;
         
     end
     

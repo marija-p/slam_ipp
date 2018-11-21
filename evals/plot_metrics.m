@@ -93,7 +93,7 @@ if (do_plot)
     set([h_xlabel, h_ylabel], ...
         'FontName'   , 'Helvetica');
     hold off
-
+    
     % MLL
     subplot(2,3,3)
     hold on
@@ -143,7 +143,7 @@ if (do_plot)
     set([h_xlabel, h_ylabel], ...
         'FontName'   , 'Helvetica');
     hold off
-
+    
     % Robot covariance determinant (D-opt)
     subplot(2,3,5)
     hold on
