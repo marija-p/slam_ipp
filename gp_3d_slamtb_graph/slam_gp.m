@@ -73,19 +73,21 @@ lattice = create_lattice(map_params, planning_params);
 field_map = [];
 
 % Graphics handles
-[MapFig,SenFig,FldFig]          = createGraphicsStructures(...
-    Rob, Sen, Lmk, Obs,...      % SLAM data
-    Trj, Frm, Fac, ...
-    SimRob, SimSen, SimLmk,...  % Simulator data
-    testing_data.X_test, ...    % Field data
-    FigOpt);                    % User-defined graphic options
-refresh_field_fig = 0;
+if (FigOpt.drawFigs)
+    [MapFig,SenFig,FldFig]          = createGraphicsStructures(...
+        Rob, Sen, Lmk, Obs,...      % SLAM data
+        Trj, Frm, Fac, ...
+        SimRob, SimSen, SimLmk,...  % Simulator data
+        testing_data.X_test, ...    % Field data
+        FigOpt);                    % User-defined graphic options
+    refresh_field_fig = 0;
+end
 
 % Clear user data
 clear Robot Sensor World Time
 
 %% III. Initialize data logging
-metrics = initialize_metrics();
+metrics = initialize_metrics(map_params, planning_params, opt_params, gp_params);
 
 %% IV. Startup
 % TODO: Possibly put in initRobots and createFrames, createFactors, createTrj...
@@ -290,6 +292,8 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
             
             metrics.times = [metrics.times; Map.t];
             metrics.points_meas = [metrics.points_meas; Rob(rob).state.x(1:3)'];
+            metrics.points_meas_gt = [metrics.points_meas; SimRob(rob).state.x(1:3)'];
+            metrics.measurements = [metrics.measurements; training_data.Y_train(end)];
             metrics.P_traces = [metrics.P_traces; sum(field_map.cov)];
             metrics.rmses = [metrics.rmses; compute_rmse(field_map.mean, gt_data.Y_gt)];
             metrics.mlls = [metrics.mlls; compute_mll(field_map, gt_data.Y_gt)];
