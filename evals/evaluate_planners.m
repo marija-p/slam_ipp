@@ -1,11 +1,11 @@
 %clear all; close all; clc;
 
 % If data already exists, want to append to it for the trials it contains.
-append_to_logger = 1;
+append_to_logger = 0;
 
 % Number of trials to run
 if (~append_to_logger)
-    num_trials = 5;
+    num_trials = 20;
     logger = [];
 else
     trials = fieldnames(logger);
@@ -16,6 +16,7 @@ else
         trials_names = ...
             [trials_names; str2num(cell2mat(trials(i)))];
     end
+    num_trials = length(trials);
 end
 
 % UAV workspace dimensions [m]
@@ -27,7 +28,7 @@ dim_z_env = 5;
     training_data, gt_data, testing_data] = ...
     load_params_and_data(dim_x_env, dim_y_env, dim_z_env);
 
-for i = 1:5
+for i = 1:num_trials
     
     %   planning_params.control_noise_percent = [10, 10, 10];
     
@@ -38,19 +39,19 @@ for i = 1:5
     end
     
     logger.(['trial', num2str(t)]).num = t;
-
-%     rng(t, 'twister');
-%     gp_params.use_modified_kernel = 0;
-%     [metrics] = slam_gp(map_params, planning_params, opt_params, gp_params, ...
-%         training_data, gt_data, testing_data);
-%     logger.(['trial', num2str(t)]).('no_UI') = metrics;
+    
+    rng(t, 'twister');
+    gp_params.use_modified_kernel = 0;
+    [metrics] = slam_gp(map_params, planning_params, opt_params, gp_params, ...
+        training_data, gt_data, testing_data);
+    logger.(['trial', num2str(t)]).('no_UI') = metrics;
     clear global
     
     rng(t, 'twister');
     gp_params.use_modified_kernel = 1;
     [metrics] = slam_gp(map_params, planning_params, opt_params, gp_params, ...
         training_data, gt_data, testing_data);
-    logger.(['trial', num2str(t)]).('UI') = metrics; 
+    logger.(['trial', num2str(t)]).('UI_N_gauss_9') = metrics;
     clear global
     
     disp(['Completed Trial ', num2str(t)])

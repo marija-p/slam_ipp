@@ -19,9 +19,13 @@ if isfield(planning_params, 'control_points')
             planning_params.max_vel, ...
             planning_params.max_acc);
         [t_poly, p_poly] = sample_trajectory(trajectory, 0.1);
+        
         if (i == 1)
             t = [t; t_poly'];
         else
+            disp(['Trajectory start: ', num2str(t(end))])
+            disp(['Trajectory length: ', ...
+                num2str(get_trajectory_total_time(trajectory)), 's']);
             t = [t; t(end) + t_poly'];
         end
         p = [p; p_poly];
