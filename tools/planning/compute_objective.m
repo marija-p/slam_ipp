@@ -1,6 +1,7 @@
 function obj = compute_objective(control_points, field_map, ...
     Rob, Sen, SimLmk, Lmk, Obs, Trj, Frm, Fac, factorRob, Opt, ...
-    training_data, testing_data, map_params, planning_params, gp_params)
+    num_control_frames, training_data, testing_data, ...
+    map_params, planning_params, gp_params)
 % Calculates the expected informative objective for a polynomial path.
 % ---
 % Inputs:
@@ -22,7 +23,13 @@ dim_x_env = map_params.dim_x*map_params.res_x;
 dim_y_env = map_params.dim_y*map_params.res_y;
 dim_z_env = map_params.dim_y*map_params.res_z;
 
-P_i = sum(field_map.cov);
+if (planning_params.use_thres)
+    above_thres_ind = find(field_map.mean + ...
+        planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);
+    P_i = sum(field_map.cov(above_thres_ind));
+else
+    P_i = sum(field_map.cov);
+end
 
 % Number of time-frames between each measurement
 meas_frame_interval = planning_params.control_freq/planning_params.meas_freq;
@@ -67,6 +74,7 @@ try
         Rob.con.u(1:3) = u;
         % Pop target control point from queue.
         points_control = points_control(2:end,:);
+        num_control_frames = num_control_frames + 1;
         
         % Simulate control for this time-step.
         Rob.con.u = ...
@@ -103,7 +111,7 @@ try
         end
         
         % Take a measurement.
-        if (mod(current_frame-1, meas_frame_interval) == 0)
+        if (mod(num_control_frames-1, meas_frame_interval) == 0)
             
             % Update training data.
             training_data.X_train = [training_data.X_train; Rob.state.x(1:3)'];
@@ -126,7 +134,13 @@ try
     field_map = predict_map_update(Rob.state.x(1:3)', Rob_P, field_map, ...
         training_data, testing_data, map_params, gp_params);
     
-    P_f = sum(field_map.cov);
+    if (planning_params.use_thres)
+        above_thres_ind = find(field_map.mean + ...
+            planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);
+        P_f = sum(field_map.cov(above_thres_ind));
+    else
+        P_f = sum(field_map.cov);
+    end
     
     % Formulate objective.
     gain = P_i - P_f;
@@ -139,6 +153,7 @@ try
 
 catch
     
+    % Optimization didn't work for some reason. xD
     obj = Inf;
     return;
     

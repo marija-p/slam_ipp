@@ -31,7 +31,13 @@ global Map
 Map_init = Map;
 
 %% Prepare variables.
-P_trace_prev = sum(field_map.cov);
+if (planning_params.use_thres)
+    above_thres_ind = find(field_map.mean + ...
+        planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);
+    P_i = sum(field_map.cov(above_thres_ind));
+else
+    P_i = sum(field_map.cov);
+end
 point_prev = Rob_init.state.x(1:3)';
 path_points = Rob_init.state.x(1:3)';
 
@@ -79,9 +85,16 @@ while (planning_params.control_points > size(path_points, 1))
         % Predict map update at target location.
         field_map_eval = predict_map_update(point_eval, Rob_P, field_map, ...
             training_data, testing_data, map_params, gp_params);
-        P_trace = sum(field_map_eval.cov);
+        if (planning_params.use_thres)
+            above_thres_ind = find(field_map.mean + ...
+                planning_params.beta*sqrt(field_map.cov) >= ...
+                planning_params.lower_thres);
+            P_f = sum(field_map.cov(above_thres_ind));
+        else
+            P_f = sum(field_map.cov);
+        end
         
-        gain = P_trace_prev - P_trace;
+        gain = P_i - P_f;
         cost = max(travel_time, 1/planning_params.meas_freq);
         obj = -gain/cost;
         
@@ -118,7 +131,13 @@ while (planning_params.control_points > size(path_points, 1))
     
     %% Write variables for next lattice evaluation.
     path_points = [path_points; point_best];
-    P_trace_prev = sum(field_map.cov);
+    if (planning_params.use_thres)
+        above_thres_ind = find(field_map.mean + ...
+            planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);
+        P_i = sum(field_map.cov(above_thres_ind));
+    else
+        P_i = sum(field_map.cov);
+    end
     point_prev = point_best;
     [Rob_prev, Sen_prev, Lmk_prev, Trj_prev, Frm_prev, Fac_prev, factorRob_prev] = ...
         copy_graphslam_vars(Rob_best, Sen_best, Lmk_best, Trj_best, Frm_best, Fac_best, factorRob_best);

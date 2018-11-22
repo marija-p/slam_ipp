@@ -47,6 +47,15 @@ planning_params.control_points = 3;
 % Total time budget for informative planning [s].
 planning_params.time_budget = 200;
 
+
+% Threshold - only regions above this value are
+% considered "interesting" and used when computing information gain.
+planning_params.lower_thres = 35;
+% Whether to use the threshold value for active planning
+planning_params.use_thres = 0;
+% Design parameter for uncertainty-aware adaptive planning
+planning_params.beta = 0;
+
 % Optimization/CMA-ES related parameters
 opt_params.max_iters = 10;
 opt_params.opt_method = 'cmaes'; % 'fmc'/cmaes'/'none'/'bo'
