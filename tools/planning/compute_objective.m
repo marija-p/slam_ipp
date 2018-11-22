@@ -1,6 +1,7 @@
 function obj = compute_objective(control_points, field_map, ...
     Rob, Sen, SimLmk, Lmk, Obs, Trj, Frm, Fac, factorRob, Opt, ...
-    training_data, testing_data, map_params, planning_params, gp_params)
+    num_control_frames, training_data, testing_data, ...
+    map_params, planning_params, gp_params)
 % Calculates the expected informative objective for a polynomial path.
 % ---
 % Inputs:
@@ -67,6 +68,7 @@ try
         Rob.con.u(1:3) = u;
         % Pop target control point from queue.
         points_control = points_control(2:end,:);
+        num_control_frames = num_control_frames + 1;
         
         % Simulate control for this time-step.
         Rob.con.u = ...
@@ -103,7 +105,7 @@ try
         end
         
         % Take a measurement.
-        if (mod(current_frame-1, meas_frame_interval) == 0)
+        if (mod(num_control_frames-1, meas_frame_interval) == 0)
             
             % Update training data.
             training_data.X_train = [training_data.X_train; Rob.state.x(1:3)'];
@@ -139,6 +141,7 @@ try
 
 catch
     
+    % Optimization didn't work for some reason. xD
     obj = Inf;
     return;
     

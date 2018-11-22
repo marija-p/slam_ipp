@@ -330,7 +330,8 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
         if (strcmp(opt_params.opt_method, 'cmaes'))
             path_optimized = optimize_with_cmaes(path_points, field_map, ...
                 Rob, Sen, SimLmk, Lmk, Obs, Trj, Frm, Fac, factorRob, Opt, ...
-                training_data, testing_data, map_params, planning_params, opt_params, gp_params);
+                num_control_frames, training_data, testing_data, ...
+                map_params, planning_params, opt_params, gp_params);
             
         else
             path_optimized = path_points;

@@ -1,5 +1,5 @@
 function path_optimized = optimize_with_cmaes(path_points, field_map, ...
-    Rob, Sen, SimLmk, Lmk, Obs, Trj, Frm, Fac, factorRob, Opt, ...
+    Rob, Sen, SimLmk, Lmk, Obs, Trj, Frm, Fac, factorRob, Opt, num_control_frames, ...
     training_data, testing_data, map_params, planning_params, opt_params, gp_params)
 % Optimizes a polynomial path (defined by control points) using
 % the Covariance Matrix Adaptation Evolutionary Strategy (CMA-ES).
@@ -26,7 +26,7 @@ opt.Seed = randi(2^5);
 LBounds = [map_params.pos_x;map_params.pos_y;map_params.pos_z];
 UBounds = [map_params.pos_x+dim_x_env;map_params.pos_y+dim_y_env;map_params.pos_z+dim_z_env];
 opt.LBounds = repmat(LBounds, size(path_points,1)-1, 1);
-opt.UBounds = repmat(UBounds, size(path_points,1)-1, 1); 
+opt.UBounds = repmat(UBounds, size(path_points,1)-1, 1);
 cov = [opt_params.cov_x; opt_params.cov_y; opt_params.cov_z];
 cov = repmat(cov, size(path_points,1)-1, 1);
 
@@ -35,7 +35,8 @@ path_initial = reshape(path_points(2:end,:)', [], 1);
 path_optimized = cmaes('optimize_points', ...
     path_initial, cov, opt, path_points(1,:), field_map, ...
     Rob, Sen, SimLmk, Lmk, Obs, Trj, Frm, Fac, factorRob, Opt, ...
-    training_data, testing_data, map_params, planning_params, gp_params);
+    num_control_frames, training_data, testing_data, ...
+    map_params, planning_params, gp_params);
 path_optimized = reshape(path_optimized, 3, [])';
 path_optimized = [path_points(1,:); path_optimized];
 
