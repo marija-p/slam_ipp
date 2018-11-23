@@ -50,7 +50,7 @@ planning_params.time_budget = 200;
 
 % Threshold - only regions above this value are
 % considered "interesting" and used when computing information gain.
-planning_params.lower_thres = 35;
+planning_params.lower_thres = 30;
 % Whether to use the threshold value for active planning
 planning_params.use_thres = 0;
 % Design parameter for uncertainty-aware adaptive planning
