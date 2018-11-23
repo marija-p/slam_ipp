@@ -42,7 +42,7 @@ Rob_Ps_Dopt_resampled = ts_resampled.data';
 
 if (do_plot)
 
-    % GP field covariance trace
+    %% GP field covariance trace %%
     subplot(2,3,1)
     hold on
     set(gca, ...
@@ -69,7 +69,7 @@ if (do_plot)
         'FontName'   , 'Helvetica');
     hold off
     
-    % RMSE
+    %% RMSE %%
     subplot(2,3,2)
     hold on
     set(gca, ...
@@ -94,7 +94,7 @@ if (do_plot)
         'FontName'   , 'Helvetica');
     hold off
     
-    % MLL
+    %% MLL %%
     subplot(2,3,3)
     hold on
     set(gca, ...
@@ -119,7 +119,7 @@ if (do_plot)
         'FontName'   , 'Helvetica');
     hold off
     
-    % Robot covariance trace (A-opt)
+    %% Robot covariance trace (A-opt) %%
     subplot(2,3,4)
     hold on
     set(gca, ...
@@ -144,7 +144,7 @@ if (do_plot)
         'FontName'   , 'Helvetica');
     hold off
     
-    % Robot covariance determinant (D-opt)
+    %% Robot covariance determinant (D-opt) %%
     subplot(2,3,5)
     hold on
     set(gca, ...
