@@ -23,12 +23,15 @@ dim_x_env = map_params.dim_x*map_params.res_x;
 dim_y_env = map_params.dim_y*map_params.res_y;
 dim_z_env = map_params.dim_y*map_params.res_z;
 
-if (planning_params.use_thres)
-    above_thres_ind = find(field_map.mean + ...
-        planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);
-    P_i = sum(field_map.cov(above_thres_ind));
-else
-    P_i = sum(field_map.cov);
+switch planning_params.obj_func
+    case {'uncertainty_adaptive', 'renyi_adaptive'}
+        above_thres_ind = find(field_map.mean + ...
+            planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);
+        P_i = sum(field_map.cov(above_thres_ind));
+    case {'uncertainty', 'renyi'}
+        P_i = sum(field_map.cov);
+    otherwise
+        warning('Unknown objective function!');
 end
 
 % Number of time-frames between each measurement
@@ -134,12 +137,24 @@ try
     field_map = predict_map_update(Rob.state.x(1:3)', Rob_P, field_map, ...
         training_data, testing_data, map_params, gp_params);
     
-    if (planning_params.use_thres)
-        above_thres_ind = find(field_map.mean + ...
-            planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);
-        P_f = sum(field_map.cov(above_thres_ind));
-    else
-        P_f = sum(field_map.cov);
+    switch planning_params.obj_func
+        case 'uncertainty_adaptive'
+            above_thres_ind = find(field_map.mean + ...
+                planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);
+            P_f = sum(field_map.cov(above_thres_ind));
+        case 'uncertainty'
+            P_f = sum(field_map.cov);
+        case 'renyi_adaptive'
+            above_thres_ind = find(field_map.mean + ...
+                planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);
+            alpha = 1 + 1/det(Rob_P);
+            P_f = sum(field_map.cov(above_thres_ind)) - ...
+                sum(field_map.cov(above_thres_ind).*(alpha^(1/alpha-1)));
+        case 'renyi'
+            alpha = 1 + 1/det(Rob_P);
+            P_f = sum(field_map.cov) - sum(field_map.cov.*(alpha^(1/alpha-1)));
+        otherwise
+            warning('Unknown objective function!');
     end
     
     % Formulate objective.

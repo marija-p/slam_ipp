@@ -31,13 +31,17 @@ global Map
 Map_init = Map;
 
 %% Prepare variables.
-if (planning_params.use_thres)
-    above_thres_ind = find(field_map.mean + ...
-        planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);
-    P_i = sum(field_map.cov(above_thres_ind));
-else
-    P_i = sum(field_map.cov);
+switch planning_params.obj_func
+    case {'uncertainty_adaptive', 'renyi_adaptive'}
+        above_thres_ind = find(field_map.mean + ...
+            planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);
+        P_i = sum(field_map.cov(above_thres_ind));
+    case {'uncertainty', 'renyi'}
+        P_i = sum(field_map.cov);
+    otherwise
+        warning('Unknown objective function!');
 end
+
 point_prev = Rob_init.state.x(1:3)';
 path_points = Rob_init.state.x(1:3)';
 
@@ -85,13 +89,25 @@ while (planning_params.control_points > size(path_points, 1))
         % Predict map update at target location.
         field_map_eval = predict_map_update(point_eval, Rob_P, field_map, ...
             training_data, testing_data, map_params, gp_params);
-        if (planning_params.use_thres)
-            above_thres_ind = find(field_map.mean + ...
-                planning_params.beta*sqrt(field_map.cov) >= ...
-                planning_params.lower_thres);
-            P_f = sum(field_map.cov(above_thres_ind));
-        else
-            P_f = sum(field_map.cov);
+        
+        switch planning_params.obj_func
+            case 'uncertainty_adaptive'
+                above_thres_ind = find(field_map.mean + ...
+                    planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);
+                P_f = sum(field_map.cov(above_thres_ind));
+            case 'uncertainty'
+                P_f = sum(field_map.cov);
+            case 'renyi_adaptive'
+                above_thres_ind = find(field_map.mean + ...
+                    planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);
+                alpha = 1 + 1/det(Rob_P);
+                P_f = sum(field_map.cov(above_thres_ind)) - ...
+                    sum(field_map.cov(above_thres_ind).*(alpha^(1/alpha-1)));
+            case 'renyi'
+                alpha = 1 + 1/det(Rob_P);
+                P_f = sum(field_map.cov) - sum(field_map.cov.*(alpha^(1/alpha-1)));
+            otherwise
+                warning('Unknown objective function!');
         end
         
         gain = P_i - P_f;

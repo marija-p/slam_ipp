@@ -28,7 +28,7 @@ planning_params.max_vel = 3;        % [m/s]
 planning_params.max_acc = 3;        % [m/s^2]
 
 % Maximum control noise % percentage added in each co-ordinate [x,y,z].
-planning_params.control_noise_percent = [5, 5, 5];
+planning_params.control_noise_percent = [5, 5, 2.5];
 % UAV initial position error [standard dev] in each co-ordinate [x,y,z].
 % (Overwrites SLAM data.)
 planning_params.position_stdev = [0.2, 0.2, 0.1];
@@ -47,8 +47,11 @@ planning_params.control_points = 3;
 % Total time budget for informative planning [s].
 planning_params.time_budget = 200;
 
+% Objective function for informative planning.
+% 'uncertainty_adaptive'/'renyi_adaptive'/'uncertainty'/'renyi'
+planning_params.obj_func = 'renyi';
 
-% Threshold - only regions above this value are
+% Threshold for adaptive planning - only regions above this value are
 % considered "interesting" and used when computing information gain.
 planning_params.lower_thres = 30;
 % Whether to use the threshold value for active planning
