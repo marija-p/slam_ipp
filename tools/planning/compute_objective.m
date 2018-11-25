@@ -147,15 +147,24 @@ try
         case 'renyi_adaptive'
             above_thres_ind = find(field_map.mean + ...
                 planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);
-            alpha = 1 + 1/det(Rob_P);
+            if strcmp(planning_params.renyi_uncertainty, 'Dopt')
+                alpha = 1 + 1/det(Rob_P);
+            elseif strcmp(planning_params.renyi_uncertainty, 'Aopt')
+                alpha = 1 + 1/trace(Rob_P);
+            end
             P_f = sum(field_map.cov(above_thres_ind)) - ...
                 sum(field_map.cov(above_thres_ind).*(alpha^(1/alpha-1)));
         case 'renyi'
-            alpha = 1 + 1/det(Rob_P);
+            if strcmp(planning_params.renyi_uncertainty, 'Dopt')
+                alpha = 1 + 1/det(Rob_P);
+            elseif strcmp(planning_params.renyi_uncertainty, 'Aopt')
+                alpha = 1 + 1/trace(Rob_P);
+            end
             P_f = sum(field_map.cov) - sum(field_map.cov.*(alpha^(1/alpha-1)));
         otherwise
             warning('Unknown objective function!');
     end
+end
     
     % Formulate objective.
     gain = P_i - P_f;
