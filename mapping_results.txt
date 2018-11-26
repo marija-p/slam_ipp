@@ -1,4 +1,24 @@
-20181123-08-56.mat 
+20181123-08-56.mat
+
+    {'no_UI'       }
+    {'UI_N_gauss_9'}
+
+      control_noise_percent: [5 5 2.5000]
+             position_stdev: [0.2000 0.2000 0.1000]
+               control_freq: 1
+                  meas_freq: 0.2000
+    keyframe_predict_factor: 1.5000
+             control_points: 3
+                time_budget: 200
+                   obj_func: 'renyi'
+          renyi_uncertainty: 'Dopt'
+
+20181123-14-41.mat [Split environment]
+
+    {'no_UI'       }
+    {'UI_N_gauss_9'}
+    {'UI_N_gauss_5'}
+
       control_noise_percent: [5 5 2.5000]
              position_stdev: [0.2000 0.2000 0.1000]
                control_freq: 1
