@@ -164,7 +164,6 @@ try
         otherwise
             warning('Unknown objective function!');
     end
-end
     
     % Formulate objective.
     gain = P_i - P_f;
@@ -174,7 +173,7 @@ end
     %disp(['Gain = ', num2str(gain)])
     %disp(['Cost = ', num2str(cost)])
     %disp(['Objective = ', num2str(obj)])
-
+    
 catch
     
     % Optimization didn't work for some reason. xD
