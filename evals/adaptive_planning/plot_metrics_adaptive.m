@@ -130,7 +130,7 @@ if (do_plot)
     plot(time_vector, rmses_interesting_resampled)
     axis([0 time_vector(end) 1 8.5])
     h_xlabel = xlabel('Time (s)');
-    h_ylabel = ylabel('RMSE');
+    h_ylabel = ylabel('RMSE - interesting');
     set([h_xlabel, h_ylabel], ...
         'FontName'   , 'Helvetica');
     hold off
