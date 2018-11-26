@@ -1,7 +1,4 @@
-file_path = '~\PhD\Submissions\asldoc-2017-iros-popovic\images\';
-
 rescale_factor = 1;
-%rescale_factor = 0.75;
 text_size = 10.5;
 
 do_plot = 1;
@@ -19,14 +16,13 @@ methods = fieldnames(logger.trial1);
 if (length(methods) ~= length(fieldnames(logger.(trials{end}))))
     trials = trials(1:end-1);
 end
-
+    
 time_vector = 0:0.1:200;
 
 P_traces = zeros(length(methods)-1,length(time_vector));
+P_traces_interesting = zeros(length(methods)-1,length(time_vector));
 rmses = zeros(length(methods)-1,length(time_vector));
-mlls = zeros(length(methods)-1,length(time_vector));
-Rob_Ps_Aopt = zeros(length(methods)-1,length(time_vector));
-Rob_Ps_Dopt = zeros(length(methods)-1,length(time_vector));
+rmses_interesting = zeros(length(methods)-1,length(time_vector));
 
 for i = 1:length(trials)
     
@@ -40,36 +36,25 @@ for i = 1:length(trials)
         end
         
         P_trace = logger.(trials{i}).(methods{j}).P_traces;
+        P_trace_interesting = logger.(trials{i}).(methods{j}).P_traces_interesting;
         rmse = logger.(trials{i}).(methods{j}).rmses;
-        mll = logger.(trials{i}).(methods{j}).mlls;
-        
-        Rob_P_Aopt = [];
-        Rob_P_Dopt = [];
-        
-        for k = 1:size(metrics.times,1)
-            Rob_P_Aopt = [Rob_P_Aopt; trace(logger.(trials{i}).(methods{j}).Rob_Ps(:,:,k))];
-            Rob_P_Dopt = [Rob_P_Dopt; det(logger.(trials{i}).(methods{j}).Rob_Ps(:,:,k))];
-        end
+        rmse_interesting = logger.(trials{i}).(methods{j}).rmses_interesting;
         
         ts = timeseries(P_trace, time);
         ts_resampled = resample(ts, time_vector, 'zoh');
         P_traces(j-1,:,i) = ts_resampled.data';
         
+        ts = timeseries(P_trace_interesting, time);
+        ts_resampled = resample(ts, time_vector, 'zoh');
+        P_traces_interesting(j-1,:,i) = ts_resampled.data';
+        
         ts = timeseries(rmse, time);
         ts_resampled = resample(ts, time_vector, 'zoh');
         rmses(j-1,:,i) = ts_resampled.data';
         
-        ts = timeseries(mll, time);
+        ts = timeseries(rmse_interesting, time);
         ts_resampled = resample(ts, time_vector, 'zoh');
-        mlls(j-1,:,i) = ts_resampled.data';
-        
-        ts = timeseries(Rob_P_Aopt, time);
-        ts_resampled = resample(ts, time_vector, 'zoh');
-        Rob_Ps_Aopt(j-1,:,i) = ts_resampled.data';
-        
-        ts = timeseries(Rob_P_Dopt, time);
-        ts_resampled = resample(ts, time_vector, 'zoh');
-        Rob_Ps_Dopt(j-1,:,i) = ts_resampled.data';
+        rmses_interesting(j-1,:,i) = ts_resampled.data';
         
     end
     
@@ -77,33 +62,26 @@ end
 
 % Find means and medians.
 mean_P_traces = sum(P_traces,3)./length(trials);
+mean_P_traces_interesting = sum(P_traces_interesting,3)./length(trials);
 mean_rmses = sum(rmses,3)./length(trials);
-mean_mlls = sum(mlls,3)./length(trials);
-mean_Rob_Ps_Aopt = sum(Rob_Ps_Aopt,3)./length(trials);
-mean_Rob_Ps_Dopt = sum(Rob_Ps_Dopt,3)./length(trials);
-median_P_traces = median(P_traces,3);
-median_rmses = median(rmses,3);
-median_mlls = median(mlls,3);
+mean_rmses_interesting = sum(rmses_interesting,3)./length(trials);
 
 % Find confidence intervals
 % http://ch.mathworks.com/matlabcentral/answers/159417-how-to-calculate-the-confidence-interva
 SEM_P_traces = [];
+SEM_P = [];
 SEM_rmses = [];
-SEM_mlls = [];
-SEM_Rob_Ps_Aopt = [];
-SEM_Rob_Ps_Dopt = [];
+SEM_rmses_interesting = [];
 
 for j = 2:length(methods)
     
     SEM_P_traces(j-1,:) = std(squeeze(P_traces(j-1,:,:))', 'omitnan')/...
         sqrt(length(trials));
+    SEM_P_traces_interesting(j-1,:) = (std(squeeze(P_traces_interesting(j-1,:,:))', 'omitnan')/...
+        sqrt(length(trials)));
     SEM_rmses(j-1,:) = (std(squeeze(rmses(j-1,:,:))', 'omitnan')/...
         sqrt(length(trials)));
-    SEM_mlls(j-1,:) = (std(squeeze(mlls(j-1,:,:))', 'omitnan')/...
-        sqrt(length(trials)));
-    SEM_Rob_Ps_Aopt(j-1,:) = (std(squeeze(Rob_Ps_Aopt(j-1,:,:))', 'omitnan')/...
-        sqrt(length(trials)));
-    SEM_Rob_Ps_Dopt(j-1,:) = (std(squeeze(Rob_Ps_Dopt(j-1,:,:))', 'omitnan')/...
+    SEM_rmses_interesting(j-1,:) = (std(squeeze(rmses_interesting(j-1,:,:))', 'omitnan')/...
         sqrt(length(trials)));
     
 end
@@ -128,12 +106,13 @@ if (do_plot)
     
     figure;
     %% GP field covariance trace %%
-    subplot(2,3,1)
+    subplot(2,2,1)
     hold on
     h = zeros(length(methods)-1,1);
     boundedline(time_vector, mean_P_traces(1,:), SEM_P_traces(1,:)*ts, ...
         time_vector, mean_P_traces(2,:), SEM_P_traces(2,:)*ts, ...
         time_vector, mean_P_traces(3,:), SEM_P_traces(3,:)*ts, ...
+        time_vector, mean_P_traces(4,:), SEM_P_traces(4,:)*ts, ...
         'alpha', 'cmap', colours, 'transparency', transparency);
     
     for i = 1:length(methods)-1
@@ -142,7 +121,47 @@ if (do_plot)
     end
     
     h_xlabel = xlabel('Time (s)');
-    h_ylabel = ylabel('Trace(P)');
+    h_ylabel = ylabel('Tr(P)');
+    set([h_xlabel, h_ylabel], ...
+        'FontName'   , 'Helvetica');
+    
+    set(gca, ...
+        'Box'         , 'off'     , ...
+        'TickDir'     , 'out'     , ...
+        'TickLength'  , [.02 .02] , ...
+        'XMinorTick'  , 'on'      , ...
+        'YMinorTick'  , 'on'      , ...
+        'YGrid'       , 'on'      , ...
+        'XColor'      , [.3 .3 .3], ...
+        'YColor'      , [.3 .3 .3], ...
+        'YScale'      , 'log'     , ...
+        'YGrid'       , 'on'      , ...
+        'LineWidth'   , 1         , ...
+        'FontSize'    , text_size, ...
+        'LooseInset', max(get(gca,'TightInset'), 0.02));
+    
+    axis([0 time_vector(end) 0 6*10^7])
+    rescale_axes(rescale_factor);
+    %   pbaspect(gca, [1 2 1])
+    hold off
+
+    %% GP field covariance trace - interesting areas %%
+    subplot(2,2,2)
+    hold on
+    h = zeros(length(methods)-1,1);
+    boundedline(time_vector, mean_P_traces_interesting(1,:), SEM_P_traces_interesting(1,:)*ts, ...
+        time_vector, mean_P_traces_interesting(2,:), SEM_P_traces_interesting(2,:)*ts, ...
+        time_vector, mean_P_traces_interesting(3,:), SEM_P_traces_interesting(3,:)*ts, ...
+        time_vector, mean_P_traces_interesting(4,:), SEM_P_traces_interesting(4,:)*ts, ...
+        'alpha', 'cmap', colours, 'transparency', transparency);
+    
+    for i = 1:length(methods)-1
+        P_trace_interesting = mean_P_traces_interesting(i,:);
+        h(i) = plot(time_vector, P_trace_interesting, 'LineWidth', 1, 'Color', colours(i,:));
+    end
+    
+    h_xlabel = xlabel('Time (s)');
+    h_ylabel = ylabel('Tr(P) - interesting');
     set([h_xlabel, h_ylabel], ...
         'FontName'   , 'Helvetica');
     
@@ -167,11 +186,12 @@ if (do_plot)
     hold off
     
     %% RMSE %%
-    subplot(2,3,2)
+    subplot(2,2,3)
     hold on
     boundedline(time_vector, mean_rmses(1,:), SEM_rmses(1,:)*ts, ...
         time_vector, mean_rmses(2,:), SEM_rmses(2,:)*ts, ...
         time_vector, mean_rmses(3,:), SEM_rmses(3,:)*ts, ...
+        time_vector, mean_rmses(4,:), SEM_rmses(4,:)*ts, ...
         'alpha', 'cmap', colours, 'transparency', transparency);
     
     for i = 1:length(methods)-1
@@ -201,21 +221,22 @@ if (do_plot)
     %    pbaspect(gca, [1 2 1])
     hold off
     
-    %% MLL %%
-    subplot(2,3,3)
+    %% RMSE - interesting %%
+    subplot(2,2,4)
     hold on
-    boundedline(time_vector, mean_mlls(1,:), SEM_mlls(1,:)*ts, ...
-        time_vector, mean_mlls(2,:), SEM_mlls(2,:)*ts, ...
-        time_vector, mean_mlls(3,:), SEM_mlls(3,:)*ts, ...
+    boundedline(time_vector, mean_rmses_interesting(1,:), SEM_rmses_interesting(1,:)*ts, ...
+        time_vector, mean_rmses_interesting(2,:), SEM_rmses_interesting(2,:)*ts, ...
+        time_vector, mean_rmses_interesting(3,:), SEM_rmses_interesting(3,:)*ts, ...
+        time_vector, mean_rmses_interesting(4,:), SEM_rmses_interesting(4,:)*ts, ...
         'alpha', 'cmap', colours, 'transparency', transparency);
     
     for i = 1:length(methods)-1
-        mll = mean_mlls(i,:);
-        h(i) = plot(time_vector, mll, 'LineWidth', 1, 'Color', colours(i,:));
+        rmse_interesting = mean_rmses_interesting(i,:);
+        h(i) = plot(time_vector, rmse_interesting, 'LineWidth', 1, 'Color', colours(i,:));
     end
     
     h_xlabel = xlabel('Time (s)');
-    h_ylabel = ylabel('MLL');
+    h_ylabel = ylabel('RMSE - interesting');
     set([h_xlabel, h_ylabel], ...
         'FontName'   , 'Helvetica');
     set(gca, ...
@@ -227,83 +248,13 @@ if (do_plot)
         'YGrid'       , 'on'      , ...
         'XColor'      , [.3 .3 .3], ...
         'YColor'      , [.3 .3 .3], ...
-        'YTick'       , 0:2:10, ...
+        'YTick'       , 0:1:8, ...
         'LineWidth'   , 1         , ...
         'FontSize'    , text_size, ...
         'LooseInset', max(get(gca,'TightInset'), 0.02));
     rescale_axes(rescale_factor);
-    axis([0 time_vector(end) 0 10])
+    axis([0 time_vector(end) 1 8.5])
     %    pbaspect(gca, [1 2 1])
-    hold off
-    
-    %% Robot covariance trace (A-opt) %%
-    subplot(2,3,4)
-    hold on
-    boundedline(time_vector, mean_Rob_Ps_Aopt(1,:), SEM_Rob_Ps_Aopt(1,:)*ts, ...
-        time_vector, mean_Rob_Ps_Aopt(2,:), SEM_Rob_Ps_Aopt(2,:)*ts, ...
-        time_vector, mean_Rob_Ps_Aopt(3,:), SEM_Rob_Ps_Aopt(3,:)*ts, ...
-        'alpha', 'cmap', colours, 'transparency', transparency);
-    
-    for i = 1:length(methods)-1
-        Rob_P_Aopt = mean_Rob_Ps_Aopt(i,:);
-        h(i) = plot(time_vector, Rob_P_Aopt, 'LineWidth', 1, 'Color', colours(i,:));
-    end
-    
-    h_xlabel = xlabel('Time (s)');
-    h_ylabel = ylabel('Robot uncertainty @ A-opt');
-    set([h_xlabel, h_ylabel], ...
-        'FontName'   , 'Helvetica');
-    set(gca, ...
-        'Box'         , 'off'     , ...
-        'TickDir'     , 'out'     , ...
-        'TickLength'  , [.02 .02] , ...
-        'XMinorTick'  , 'on'      , ...
-        'YMinorTick'  , 'on'      , ...
-        'YGrid'       , 'on'      , ...
-        'XColor'      , [.3 .3 .3], ...
-        'YColor'      , [.3 .3 .3], ...
-        'YTick'       , 0:0.05:1, ...
-        'LineWidth'   , 1         , ...
-        'FontSize'    , text_size, ...
-        'LooseInset', max(get(gca,'TightInset'), 0.02));
-    rescale_axes(rescale_factor);
-    axis([0 time_vector(end) 0 0.2])
-    %   pbaspect(gca, [1 2 1])
-    hold off
-    
-    %% Robot covariance trace (D-opt) %%
-    subplot(2,3,5)
-    hold on
-    boundedline(time_vector, mean_Rob_Ps_Dopt(1,:), SEM_Rob_Ps_Dopt(1,:)*ts, ...
-        time_vector, mean_Rob_Ps_Dopt(2,:), SEM_Rob_Ps_Dopt(2,:)*ts, ...
-        time_vector, mean_Rob_Ps_Dopt(3,:), SEM_Rob_Ps_Dopt(3,:)*ts, ...
-        'alpha', 'cmap', colours, 'transparency', transparency);
-    
-    for i = 1:length(methods)-1
-        Rob_P_Dopt = mean_Rob_Ps_Dopt(i,:);
-        h(i) = plot(time_vector, Rob_P_Dopt, 'LineWidth', 1, 'Color', colours(i,:));
-    end
-    
-    h_xlabel = xlabel('Time (s)');
-    h_ylabel = ylabel('Robot uncertainty @ D-opt');
-    set([h_xlabel, h_ylabel], ...
-        'FontName'   , 'Helvetica');
-    set(gca, ...
-        'Box'         , 'off'     , ...
-        'TickDir'     , 'out'     , ...
-        'TickLength'  , [.02 .02] , ...
-        'XMinorTick'  , 'on'      , ...
-        'YMinorTick'  , 'on'      , ...
-        'YGrid'       , 'on'      , ...
-        'XColor'      , [.3 .3 .3], ...
-        'YColor'      , [.3 .3 .3], ...
-        'YTick'       , 0:10^-4:10^-2, ...
-        'LineWidth'   , 1         , ...
-        'FontSize'    , text_size, ...
-        'LooseInset', max(get(gca,'TightInset'), 0.02));
-    rescale_axes(rescale_factor);
-    axis([0 time_vector(end) 0 0.5*10^-4])
-    %   pbaspect(gca, [1 2 1])
     hold off
     
     set(gcf, 'Position', [-250, 654, 734, 485])
@@ -318,7 +269,7 @@ if (do_plot)
     
     
     if (show_legend)
-        h_legend = legend(h, 'No UI', 'UI - N = 5', 'UI - N = 9');
+        h_legend = legend(h, 'No UI', 'No UI - adaptive', 'UI (N=9)', 'UI (N=9) - adaptive');
         %set(h_legend, 'Location', 'SouthOutside');
         %set(h_legend, 'orientation', 'horizontal')
         %set(h_legend, 'box', 'off')

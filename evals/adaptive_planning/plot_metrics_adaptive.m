@@ -32,7 +32,7 @@ rmses_interesting_resampled = ts_resampled.data';
 if (do_plot)
 
     % GP field covariance trace
-    subplot(2,3,1)
+    subplot(2,2,1)
     hold on
     set(gca, ...
         'Box'         , 'off'     , ...
@@ -53,13 +53,13 @@ if (do_plot)
     plot(time_vector, P_traces_resampled)
     axis([0 time_vector(end) 0 6*10^7])
     h_xlabel = xlabel('Time (s)');
-    h_ylabel = ylabel('GP cov. trace');
+    h_ylabel = ylabel('Tr(P)');
     set([h_xlabel, h_ylabel], ...
         'FontName'   , 'Helvetica');
     hold off
     
     % GP field covariance trace - interesting areas.
-    subplot(2,3,2)
+    subplot(2,2,2)
     hold on
     set(gca, ...
         'Box'         , 'off'     , ...
@@ -80,13 +80,13 @@ if (do_plot)
     plot(time_vector, P_traces_interesting_resampled)
     axis([0 time_vector(end) 0 6*10^7])
     h_xlabel = xlabel('Time (s)');
-    h_ylabel = ylabel('GP cov. trace - interesting');
+    h_ylabel = ylabel('Tr(P) - interesting');
     set([h_xlabel, h_ylabel], ...
         'FontName'   , 'Helvetica');
     hold off
     
     % RMSE
-    subplot(2,3,4)
+    subplot(2,2,3)
     hold on
     set(gca, ...
         'Box'         , 'off'     , ...
@@ -111,7 +111,7 @@ if (do_plot)
     hold off
     
     % RMSE - interesting areas
-    subplot(2,3,5)
+    subplot(2,2,4)
     hold on
     set(gca, ...
         'Box'         , 'off'     , ...
@@ -135,7 +135,7 @@ if (do_plot)
         'FontName'   , 'Helvetica');
     hold off
     
-    set(gcf, 'Position', [345, 146, 1208, 707]);
+    set(gcf, 'Position', [345, 118, 792, 707]);
     
 end
 
