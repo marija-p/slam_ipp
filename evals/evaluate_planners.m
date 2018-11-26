@@ -53,7 +53,7 @@ for i = 1:num_trials
         training_data, gt_data, testing_data);
     logger.(['trial', num2str(t)]).('UI_N_gauss_9') = metrics;
     clear global
-    
+
     disp(['Completed Trial ', num2str(t)])
     
 end

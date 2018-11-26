@@ -88,6 +88,7 @@ clear Robot Sensor World Time
 
 %% III. Initialize data logging
 metrics = initialize_metrics(map_params, planning_params, opt_params, gp_params);
+metrics.landmarks = SimLmk.points.coord;
 
 %% IV. Startup
 % TODO: Possibly put in initRobots and createFrames, createFactors, createTrj...

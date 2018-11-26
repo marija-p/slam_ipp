@@ -1,6 +1,8 @@
 function metrics = ...
     initialize_metrics(map_params, planning_params, opt_params, gp_params)
 
+metrics.landmarks = [];
+
 metrics.path_travelled = [];
 
 metrics.times = [];
