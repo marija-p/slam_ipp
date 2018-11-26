@@ -44,3 +44,18 @@
                 time_budget: 200
                    obj_func: 'renyi'
           renyi_uncertainty: 'Aopt'
+
+20181126-22-41.mat
+
+    {'no_UI'       }
+    {'UI_N_gauss_9'}
+
+     control_noise_percent: [2 2 1]
+             position_stdev: [0.1000 0.1000 0.0500]
+               control_freq: 1
+                  meas_freq: 0.2000
+    keyframe_predict_factor: 1.5000
+             control_points: 3
+                time_budget: 200
+                   obj_func: 'renyi'
+          renyi_uncertainty: 'Dopt'
