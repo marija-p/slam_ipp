@@ -39,11 +39,12 @@ for t = 1:length(trials)
             
             % Do GP regression and update the field map.
             if (gp_params.use_modified_kernel)
-                gp_params.cov_func = ...
-                    {@covUI, gp_params.cov_func, gp_params.N_gauss, P};
+                cov_func = {@covUI, gp_params.cov_func, gp_params.N_gauss, P};
+            else
+                cov_func = gp_params.cov_func;
             end
             [ymu, ys, fmu, fs, ~ , post] = gp(gp_params.hyp_trained, ...
-                gp_params.inf_func, gp_params.mean_func, gp_params.cov_func, gp_params.lik_func, ...
+                gp_params.inf_func, gp_params.mean_func, cov_func, gp_params.lik_func, ...
                 training_data.X_train, training_data.Y_train, testing_data.X_test);
             field_map.mean = ymu;
             field_map.cov = ys;
