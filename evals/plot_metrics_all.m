@@ -19,6 +19,7 @@ methods = fieldnames(logger.trial1);
 if (length(methods) ~= length(fieldnames(logger.(trials{end}))))
     trials = trials(1:end-1);
 end
+disp(['Number of trials = ', num2str(length(trials))])
 
 time_vector = 0:0.1:200;
 
