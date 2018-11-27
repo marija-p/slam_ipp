@@ -93,3 +93,18 @@
                 time_budget: 200
                    obj_func: 'renyi'
           renyi_uncertainty: 'Dopt'
+
+20181127-16-18.mat [Split environment - 15 landmarks]
+
+    {'no_UI'       }
+    {'UI_N_gauss_5'}
+
+      control_noise_percent: [5 5 5]
+             position_stdev: [0.2000 0.2000 0.1000]
+               control_freq: 1
+                  meas_freq: 0.2000
+    keyframe_predict_factor: 1.5000
+             control_points: 3
+                time_budget: 200
+                   obj_func: 'renyi'
+          renyi_uncertainty: 'Aopt'
