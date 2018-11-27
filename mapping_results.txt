@@ -30,7 +30,7 @@
           renyi_uncertainty: 'Dopt'
 
 
-20181126-10-06.mat
+20181126-10-06.mat [Split environment]
 
     {'no_UI'       }
     {'UI_N_gauss_9'}
@@ -46,7 +46,7 @@
                    obj_func: 'renyi'
           renyi_uncertainty: 'Aopt'
 
-20181126-21-41.mat
+20181126-21-41.mat [Split environment]
 
     {'no_UI'       }
     {'UI_N_gauss_9'}
@@ -61,3 +61,19 @@
                 time_budget: 200
                    obj_func: 'renyi'
           renyi_uncertainty: 'Aopt'
+
+20181127-08-41.mat [Split environment - 15 landmarks]
+
+    {'no_UI'       }
+    {'UI_N_gauss_5'}
+    {'UI_N_gauss_9'}
+
+      control_noise_percent: [5 5 5]
+             position_stdev: [0.2000 0.2000 0.1000]
+               control_freq: 1
+                  meas_freq: 0.2000
+    keyframe_predict_factor: 1.5000
+             control_points: 3
+                time_budget: 200
+                   obj_func: 'renyi'
+          renyi_uncertainty: 'Dopt'
