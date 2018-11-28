@@ -51,7 +51,7 @@ planning_params.time_budget = 200;
 % 'uncertainty_adaptive'/'renyi_adaptive'/'uncertainty'/'renyi'
 planning_params.obj_func = 'renyi';
 % Renyi objective function only: uncertainty measure for alpha parameter.
-planning_params.renyi_uncertainty = 'Dopt';
+planning_params.renyi_uncertainty = 'Aopt';
 
 % Threshold for adaptive planning - only regions above this value are
 % considered "interesting" and used when computing information gain.
