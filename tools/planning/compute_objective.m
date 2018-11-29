@@ -162,7 +162,7 @@ try
             %disp(['Alpha = ', num2str(alpha)])
             %disp(P_i)
             %disp(num2str(sum(field_map.cov)))
-            disp(num2str(sum(field_map.cov.*(alpha^(1/(alpha-1))))))
+            %disp(num2str(sum(field_map.cov.*(alpha^(1/(alpha-1))))))
             P_f = sum(field_map.cov.*(alpha^(1/(alpha-1))));
         otherwise
             warning('Unknown objective function!');
