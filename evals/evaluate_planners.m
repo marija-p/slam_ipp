@@ -28,6 +28,8 @@ dim_z_env = 5;
     training_data, gt_data, testing_data] = ...
     load_params_and_data(dim_x_env, dim_y_env, dim_z_env);
 
+debug_file = fopen('map_rmses.txt', 'w');
+
 for i = 1:num_trials
     
     %   planning_params.control_noise_percent = [10, 10, 10];
@@ -46,6 +48,8 @@ for i = 1:num_trials
         training_data, gt_data, testing_data);
     logger.(['trial', num2str(t)]).('no_UI') = metrics;
     clear global
+    fprintf(debug_file, 'no_UI\n');
+    fprintf(debug_file, '%f\n', metrics.rmses);
     
     rng(t, 'twister');
     gp_params.use_modified_kernel = 1;
@@ -54,6 +58,8 @@ for i = 1:num_trials
         training_data, gt_data, testing_data);
     logger.(['trial', num2str(t)]).('UI_N_gauss_5') = metrics;
     clear global
+    fprintf(debug_file, 'UI_N_gauss_5\n');
+    fprintf(debug_file, '%f\n', metrics.rmses);
 
     disp(['Completed Trial ', num2str(t)])
     
