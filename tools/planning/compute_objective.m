@@ -152,21 +152,27 @@ try
             elseif strcmp(planning_params.renyi_uncertainty, 'Aopt')
                 alpha = 1 + 1/trace(Rob_P);
             end
-            P_f = sum(field_map.cov(above_thres_ind)) + ...
-                sum(field_map.cov(above_thres_ind).*(alpha^(1/(alpha-1))));
+            P_f = sum(field_map.cov(above_thres_ind).*(alpha^(1/(alpha-1))));
         case 'renyi'
             if strcmp(planning_params.renyi_uncertainty, 'Dopt')
                 alpha = 1 + 1/det(Rob_P);
             elseif strcmp(planning_params.renyi_uncertainty, 'Aopt')
                 alpha = 1 + 1/trace(Rob_P);
             end
-            P_f = sum(field_map.cov) + sum(field_map.cov.*(alpha^(1/(alpha-1))));
+            %disp(['Alpha = ', num2str(alpha)])
+            %disp(P_i)
+            %disp(num2str(sum(field_map.cov)))
+            disp(num2str(sum(field_map.cov.*(alpha^(1/(alpha-1))))))
+            P_f = sum(field_map.cov.*(alpha^(1/(alpha-1))));
         otherwise
             warning('Unknown objective function!');
     end
     
     % Formulate objective.
     gain = P_i - P_f;
+    if (gain < 0)
+        keyboard
+    end
     cost = max(get_trajectory_total_time(trajectory), 1/planning_params.meas_freq);
     obj = -gain/cost;
     
