@@ -29,7 +29,7 @@ switch planning_params.obj_func
             planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);
         P_i = sum(field_map.cov(above_thres_ind));
     case {'uncertainty', 'renyi'}
-        P_i = sum(field_map.cov);
+        P_i = sum(log(field_map.cov));
     otherwise
         warning('Unknown objective function!');
 end
@@ -163,7 +163,7 @@ try
             %disp(P_i)
             %disp(num2str(sum(field_map.cov)))
             %disp(num2str(sum(field_map.cov.*(alpha^(1/(alpha-1))))))
-            P_f = sum(field_map.cov.*(alpha^(1/(alpha-1))));
+            P_f = sum(log(field_map.cov.*(alpha^(1/(alpha-1)))));
         otherwise
             warning('Unknown objective function!');
     end
