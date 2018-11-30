@@ -44,7 +44,7 @@ Time = struct(...
 [X,Y] = meshgrid(-6:3:6,-6:3:6);
 landmarks = [X(:), Y(:), zeros(numel(X),1)]';
 % Split landmarks
-landmarks = landmarks(:,1:15);
+%landmarks = landmarks(:,1:10);
 
 World = struct(...
     'points',           landmarks,... % 3d point landmarks - see THICKCLOISTER.
