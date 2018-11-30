@@ -1,4 +1,5 @@
 %clear all; close all; clc;
+warning('off','all')
 
 % If data already exists, want to append to it for the trials it contains.
 append_to_logger = 0;
