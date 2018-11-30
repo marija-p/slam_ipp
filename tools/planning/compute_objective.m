@@ -27,7 +27,7 @@ switch planning_params.obj_func
     case {'uncertainty_adaptive', 'renyi_adaptive'}
         above_thres_ind = find(field_map.mean + ...
             planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);
-        P_i = sum(field_map.cov(above_thres_ind));
+        P_i = sum(log(field_map.cov(above_thres_ind)));
     case {'uncertainty', 'renyi'}
         P_i = sum(log(field_map.cov));
     otherwise
@@ -80,8 +80,10 @@ try
         num_control_frames = num_control_frames + 1;
         
         % Simulate control for this time-step.
-        Rob.con.u = ...
-            Rob.con.u + Rob.con.uStd.*randn(size(Rob.con.uStd));
+        Rob(rob).con.u(1:3) = Rob(rob).con.u(1:3) + ...
+            Rob(rob).con.u(1:3).* ...
+            (-1 + 2.*rand(3,1)).* ...
+            planning_params.control_noise_percent'./100;
         Raw = simObservation(Rob, Sen, SimLmk, Opt);
         Rob = simMotion(Rob,[]);
         % Integrate odometry for relative motion factors.
@@ -141,9 +143,9 @@ try
         case 'uncertainty_adaptive'
             above_thres_ind = find(field_map.mean + ...
                 planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);
-            P_f = sum(field_map.cov(above_thres_ind));
+            P_f = sum(log(field_map.cov(above_thres_ind)));
         case 'uncertainty'
-            P_f = sum(field_map.cov);
+            P_f = sum(log(field_map.cov));
         case 'renyi_adaptive'
             above_thres_ind = find(field_map.mean + ...
                 planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);
@@ -152,18 +154,20 @@ try
             elseif strcmp(planning_params.renyi_uncertainty, 'Aopt')
                 alpha = 1 + 1/trace(Rob_P);
             end
-            P_f = sum(field_map.cov(above_thres_ind).*(alpha^(1/(alpha-1))));
+            renyi_term = alpha^(1/(alpha-1));
+            P_f = sum(log(field_map.cov(above_thres_ind).*renyi_term));
         case 'renyi'
             if strcmp(planning_params.renyi_uncertainty, 'Dopt')
                 alpha = 1 + 1/det(Rob_P);
             elseif strcmp(planning_params.renyi_uncertainty, 'Aopt')
                 alpha = 1 + 1/trace(Rob_P);
             end
+            renyi_term = alpha^(1/(alpha-1));
             %disp(['Alpha = ', num2str(alpha)])
             %disp(P_i)
             %disp(num2str(sum(field_map.cov)))
             %disp(num2str(sum(field_map.cov.*(alpha^(1/(alpha-1))))))
-            P_f = sum(log(field_map.cov.*(alpha^(1/(alpha-1)))));
+            P_f = sum(log(field_map.cov.*renyi_term));
         otherwise
             warning('Unknown objective function!');
     end

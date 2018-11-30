@@ -35,7 +35,7 @@ switch planning_params.obj_func
     case {'uncertainty_adaptive', 'renyi_adaptive'}
         above_thres_ind = find(field_map.mean + ...
             planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);
-        P_i = sum(field_map.cov(above_thres_ind));
+        P_i = sum(log(field_map.cov(above_thres_ind)));
     case {'uncertainty', 'renyi'}
         P_i = sum(log(field_map.cov));
     otherwise
@@ -92,27 +92,29 @@ while (planning_params.control_points > size(path_points, 1))
         
         switch planning_params.obj_func
             case 'uncertainty_adaptive'
-                above_thres_ind = find(field_map.mean + ...
-                    planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);
-                P_f = sum(field_map.cov(above_thres_ind));
+                above_thres_ind = find(field_map_eval.mean + ...
+                    planning_params.beta*sqrt(field_map_eval.cov) >= planning_params.lower_thres);
+                P_f = sum(log(field_map_eval.cov(above_thres_ind)));
             case 'uncertainty'
-                P_f = sum(field_map.cov);
+                P_f = sum(log(field_map_eval.cov));
             case 'renyi_adaptive'
-                above_thres_ind = find(field_map.mean + ...
-                    planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);
+                above_thres_ind = find(field_map_eval.mean + ...
+                    planning_params.beta*sqrt(field_map_eval.cov) >= planning_params.lower_thres);
                 if strcmp(planning_params.renyi_uncertainty, 'Dopt')
                     alpha = 1 + 1/det(Rob_P);
                 elseif strcmp(planning_params.renyi_uncertainty, 'Aopt')
                     alpha = 1 + 1/trace(Rob_P);
                 end
-                P_f = sum(field_map.cov(above_thres_ind).*(alpha^(1/(alpha-1))));
+                renyi_term = alpha^(1/(alpha-1));
+                P_f = sum(log(field_map_eval.cov(above_thres_ind).*renyi_term));
             case 'renyi'
                 if strcmp(planning_params.renyi_uncertainty, 'Dopt')
                     alpha = 1 + 1/det(Rob_P);
                 elseif strcmp(planning_params.renyi_uncertainty, 'Aopt')
                     alpha = 1 + 1/trace(Rob_P);
                 end
-                P_f = sum(log(field_map.cov.*(alpha^(1/(alpha-1)))));
+                renyi_term = alpha^(1/(alpha-1));
+                P_f = sum(log(field_map_eval.cov.*renyi_term));
             otherwise
                 warning('Unknown objective function!');
         end
@@ -154,13 +156,17 @@ while (planning_params.control_points > size(path_points, 1))
     
     %% Write variables for next lattice evaluation.
     path_points = [path_points; point_best];
-    if (planning_params.use_thres)
-        above_thres_ind = find(field_map.mean + ...
-            planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);
-        P_i = sum(field_map.cov(above_thres_ind));
-    else
-        P_i = sum(field_map.cov);
+    switch planning_params.obj_func
+        case {'uncertainty_adaptive', 'renyi_adaptive'}
+            above_thres_ind = find(field_map.mean + ...
+                planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);
+            P_i = sum(log(field_map.cov(above_thres_ind)));
+        case {'uncertainty', 'renyi'}
+            P_i = sum(log(field_map.cov));
+        otherwise
+            warning('Unknown objective function!');
     end
+    
     point_prev = point_best;
     [Rob_prev, Sen_prev, Lmk_prev, Trj_prev, Frm_prev, Fac_prev, factorRob_prev] = ...
         copy_graphslam_vars(Rob_best, Sen_best, Lmk_best, Trj_best, Frm_best, Fac_best, factorRob_best);
