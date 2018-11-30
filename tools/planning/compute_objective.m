@@ -11,7 +11,7 @@ function obj = compute_objective(control_points, field_map, ...
 % Output:
 % obj: informative objective value (to be minimized)
 % ---
-% M Popovic 2017
+% M Popovic 2018
 %
 
 global Map

@@ -50,7 +50,7 @@ for i = 1:num_trials
     logger.(['trial', num2str(t)]).('no_UI') = metrics;
     clear global
     fprintf(debug_file, 'no_UI\n');
-    fprintf(debug_file, '%f\n', metrics.rmses);
+    fprintf(debug_file, '%f %f\n', [metrics.times'; metrics.rmses'];
     
     rng(t, 'twister');
     gp_params.use_modified_kernel = 1;
@@ -60,7 +60,7 @@ for i = 1:num_trials
     logger.(['trial', num2str(t)]).('UI_N_gauss_5') = metrics;
     clear global
     fprintf(debug_file, 'UI_N_gauss_5\n');
-    fprintf(debug_file, '%f\n', metrics.rmses);
+    fprintf(debug_file, '%f %f\n', [metrics.times'; metrics.rmses'];
 
     disp(['Completed Trial ', num2str(t)])
     
