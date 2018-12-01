@@ -28,10 +28,10 @@ planning_params.max_vel = 3;        % [m/s]
 planning_params.max_acc = 3;        % [m/s^2]
 
 % Maximum control noise % percentage added in each co-ordinate [x,y,z].
-planning_params.control_noise_percent = [5, 5, 5];
+planning_params.control_noise_percent = [0.5, 0.5, 0.5];
 % UAV initial position error [standard dev] in each co-ordinate [x,y,z].
 % (Overwrites SLAM data.)
-planning_params.position_stdev = [0.2, 0.2, 0.1];
+planning_params.position_stdev = [0.1, 0.1, 0.05];
 
 % Frequency at which to send commands - simulate motion/covariance update
 planning_params.control_freq = 1;   % [Hz]
@@ -49,15 +49,13 @@ planning_params.time_budget = 200;
 
 % Objective function for informative planning.
 % 'uncertainty_adaptive'/'renyi_adaptive'/'uncertainty'/'renyi'
-planning_params.obj_func = 'renyi';
+planning_params.obj_func = 'uncertainty';
 % Renyi objective function only: uncertainty measure for alpha parameter.
 planning_params.renyi_uncertainty = 'Aopt';
 
 % Threshold for adaptive planning - only regions above this value are
 % considered "interesting" and used when computing information gain.
 planning_params.lower_thres = 30;
-% Whether to use the threshold value for active planning
-planning_params.use_thres = 0;
 % Design parameter for uncertainty-aware adaptive planning
 planning_params.beta = 0;
 
@@ -65,9 +63,9 @@ planning_params.beta = 0;
 opt_params.max_iters = 10;
 opt_params.opt_method = 'cmaes'; % 'fmc'/cmaes'/'none'/'bo'
 % Covariances in each search dimension
-opt_params.cov_x = 4;
-opt_params.cov_y = 4;
-opt_params.cov_z = 1.5;
+opt_params.cov_x = 3;
+opt_params.cov_y = 3;
+opt_params.cov_z = 1;
 
 % GP-related parameters
 gp_params.hyp_trained = hyp_trained;
