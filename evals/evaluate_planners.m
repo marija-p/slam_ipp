@@ -58,16 +58,6 @@ for i = 1:num_trials
     clear global
     fprintf(debug_file, 'UI_N_gauss_5\n');
     fprintf(debug_file, '%f %f\n', [metrics.times'; metrics.rmses']);
-    
-    rng(t, 'twister');
-    gp_params.use_modified_kernel = 1;
-    gp_params.N_gauss = 9;
-    [metrics] = slam_gp(map_params, planning_params, opt_params, gp_params, ...
-        training_data, gt_data, testing_data);
-    logger.(['trial', num2str(t)]).('UI_N_gauss_9') = metrics;
-    clear global
-    fprintf(debug_file, 'UI_N_gauss_9\n');
-    fprintf(debug_file, '%f %f\n', [metrics.times'; metrics.rmses']);
 
     disp(['Completed Trial ', num2str(t)])
     

@@ -349,7 +349,7 @@ if (do_plot)
     
     
     if (show_legend)
-        h_legend = legend(h, 'No UI', 'UI - N = 9', 'UI - N = 5');
+        h_legend = legend(h, 'No UI', 'UI - N = 5', 'UI - N = 5');
         %set(h_legend, 'Location', 'SouthOutside');
         %set(h_legend, 'orientation', 'horizontal')
         %set(h_legend, 'box', 'off')
