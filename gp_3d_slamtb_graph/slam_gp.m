@@ -333,7 +333,6 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
                 Rob, Sen, SimLmk, Lmk, Obs, Trj, Frm, Fac, factorRob, Opt, ...
                 num_control_frames, training_data, testing_data, ...
                 map_params, planning_params, opt_params, gp_params);
-            
         else
             path_optimized = path_points;
         end
