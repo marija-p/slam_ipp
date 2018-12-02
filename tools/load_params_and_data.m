@@ -49,7 +49,7 @@ planning_params.time_budget = 200;
 
 % Objective function for informative planning.
 % 'uncertainty_adaptive'/'renyi_adaptive'/'uncertainty'/'renyi'
-planning_params.obj_func = 'uncertainty';
+planning_params.obj_func = 'renyi';
 % Renyi objective function only: uncertainty measure for alpha parameter.
 planning_params.renyi_uncertainty = 'Aopt';
 
