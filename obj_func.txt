@@ -60,6 +60,17 @@
                    obj_func: 'renyi'
           renyi_uncertainty: 'Aopt'
 
+20181203-04-40.mat [Uniform environment, 5 trials]
+
+      control_noise_percent: [0.5000 0.5000 0.5000]
+             position_stdev: [0.3000 0.3000 0.2000]
+               control_freq: 1
+                  meas_freq: 0.2000
+    keyframe_predict_factor: 1.5000
+             control_points: 3
+                time_budget: 200
+                   obj_func: 'uncertainty'
+
 20181203-11-32.mat [Uniform environment, 6 trials]
 
       control_noise_percent: [0.5000 0.5000 0.5000]
