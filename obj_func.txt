@@ -62,6 +62,9 @@
 
 20181203-04-40.mat [Uniform environment, 5 trials]
 
+    {'no_UI'       }
+    {'UI_N_gauss_5'}
+
       control_noise_percent: [0.5000 0.5000 0.5000]
              position_stdev: [0.3000 0.3000 0.2000]
                control_freq: 1
@@ -73,6 +76,9 @@
 
 20181203-11-32.mat [Uniform environment, 6 trials]
 
+    {'no_UI'       }
+    {'UI_N_gauss_5'}
+
       control_noise_percent: [0.5000 0.5000 0.5000]
              position_stdev: [0.1000 0.1000 0.0500]
                control_freq: 1
@@ -82,3 +88,17 @@
                 time_budget: 200
                    obj_func: 'renyi'
           renyi_uncertainty: 'Aopt'
+
+20181203-12-11.mat [Uniform environment, 5 trials]
+
+    {'no_UI'       }
+    {'UI_N_gauss_5'}
+
+      control_noise_percent: [0.5000 0.5000 0.5000]
+             position_stdev: [0.5000 0.5000 0.5000]
+               control_freq: 1
+                  meas_freq: 0.2000
+    keyframe_predict_factor: 1.5000
+             control_points: 3
+                time_budget: 200
+                   obj_func: 'uncertainty'
