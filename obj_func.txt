@@ -78,6 +78,7 @@
 
     {'no_UI'       }
     {'UI_N_gauss_5'}
+    + {'UI_N_gauss_9'} in 20181204-08-43.mat
 
       control_noise_percent: [0.5000 0.5000 0.5000]
              position_stdev: [0.1000 0.1000 0.0500]
