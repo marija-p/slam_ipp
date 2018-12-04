@@ -39,7 +39,7 @@ planning_params.control_freq = 1;   % [Hz]
 planning_params.meas_freq = 0.2;    % [Hz]
 % Factor by which to divide keyframe/graph optimisation frequency
 % (Opt.map.kfrmPeriod).
-planning_params.keyframe_predict_factor = 1.5;
+planning_params.keyframe_predict_factor = 1;
 
 % Number of control points for a polynomial (start point fixed).
 planning_params.control_points = 3;
