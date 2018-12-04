@@ -35,9 +35,9 @@ switch planning_params.obj_func
     case {'uncertainty_adaptive', 'renyi_adaptive'}
         above_thres_ind = find(field_map.mean + ...
             planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);
-        P_i = sum(log(field_map.cov(above_thres_ind)));
+        P_i = sum(log(field_map.cov(above_thres_ind).*exp(1)));
     case {'uncertainty', 'renyi'}
-        P_i = sum(log(field_map.cov));
+        P_i = sum(log(field_map.cov.*exp(1)));
     otherwise
         warning('Unknown objective function!');
 end
@@ -94,9 +94,9 @@ while (planning_params.control_points > size(path_points, 1))
             case 'uncertainty_adaptive'
                 above_thres_ind = find(field_map_eval.mean + ...
                     planning_params.beta*sqrt(field_map_eval.cov) >= planning_params.lower_thres);
-                P_f = sum(log(field_map_eval.cov(above_thres_ind)));
+                P_f = sum(log(field_map_eval.cov(above_thres_ind).*exp(1)));
             case 'uncertainty'
-                P_f = sum(log(field_map_eval.cov));
+                P_f = sum(log(field_map_eval.cov.*exp(1)));
             case 'renyi_adaptive'
                 above_thres_ind = find(field_map_eval.mean + ...
                     planning_params.beta*sqrt(field_map_eval.cov) >= planning_params.lower_thres);
@@ -160,9 +160,9 @@ while (planning_params.control_points > size(path_points, 1))
         case {'uncertainty_adaptive', 'renyi_adaptive'}
             above_thres_ind = find(field_map.mean + ...
                 planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);
-            P_i = sum(log(field_map.cov(above_thres_ind)));
+            P_i = sum(log(field_map.cov(above_thres_ind).*exp(1)));
         case {'uncertainty', 'renyi'}
-            P_i = sum(log(field_map.cov));
+            P_i = sum(log(field_map.cov.*exp(1)));
         otherwise
             warning('Unknown objective function!');
     end
