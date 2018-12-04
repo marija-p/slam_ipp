@@ -6,7 +6,8 @@ function [SimRob,SimSen,SimLmk,SimOpt] = createSimStructures(Robot,Sensor,World,
 
 % Random generator
 if SimOpt.random.newSeed
-    SimOpt.random.seed = sum(100*clock);
+    %SimOpt.random.seed = sum(100*clock);
+    SimOpt.random.seed = randi(10^7);
     rng(SimOpt.random.seed);
     %    randn('state',SimOpt.random.seed);
     fprintf('Random seed: %6.0f.\n',SimOpt.random.seed)
