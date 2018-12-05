@@ -6,7 +6,7 @@ load ground_truth_3d.mat
 X_train = mesh;
 Y_train = ground_truth;
 
-train_hyperparameters = 0;
+train_hyperparameters = 1;
 
 inf_func = @infExact;
 cov_func = @covSEiso; 
