@@ -197,8 +197,12 @@ Including exponential term in initial entropy calculation.
                    obj_func: 'renyi'
           renyi_uncertainty: 'Aopt'
 
-20181204-22-32.mat [Uniform environment, 3 trials]
+--
+
+From here:
 Including exponential term in initial entropy calculation.
+
+20181204-22-32.mat [Uniform environment, 3 trials]
 
     {'no_UI'       }
     {'UI_N_gauss_5'}
@@ -227,3 +231,17 @@ Including exponential term in initial entropy calculation.
                 time_budget: 200
                    obj_func: 'renyi'
           renyi_uncertainty: 'Aopt'
+
+20181205-14-42.mat [Uniform environment, 6 trials]
+
+    {'no_UI'       }
+    {'UI_N_gauss_5'}
+
+      control_noise_percent: [2 2 2]
+             position_stdev: [0.5000 0.5000 0.5000]
+               control_freq: 1
+                  meas_freq: 0.2000
+    keyframe_predict_factor: 1.5000
+             control_points: 3
+                time_budget: 200
+                   obj_func: 'uncertainty'
