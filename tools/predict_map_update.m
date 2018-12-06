@@ -29,7 +29,7 @@ training_data.Y_train = [training_data.Y_train; ...
     pos(1), pos(2), pos(3), 'spline')];
 
 % Do GP regression and update the field map.
-if (gp_params.use_modified_kernel)
+if (gp_params.use_modified_kernel_prediction)
     gp_params.cov_func = {@covUI, gp_params.cov_func, gp_params.N_gauss, Rob_P};
 end
 [ymu, ys, ~, ~, ~ , ~] = gp(gp_params.hyp_trained, ...
