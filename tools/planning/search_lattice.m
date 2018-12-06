@@ -154,6 +154,7 @@ while (planning_params.control_points > size(path_points, 1))
         point_best(1), point_best(2), point_best(3), 'spline')];
     field_map = field_map_best;
     
+    
     %% Write variables for next lattice evaluation.
     path_points = [path_points; point_best];
     switch planning_params.obj_func
