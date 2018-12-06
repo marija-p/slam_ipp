@@ -155,6 +155,9 @@ try
             renyi_term = alpha^(1/(alpha-1));
             P_f = sum(log(field_map.cov(above_thres_ind).*renyi_term));
         case 'renyi'
+            if (P_i - sum(log(field_map.cov.*exp(1))) < 0)
+                keyboard
+            end
             if strcmp(planning_params.renyi_uncertainty, 'Dopt')
                 alpha = 1 + 1/det(Rob_P);
             elseif strcmp(planning_params.renyi_uncertainty, 'Aopt')
@@ -172,6 +175,9 @@ try
     
     % Formulate objective.
     gain = P_i - P_f;
+    if (gain < 0)
+        keyboard
+    end
     cost = max(get_trajectory_total_time(trajectory), 1/planning_params.meas_freq);
     obj = -gain/cost;
     
