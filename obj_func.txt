@@ -245,3 +245,37 @@ Including exponential term in initial entropy calculation.
              control_points: 3
                 time_budget: 200
                    obj_func: 'uncertainty'
+
+20181205-20-06.mat [Uniform environment, 7 trials]
+No UI in prediction.
+
+    {'no_UI'       }
+    {'UI_N_gauss_5'}
+
+      control_noise_percent: [0.5000 0.5000 0.5000]
+             position_stdev: [0.1000 0.1000 0.0500]
+               control_freq: 1
+                  meas_freq: 0.2000
+    keyframe_predict_factor: 1
+             control_points: 3
+                time_budget: 200
+                   obj_func: 'renyi'
+          renyi_uncertainty: 'Aopt'
+
+20181206-08-29.mat [Uniform environment, 7 trials]
+No UI in prediction.
+
+    {'no_UI'       }
+    {'UI_N_gauss_5'}
+
+      control_noise_percent: [0.5000 0.5000 0.5000]
+             position_stdev: [0.5000 0.5000 0.5000]
+               control_freq: 1
+                  meas_freq: 0.2000
+    keyframe_predict_factor: 1
+             control_points: 3
+                time_budget: 200
+                   obj_func: 'renyi'
+          renyi_uncertainty: 'Aopt'
+                  max_iters: 20
+                 opt_method: 'cmaes'
