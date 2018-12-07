@@ -60,12 +60,12 @@ planning_params.lower_thres = 30;
 planning_params.beta = 0;
 
 % Optimization/CMA-ES related parameters
-opt_params.max_iters = 10;
+opt_params.max_iters = 50;
 opt_params.opt_method = 'cmaes'; % 'fmc'/cmaes'/'none'/'bo'
 % Covariances in each search dimension
-opt_params.cov_x = 3;
-opt_params.cov_y = 3;
-opt_params.cov_z = 1;
+opt_params.cov_x = 1;
+opt_params.cov_y = 1;
+opt_params.cov_z = 0.5;
 
 % GP-related parameters
 gp_params.hyp_trained = hyp_trained;
