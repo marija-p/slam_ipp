@@ -1,6 +1,6 @@
 function obj = compute_objective(control_points, field_map, ...
     Rob, Sen, SimLmk, Lmk, Obs, Trj, Frm, Fac, factorRob, Opt, ...
-    num_control_frames, training_data, testing_data, ...
+    num_control_frames, current_frame, training_data, testing_data, ...
     map_params, planning_params, gp_params)
 % Calculates the expected informative objective for a polynomial path.
 % ---
@@ -36,8 +36,6 @@ end
 
 % Number of time-frames between each measurement
 meas_frame_interval = planning_params.control_freq/planning_params.meas_freq;
-
-current_frame = 1;
 
 %% Path generation.
 % Create polynomial path through the control points.
