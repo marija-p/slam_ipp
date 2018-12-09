@@ -299,8 +299,8 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
             P = Map.P(r,r);
             metrics.Rob_Ps(:,:,size(metrics.times,1)) = P;
             
-            disp(['Distance between real + estimated robot positions: ', ...
-                num2str(pdist([Rob.state.x(1:3)'; SimRob.state.x(1:3)']))])
+            %disp(['Distance between real + estimated robot positions: ', ...
+            %    num2str(pdist([Rob.state.x(1:3)'; SimRob.state.x(1:3)']))])
             disp(['Map RMSE = ', num2str(metrics.rmses(end))])
             
         end
@@ -340,6 +340,13 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
         disp('Next path: ')
         disp(path_optimized)
         disp(['Time: ', num2str(Map.t)])
+        
+        Map_init = Map;
+        obj = compute_objective_debug(path_optimized, field_map, ...
+            Rob, Sen, SimLmk, Lmk, Obs, Trj, Frm, Fac, factorRob, Opt, ...
+            num_control_frames, currentFrame, training_data, testing_data, ...
+            map_params, planning_params, gp_params);
+        Map = Map_init;
         
         % Create polynomial path through the control points.
         trajectory = plan_path_waypoints(path_optimized, planning_params.max_vel, ...
