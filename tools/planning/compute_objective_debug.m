@@ -133,8 +133,11 @@ try
         
     end
     
-    field_map = predict_map_update(Rob.state.x(1:3)', Rob_P, field_map, ...
-        training_data, testing_data, map_params, gp_params);
+    [ymu, ys, ~, ~, ~ , ~] = gp(gp_params.hyp_trained, ...
+        gp_params.inf_func, gp_params.mean_func, gp_params.cov_func, gp_params.lik_func, ...
+        training_data.X_train, training_data.Y_train, testing_data.X_test);
+    field_map.mean = ymu;
+    field_map.cov = ys;
     
     switch planning_params.obj_func
         case 'uncertainty_adaptive'
