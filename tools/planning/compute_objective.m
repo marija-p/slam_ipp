@@ -128,14 +128,20 @@ try
                 Rob.state.x(1), Rob.state.x(2), Rob.state.x(3), 'spline')];
             
             r = Rob.state.r(1:3);
-            Rob_P = Map.P(r,r);
+            Rob_P_meas = Map.P(r,r);
             
         end
+        
+        r = Rob.state.r(1:3);
+        Rob_P_traj = Map.P(r,r);
         
         current_frame = current_frame + 1;
         
     end
     
+    if (gp_params.use_modified_kernel_prediction)
+        gp_params.cov_func = {@covUI, gp_params.cov_func, gp_params.N_gauss, Rob_P_meas};
+    end
     [ymu, ys, ~, ~, ~ , ~] = gp(gp_params.hyp_trained, ...
         gp_params.inf_func, gp_params.mean_func, gp_params.cov_func, gp_params.lik_func, ...
         training_data.X_train, training_data.Y_train, testing_data.X_test);
@@ -153,9 +159,9 @@ try
             above_thres_ind = find(field_map.mean + ...
                 planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);
             if strcmp(planning_params.renyi_uncertainty, 'Dopt')
-                alpha = 1 + 1/det(Rob_P);
+                alpha = 1 + 1/det(Rob_P_meas);
             elseif strcmp(planning_params.renyi_uncertainty, 'Aopt')
-                alpha = 1 + 1/trace(Rob_P);
+                alpha = 1 + 1/trace(Rob_P_meas);
             end
             renyi_term = alpha^(1/(alpha-1));
             P_f = sum(log(field_map.cov(above_thres_ind).*renyi_term));
@@ -164,9 +170,9 @@ try
             %    keyboard
             %end
             if strcmp(planning_params.renyi_uncertainty, 'Dopt')
-                alpha = 1 + 1/det(Rob_P);
+                alpha = 1 + 1/det(Rob_P_meas);
             elseif strcmp(planning_params.renyi_uncertainty, 'Aopt')
-                alpha = 1 + 1/trace(Rob_P);
+                alpha = 1 + 1/trace(Rob_P_meas);
             end
             renyi_term = alpha^(1/(alpha-1));
             %disp(['Alpha = ', num2str(alpha)])
