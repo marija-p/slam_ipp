@@ -65,7 +65,7 @@ if (any(points_meas(:,1) > map_params.pos_x+dim_x_env) || ...
     return;
 end
 
-try
+%try
     
     %% Control/measurement simulation.
     while ~isempty(points_control)
@@ -78,12 +78,15 @@ try
         num_control_frames = num_control_frames + 1;
         
         % Simulate control for this time-step.
-        Rob.con.u(1:3) = Rob.con.u(1:3) + Rob.con.u(1:3).* ...
+        du = Rob.con.u(1:3).* ...
             (-1 + 2.*rand(3,1)).*planning_params.control_noise_percent'./100;
+        Rob.con.u(1:3) = Rob.con.u(1:3) + du;
+        Rob.con.U(1:3,1:3) = diag(max([1e-8; 1e-8; 1e-8], du.^2/2));
         Raw = simObservation(Rob, Sen, SimLmk, Opt);
         Rob = simMotion(Rob,[]);
         % Integrate odometry for relative motion factors.
         factorRob.con.u = Rob.con.u;
+        factorRob.con.U = Rob.con.U;
         factorRob = integrateMotion(factorRob, []);
         
         % Add keyframes and solve graphSLAM.
@@ -189,12 +192,12 @@ try
     %disp(['Cost = ', num2str(cost)])
     %disp(['Objective = ', num2str(obj)])
     
-catch
+%%catch
     
     % Optimization didn't work for some reason. xD
-    obj = Inf;
-    return;
+    %obj = Inf;
+    %return;
     
-end
+%end
 
 end

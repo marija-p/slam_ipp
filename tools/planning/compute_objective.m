@@ -86,7 +86,7 @@ try
         Rob = simMotion(Rob,[]);
         % Integrate odometry for relative motion factors.
         factorRob.con.u = Rob.con.u;
-        factorRob.con.U = factorRob.con.U;
+        factorRob.con.U = Rob.con.U;
         factorRob = integrateMotion(factorRob, []);
         
         % Add keyframes and solve graphSLAM.
