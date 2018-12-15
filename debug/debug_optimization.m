@@ -1,4 +1,4 @@
-debug_file = 'debug2.mat';
+debug_file = 'debug1.mat';
 
 load(debug_file)
 compute_objective_debug(path_points, field_map, ...

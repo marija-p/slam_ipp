@@ -59,6 +59,8 @@ for i = 1:num_trials
     fprintf(debug_file, 'UI_N_gauss_5\n');
     fprintf(debug_file, '%f %f\n', [metrics.times'; metrics.rmses']);
     
+    save data.mat
+    
     disp(['Completed Trial ', num2str(t)])
     
 end
