@@ -28,6 +28,7 @@ rmses = zeros(length(methods)-1,length(time_vector));
 mlls = zeros(length(methods)-1,length(time_vector));
 Rob_Ps_Aopt = zeros(length(methods)-1,length(time_vector));
 Rob_Ps_Dopt = zeros(length(methods)-1,length(time_vector));
+pose_errors = zeros(length(methods)-1,length(time_vector));
 
 for i = 1:length(trials)
     
@@ -51,6 +52,9 @@ for i = 1:length(trials)
             Rob_P_Aopt = [Rob_P_Aopt; trace(logger.(trials{i}).(methods{j}).Rob_Ps(:,:,k))];
             Rob_P_Dopt = [Rob_P_Dopt; det(logger.(trials{i}).(methods{j}).Rob_Ps(:,:,k))];
         end
+
+        pose_error = sqrt(sum((logger.(trials{i}).(methods{j}).points_meas - ...
+            logger.(trials{i}).(methods{j}).points_meas_gt).^2, 2));
         
         ts = timeseries(P_trace, time);
         ts_resampled = resample(ts, time_vector, 'zoh');
@@ -71,7 +75,11 @@ for i = 1:length(trials)
         ts = timeseries(Rob_P_Dopt, time);
         ts_resampled = resample(ts, time_vector, 'zoh');
         Rob_Ps_Dopt(j-1,:,i) = ts_resampled.data';
-        
+
+        ts = timeseries(pose_error, time);
+        ts_resampled = resample(ts, time_vector, 'zoh');
+        pose_errors(j-1,:,i) = ts_resampled.data';
+
     end
     
 end
@@ -82,9 +90,11 @@ mean_rmses = sum(rmses,3)./length(trials);
 mean_mlls = sum(mlls,3)./length(trials);
 mean_Rob_Ps_Aopt = sum(Rob_Ps_Aopt,3)./length(trials);
 mean_Rob_Ps_Dopt = sum(Rob_Ps_Dopt,3)./length(trials);
+mean_pose_errors = sum(pose_errors,3)./length(trials);
 median_P_traces = median(P_traces,3);
 median_rmses = median(rmses,3);
 median_mlls = median(mlls,3);
+median_pose_errors = median(pose_errors,3);
 
 % Find confidence intervals
 % http://ch.mathworks.com/matlabcentral/answers/159417-how-to-calculate-the-confidence-interva
@@ -93,6 +103,7 @@ SEM_rmses = [];
 SEM_mlls = [];
 SEM_Rob_Ps_Aopt = [];
 SEM_Rob_Ps_Dopt = [];
+SEM_pose_errors = [];
 
 for j = 2:length(methods)
     
@@ -106,7 +117,8 @@ for j = 2:length(methods)
         sqrt(length(trials)));
     SEM_Rob_Ps_Dopt(j-1,:) = (std(squeeze(Rob_Ps_Dopt(j-1,:,:))', 'omitnan')/...
         sqrt(length(trials)));
-    
+    SEM_pose_errors(j-1,:) = (std(squeeze(pose_errors(j-1,:,:))', 'omitnan')/...
+        sqrt(length(trials)));    
 end
 
 % Symmetric
@@ -336,7 +348,48 @@ if (do_plot)
     axis([0 time_vector(end) 0 0.5*10^-4])
     %   pbaspect(gca, [1 2 1])
     hold off
+ 
+    %% Robot pose error %%
+    subplot(2,3,6)
+    hold on
+    if length(methods)-1 == 3
+        boundedline(time_vector, mean_pose_errors(1,:), SEM_pose_errors(1,:)*ts, ...
+            time_vector, mean_pose_errors(2,:), SEM_pose_errors(2,:)*ts, ...
+            time_vector, mean_pose_errors(3,:), SEM_pose_errors(3,:)*ts, ...
+            'alpha', 'cmap', colours, 'transparency', transparency);
+    elseif length(methods)-1 == 2
+        boundedline(time_vector, mean_pose_errors(1,:), SEM_pose_errors(1,:)*ts, ...
+            time_vector, mean_pose_errors(2,:), SEM_pose_errors(2,:)*ts, ...
+            'alpha', 'cmap', colours, 'transparency', transparency);
+    end
     
+    for i = 1:length(methods)-1
+        pose_error = mean_pose_errors(i,:);
+        h(i) = plot(time_vector, pose_error, 'LineWidth', 1, 'Color', colours(i,:));
+    end
+    
+    h_xlabel = xlabel('Time (s)');
+    h_ylabel = ylabel('Pose error (m)');
+    set([h_xlabel, h_ylabel], ...
+        'FontName'   , 'Helvetica');
+    set(gca, ...
+        'Box'         , 'off'     , ...
+        'TickDir'     , 'out'     , ...
+        'TickLength'  , [.02 .02] , ...
+        'XMinorTick'  , 'on'      , ...
+        'YMinorTick'  , 'on'      , ...
+        'YGrid'       , 'on'      , ...
+        'XColor'      , [.3 .3 .3], ...
+        'YColor'      , [.3 .3 .3], ...
+        'YTick'       , 0:0.05:0.2, ...
+        'LineWidth'   , 1         , ...
+        'FontSize'    , text_size, ...
+        'LooseInset', max(get(gca,'TightInset'), 0.02));
+    rescale_axes(rescale_factor);
+    axis([0 time_vector(end) 0 0.2])
+    %    pbaspect(gca, [1 2 1])
+    hold off
+
     set(gcf, 'Position', [-250, 654, 734, 485])
     
     if (do_print)

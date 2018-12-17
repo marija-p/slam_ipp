@@ -20,6 +20,8 @@ for i = 1:size(metrics.times,1)
     Rob_Ps_Dopt = [Rob_Ps_Dopt; det(metrics.Rob_Ps(:,:,i))];
 end
 
+pose_error = sqrt(sum((metrics.points_meas - metrics.points_meas_gt).^2, 2));
+        
 ts = timeseries(P_traces, times);
 ts_resampled = resample(ts, time_vector, 'zoh');
 P_traces_resampled = ts_resampled.data';
@@ -39,6 +41,10 @@ Rob_Ps_Aopt_resampled = ts_resampled.data';
 ts = timeseries(Rob_Ps_Dopt, times);
 ts_resampled = resample(ts, time_vector, 'zoh');
 Rob_Ps_Dopt_resampled = ts_resampled.data';
+
+ts = timeseries(pose_error, times);
+ts_resampled = resample(ts, time_vector, 'zoh');
+pose_error_resampled = ts_resampled.data';
 
 if (do_plot)
 
@@ -165,6 +171,31 @@ if (do_plot)
     axis([0 time_vector(end) 0 0.5*10^-4])
     h_xlabel = xlabel('Time (s)');
     h_ylabel = ylabel('Robot uncertainty @ D-opt');
+    set([h_xlabel, h_ylabel], ...
+        'FontName'   , 'Helvetica');
+    hold off
+
+    %% Robot pose error %%
+    subplot(2,3,6)
+    hold on
+    set(gca, ...
+        'Box'         , 'off'     , ...
+        'TickDir'     , 'out'     , ...
+        'TickLength'  , [.02 .02] , ...
+        'XMinorTick'  , 'on'      , ...
+        'YMinorTick'  , 'on'      , ...
+        'YGrid'       , 'on'      , ...
+        'XColor'      , [.3 .3 .3], ...
+        'YColor'      , [.3 .3 .3], ...
+        'YTick'       , 0:0.05:0.2, ...
+        'LineWidth'   , 1         , ...
+        'FontSize'    , text_size, ...
+        'LooseInset', max(get(gca,'TightInset'), 0.02));
+    
+    plot(time_vector, pose_error_resampled)
+    axis([0 time_vector(end) 0 0.2])
+    h_xlabel = xlabel('Time (s)');
+    h_ylabel = ylabel('Pose error (m)');
     set([h_xlabel, h_ylabel], ...
         'FontName'   , 'Helvetica');
     hold off
