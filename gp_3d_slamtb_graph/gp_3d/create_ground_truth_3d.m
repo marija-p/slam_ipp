@@ -12,7 +12,7 @@ res_z = 1;
 
 % Correlation function parameters.
 corr.name = 'gauss';
-corr.c0 = [20, 20, 60];
+corr.c0 = [5, 5, 5];
 corr.sigma = 600;
 
 % Create the random field.
@@ -23,6 +23,7 @@ z = linspace(0,dim_z_env,dim_z_env/res_z);
 F = randomfield(corr,mesh);
 % Scale.
 F = rescale(F, 0, 40);
+ground_truth = F;
 
 % Visualize the random field.
 scatter3(mesh(:,1), mesh(:,2), mesh(:,3), 100, F, 'filled')

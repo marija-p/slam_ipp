@@ -1,4 +1,4 @@
-load ground_truth_3d_small.mat
+load ground_truth_3d_small2.mat
 
 %% Hyperparameter training %%
 
@@ -6,7 +6,7 @@ load ground_truth_3d_small.mat
 X_train = mesh;
 Y_train = ground_truth;
 
-train_hyperparameters = 0;
+train_hyperparameters = 1;
 
 inf_func = @infExact;
 cov_func = @covSEiso; 
@@ -16,7 +16,7 @@ mean_func = @meanConst;
 if (train_hyperparameters)
     hyp.cov = [0 ; 0];
     hyp.lik = log(0.1);
-    hyp.mean = 23.1482; %24.3446;
+    hyp.mean = 17.5466; %24.3446;
     hyp_trained = ...
         minimize(hyp, @gp, -200, inf_func, mean_func, ...
         cov_func, lik_func, X_train, Y_train);
