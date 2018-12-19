@@ -64,7 +64,7 @@ Robot{1} = struct(...                  % ODOMETRY EXAMPLE
     'name',               'Dala',...      % robot name
     'type',               'atrv',...      % type of robot
     'motion',             'odometry',...  % motion model
-    'position',           [0;0;2],...     % robot position in map
+    'position',           [0;0;1],...     % robot position in map
     'orientationDegrees', [0;0;0],...     % orientation, in degrees, [roll; pitch; yaw].
     'positionStd',        [0.4;0.4;0],...     % position error, std
     'orientationStd',     [0;0;0],...     % orient. error, std, in degrees
@@ -125,7 +125,7 @@ Sensor{1} = struct(...
     'imageSize',          [640;480],...   % image size
     'pixErrorStd',        1.0,...         % pixel error std [pixels]
     'depthErrorStd',      0.1,...         % depth error std [m]
-    'intrinsic',          [320;240;320;320],... % intrinsic params [u0 v0 au av]
+    'intrinsic',          [320;240;583.28;579.41],... % intrinsic params [u0 v0 au av]
     'distortion',         [],...          % distortion params, e.g. [-0.3;0.1]
     'frameInMap',         false,...       % add sensor frame in slam map?
     'imGrid',             struct(...      % grid for Active Search

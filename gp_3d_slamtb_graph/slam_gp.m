@@ -31,7 +31,7 @@ global Map
 %% I. Specify user-defined options
 userData_graph_gp_3d;
 Robot{1}.positionStd = planning_params.position_stdev';
-
+Robot{1}.position = planning_params.initial_position';
 
 %% II. Initialize all data structures from user-defined data
 % SLAM data
