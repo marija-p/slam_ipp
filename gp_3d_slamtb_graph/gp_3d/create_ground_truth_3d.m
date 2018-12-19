@@ -3,11 +3,11 @@ close all;
 % Function to generate 3-D Gaussian random field for a given mesh.
 
 % Environment parameters.
-dim_x_env = 12;
-dim_y_env = 12;
-dim_z_env = 5;
-res_x = 0.5;
-res_y = 0.5;
+dim_x_env = 5;
+dim_y_env = 5;
+dim_z_env = 4;
+res_x = 0.25;
+res_y = 0.25;
 res_z = 1;
 
 % Correlation function parameters.
