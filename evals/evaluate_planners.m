@@ -20,9 +20,9 @@ else
 end
 
 % UAV workspace dimensions [m]
-dim_x_env = 12;
-dim_y_env = 12;
-dim_z_env = 5;
+dim_x_env = 5;
+dim_y_env = 5;
+dim_z_env = 4;
 
 [map_params, planning_params, opt_params, gp_params, ...
     training_data, gt_data, testing_data] = ...

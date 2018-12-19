@@ -11,7 +11,7 @@ set(FldFig.fig,...
     'renderer',      FigOpt.renderer,...
     'toolbar',       'none',...
     'color',         FigOpt.map.colors.bckgnd, ...
-    'Position',      [604   646   985   461]); % One display monitor
+    'Position',      [639   535   532   227]);
 
 % Axes
 for k = 1:2
@@ -26,7 +26,9 @@ for k = 1:2
     xlabel('x (m)')
     ylabel('y (m)')
     daspect([1 1 0.5])
-    axis([-10, 10, -10, 10, 0, 6])
+    axis([min(X_test(:,1)) max(X_test(:,1)) ...
+        min(X_test(:,2)) max(X_test(:,2)) ...
+        min(X_test(:,3)) max(X_test(:,3))])
     % 2D/3D plot orientation
     if (size(X_test,2) == 2)
         view(2)
@@ -98,7 +100,7 @@ if (size(X_test,2) == 2)
 elseif (size(X_test,2) == 3)
     FldFig.field_cov = scatter3(X_test(:,1), X_test(:,2), X_test(:,3), ...
         10, zeros(size(X_test,1),1), 'filled');
-    caxis([0 2e4])
+    caxis([0 500])
 end
 colorbar
 title('Variance')
