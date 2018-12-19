@@ -390,7 +390,7 @@ if (do_plot)
     %    pbaspect(gca, [1 2 1])
     hold off
 
-    set(gcf, 'Position', [-250, 654, 734, 485])
+    set(gcf, 'Position', [86, 540, 728, 434])
     
     if (do_print)
         fig = gcf;
