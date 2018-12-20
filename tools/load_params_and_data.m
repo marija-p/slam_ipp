@@ -3,7 +3,7 @@ function [map_params, planning_params, opt_params, gp_params, ...
     load_params_and_data(dim_x_env, dim_y_env, dim_z_env)
 % Loads default parameters + training data for RA-L19 IPP algorithms.
 
-load training_data_3d_small.mat
+load training_data_3d_small2.mat
 
 % Map resolution [m/cell]
 map_params.res_x = 0.25;
@@ -24,19 +24,21 @@ planning_params.lattice_points_y = 3;
 planning_params.lattice_points_z = 3;
 
 % Trajectory optimization references
-planning_params.max_vel = 3;        % [m/s]
-planning_params.max_acc = 3;        % [m/s^2]
+planning_params.max_vel = 1.5;        % [m/s]
+planning_params.max_acc = 2.0;        % [m/s^2]
 
-% Maximum control noise % percentage added in each co-ordinate [x,y,z].
-planning_params.control_noise_percent = [5, 5, 5];
-% UAV initial position error [standard dev] in each co-ordinate [x,y,z].
+% Maximum control noise % percentage added in each co-ordinate [x,y,z]
+planning_params.control_noise_percent = [2.5, 2.5, 2.5];
+% UAV initial position [m]
+planning_params.initial_position = [0, 0, 1];
+% UAV initial position error [standard dev] in each co-ordinate [x,y,z]
 % (Overwrites SLAM data.)
-planning_params.position_stdev = [0.1, 0.1, 0.05];
+planning_params.position_stdev = [0.25, 0.25, 0.1];
 
 % Frequency at which to send commands - simulate motion/covariance update
 planning_params.control_freq = 1;   % [Hz]
 % Frequency at which to take measurements
-planning_params.meas_freq = 0.2;    % [Hz]
+planning_params.meas_freq = 0.25;    % [Hz]
 % Factor by which to divide keyframe/graph optimisation frequency
 % (Opt.map.kfrmPeriod).
 planning_params.keyframe_predict_factor = 1;
@@ -45,11 +47,11 @@ planning_params.keyframe_predict_factor = 1;
 planning_params.control_points = 3;
 
 % Total time budget for informative planning [s].
-planning_params.time_budget = 200;
+planning_params.time_budget = 180;
 
 % Objective function for informative planning.
 % 'uncertainty_adaptive'/'renyi_adaptive'/'uncertainty'/'renyi'
-planning_params.obj_func = 'renyi';
+planning_params.obj_func = 'uncertainty';
 % Renyi objective function only: uncertainty measure for alpha parameter.
 planning_params.renyi_uncertainty = 'Aopt';
 
