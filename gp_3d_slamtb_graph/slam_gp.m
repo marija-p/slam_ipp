@@ -282,8 +282,6 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
         
         for rob = [Rob.rob]
             
-            %keyboard
-            
             [field_map, training_data] = ...
                 take_measurement_at_point(Rob(rob), SimRob(rob), field_map, .....
                 training_data, gt_data, testing_data, gp_params, map_params);

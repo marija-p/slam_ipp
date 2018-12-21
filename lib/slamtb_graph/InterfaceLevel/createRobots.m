@@ -54,7 +54,7 @@ for rob = 1:numel(Robot)
             
             % state
             Ro.state.x    = qp; % state
-            Ro.state.P    = EP;
+            Ro.state.P    = QP;
             Ro.state.dx   = zeros(6,1);
                         
         otherwise
