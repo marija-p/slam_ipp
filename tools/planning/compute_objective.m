@@ -34,8 +34,6 @@ switch planning_params.obj_func
         warning('Unknown objective function!');
 end
 
-keyboard
-
 % Number of time-frames between each measurement
 meas_frame_interval = planning_params.control_freq/planning_params.meas_freq;
 
