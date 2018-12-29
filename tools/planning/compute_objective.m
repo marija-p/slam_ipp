@@ -132,12 +132,12 @@ try
                 Rob.state.x(1), Rob.state.x(2), Rob.state.x(3), 'spline')];
             
             r = Rob.state.r(1:3);
-            Rob_P_meas = Map.P(r,r);
+            Rob_P_meas = Map.P(r,r) + factorRob.state.P(1:3,1:3);
             
         end
         
         r = Rob.state.r(1:3);
-        Rob_P_traj = Map.P(r,r);
+        Rob_P_traj = Map.P(r,r) + factorRob.state.P(1:3,1:3);
         
         current_frame = current_frame + 1;
         
@@ -163,9 +163,9 @@ try
             above_thres_ind = find(field_map.mean + ...
                 planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);
             if strcmp(planning_params.renyi_uncertainty, 'Dopt')
-                alpha = 1 + 1/det(Rob_P_meas);
+                alpha = 1 + 1/det(Rob_P_traj);
             elseif strcmp(planning_params.renyi_uncertainty, 'Aopt')
-                alpha = 1 + 1/trace(Rob_P_meas);
+                alpha = 1 + 1/trace(Rob_P_traj);
             end
             renyi_term = alpha^(1/(alpha-1));
             P_f = sum(log(field_map.cov(above_thres_ind).*renyi_term));
@@ -174,9 +174,9 @@ try
             %    keyboard
             %end
             if strcmp(planning_params.renyi_uncertainty, 'Dopt')
-                alpha = 1 + 1/det(Rob_P_meas);
+                alpha = 1 + 1/det(Rob_P_traj);
             elseif strcmp(planning_params.renyi_uncertainty, 'Aopt')
-                alpha = 1 + 1/trace(Rob_P_meas);
+                alpha = 1 + 1/trace(Rob_P_traj);
             end
             renyi_term = alpha^(1/(alpha-1));
             %disp(['Alpha = ', num2str(alpha)])
