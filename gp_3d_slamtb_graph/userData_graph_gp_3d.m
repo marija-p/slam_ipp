@@ -123,7 +123,7 @@ Sensor{1} = struct(...
     'positionStd',        [0;0;0],...     % position error std
     'orientationStd',     [0;0;0],...     % orient. error std
     'imageSize',          [640;480],...   % image size
-    'pixErrorStd',        1.0,...         % pixel error std [pixels]
+    'pixErrorStd',        10.0,...         % pixel error std [pixels]
     'depthErrorStd',      0.1,...         % depth error std [m]
     'intrinsic',          [320;240;583.28;579.41],... % intrinsic params [u0 v0 au av]
     'distortion',         [],...          % distortion params, e.g. [-0.3;0.1]

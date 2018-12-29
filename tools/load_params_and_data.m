@@ -24,11 +24,11 @@ planning_params.lattice_points_y = 3;
 planning_params.lattice_points_z = 3;
 
 % Trajectory optimization references
-planning_params.max_vel = 1.5;        % [m/s]
+planning_params.max_vel = 2.0;        % [m/s]
 planning_params.max_acc = 2.0;        % [m/s^2]
 
 % Parameters for control noise variance in each co-ordinate [x,y,z]
-planning_params.control_noise_coeffs = [0.01, 0.01, 0.01];
+planning_params.control_noise_coeffs = [0.001, 0.001, 0.001];
 % UAV initial position [m]
 planning_params.initial_position = [0, 0, 1];
 % UAV initial position error [standard dev] in each co-ordinate [x,y,z]
@@ -51,7 +51,7 @@ planning_params.time_budget = 180;
 
 % Objective function for informative planning.
 % 'uncertainty_adaptive'/'renyi_adaptive'/'uncertainty'/'renyi'
-planning_params.obj_func = 'uncertainty';
+planning_params.obj_func = 'renyi';
 % Renyi objective function only: uncertainty measure for alpha parameter.
 planning_params.renyi_uncertainty = 'Aopt';
 
