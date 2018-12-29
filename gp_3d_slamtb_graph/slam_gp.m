@@ -281,8 +281,11 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
         
         for rob = [Rob.rob]
             
+            r = Rob(rob).state.r(1:3);
+            Rob_P = Map.P(r,r) + factorRob.state.P(1:3,1:3);
             [field_map, training_data] = ...
-                take_measurement_at_point(Rob(rob), SimRob(rob), field_map, .....
+                take_measurement_at_point(Rob(rob).state.x(1:3)', ...
+                SimRob(rob).state.x(1:3)', Rob_P, field_map, .....
                 training_data, gt_data, testing_data, gp_params, map_params);
             
             metrics.times = [metrics.times; Map.t];
@@ -292,9 +295,7 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
             metrics.P_traces = [metrics.P_traces; sum(field_map.cov)];
             metrics.rmses = [metrics.rmses; compute_rmse(field_map.mean, gt_data.Y_gt)];
             metrics.mlls = [metrics.mlls; compute_mll(field_map, gt_data.Y_gt)];
-            r = Rob(rob).state.r(1:3);
-            P = Map.P(r,r);
-            metrics.Rob_Ps(:,:,size(metrics.times,1)) = P;
+            metrics.Rob_Ps(:,:,size(metrics.times,1)) = Rob_P;
             
             %disp(['Distance between real + estimated robot positions: ', ...
             %    num2str(pdist([Rob.state.x(1:3)'; SimRob.state.x(1:3)']))])
