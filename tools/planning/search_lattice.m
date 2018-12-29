@@ -84,7 +84,7 @@ while (planning_params.control_points > size(path_points, 1))
             Trj_eval, Frm_eval, Fac_eval, factorRob_eval, Opt, ...
             planning_params);
         r = Rob_eval.state.r(1:3);
-        Rob_P = Map_eval.P(r,r);
+        Rob_P = Map_eval.P(r,r) + factorRob_eval.state.P(1:3,1:3);
         
         % Predict map update at target location.
         field_map_eval = predict_map_update(point_eval, Rob_P, field_map, ...
