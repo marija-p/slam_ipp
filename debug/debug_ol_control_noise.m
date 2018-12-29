@@ -23,9 +23,10 @@ while ~isempty(points_control)
     points_control = points_control(2:end,:);
     
     % Simulate control for this time-step.
-    du = normrnd(0, abs(Rob.con.u(1:3))'.*planning_params.control_noise_coeffs)';
+    error_var = abs(Rob.con.u(1:3))'.*planning_params.control_noise_coeffs;
+    du = normrnd(0, error_var)';
     Rob.con.u(1:3) = Rob.con.u(1:3) + du;
-    Rob.con.U(1:3,1:3) = diag(max([1e-8; 1e-8; 1e-8], du.^2));
+    Rob.con.U(1:3,1:3) = diag(max([1e-8, 1e-8, 1e-8], error_var.^2));
     
     SimRob = simMotion(SimRob,[]);
     Rob = simMotion(Rob,[]);

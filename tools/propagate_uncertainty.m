@@ -29,12 +29,17 @@ while ~isempty(points_control)
     points_control = points_control(2:end,:);
     
     % Simulate control for this time-step.
-    Rob.con.u(1:3) = Rob.con.u(1:3) + Rob.con.u(1:3).* ...
-        (-1 + 2.*rand(3,1)).*planning_params.control_noise_percent'./100;
+    error_var = abs(Rob.con.u(1:3))'.*planning_params.control_noise_coeffs;
+    du = normrnd(0, error_var)';
+    Rob.con.u(1:3) = Rob.con.u(1:3) + du;
+    Rob.con.U(1:3,1:3) = diag(max([1e-8, 1e-8, 1e-8], error_var.^2));
+    
     Raw = simObservation(Rob, Sen, SimLmk, Opt);
     Rob = simMotion(Rob,[]);
+    
     % Integrate odometry for relative motion factors.
     factorRob.con.u = Rob.con.u;
+    factorRob.con.U = Rob.con.U;
     factorRob = integrateMotion(factorRob, []);
     
     if (mod(current_frame, Opt.map.kfrmPeriod*planning_params.keyframe_predict_factor) == 0) || ...

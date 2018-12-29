@@ -27,8 +27,8 @@ planning_params.lattice_points_z = 3;
 planning_params.max_vel = 1.5;        % [m/s]
 planning_params.max_acc = 2.0;        % [m/s^2]
 
-% Maximum control noise % percentage added in each co-ordinate [x,y,z]
-planning_params.control_noise_percent = [2.5, 2.5, 2.5];
+% Parameters for control noise variance in each co-ordinate [x,y,z]
+planning_params.control_noise_coeffs = [0.01, 0.01, 0.01];
 % UAV initial position [m]
 planning_params.initial_position = [0, 0, 1];
 % UAV initial position error [standard dev] in each co-ordinate [x,y,z]

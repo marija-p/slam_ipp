@@ -34,6 +34,8 @@ switch planning_params.obj_func
         warning('Unknown objective function!');
 end
 
+keyboard
+
 % Number of time-frames between each measurement
 meas_frame_interval = planning_params.control_freq/planning_params.meas_freq;
 
@@ -78,12 +80,14 @@ try
         num_control_frames = num_control_frames + 1;
         
         % Simulate control for this time-step.
-        du = Rob.con.u(1:3).* ...
-            (-1 + 2.*rand(3,1)).*planning_params.control_noise_percent'./100;
+        error_var = abs(Rob.con.u(1:3))'.*planning_params.control_noise_coeffs;
+        du = normrnd(0, error_var)';
         Rob.con.u(1:3) = Rob.con.u(1:3) + du;
-        Rob.con.U(1:3,1:3) = diag(max([1e-8; 1e-8; 1e-8], du.^2/2));
+        Rob.con.U(1:3,1:3) = diag(max([1e-8, 1e-8, 1e-8], error_var.^2));
+        
         Raw = simObservation(Rob, Sen, SimLmk, Opt);
         Rob = simMotion(Rob,[]);
+        
         % Integrate odometry for relative motion factors.
         factorRob.con.u = Rob.con.u;
         factorRob.con.U = Rob.con.U;
