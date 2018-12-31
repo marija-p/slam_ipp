@@ -177,7 +177,7 @@ try
                 alpha = 1 + 1/trace(Rob_P_traj);
             end
             renyi_term = alpha^(1/(alpha-1));
-            disp(['Alpha = ', num2str(alpha)])
+            %disp(['Alpha = ', num2str(alpha)])
             P_f = sum(log(field_map.cov.*renyi_term));
         otherwise
             warning('Unknown objective function!');
