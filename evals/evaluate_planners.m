@@ -51,6 +51,7 @@ for i = 1:num_trials
     
     rng(t, 'twister');
     gp_params.use_modified_kernel = 1;
+    gp_params.use_modified_kernel_prediction = 0;
     gp_params.N_gauss = 5;
     [metrics] = slam_gp(map_params, planning_params, opt_params, gp_params, ...
         training_data, gt_data, testing_data);
