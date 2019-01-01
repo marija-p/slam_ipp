@@ -155,8 +155,10 @@ try
             above_thres_ind = find(field_map.mean + ...
                 planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);
             P_f = sum(log(field_map.cov(above_thres_ind).*exp(1)));
+            cost = max(get_trajectory_total_time(trajectory), 1/planning_params.meas_freq);
         case 'uncertainty'
             P_f = sum(log(field_map.cov.*exp(1)));
+            cost = max(get_trajectory_total_time(trajectory), 1/planning_params.meas_freq);
         case 'renyi_adaptive'
             above_thres_ind = find(field_map.mean + ...
                 planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);
@@ -167,6 +169,7 @@ try
             end
             renyi_term = alpha^(1/(alpha-1));
             P_f = sum(log(field_map.cov(above_thres_ind).*renyi_term));
+            cost = 1;
         case 'renyi'
             %if (P_i - sum(log(field_map.cov.*exp(1))) < 0)
             %    keyboard
@@ -179,6 +182,7 @@ try
             renyi_term = alpha^(1/(alpha-1));
             %disp(['Alpha = ', num2str(alpha)])
             P_f = sum(log(field_map.cov.*renyi_term));
+            cost = 1;
         otherwise
             warning('Unknown objective function!');
     end
@@ -188,7 +192,6 @@ try
     %if (gain < 0)
     %    keyboard
     %end
-    cost = max(get_trajectory_total_time(trajectory), 1/planning_params.meas_freq);
     obj = -gain/cost;
     
     %disp(['Gain = ', num2str(gain)])

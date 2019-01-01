@@ -95,8 +95,10 @@ while (planning_params.control_points > size(path_points, 1))
                 above_thres_ind = find(field_map_eval.mean + ...
                     planning_params.beta*sqrt(field_map_eval.cov) >= planning_params.lower_thres);
                 P_f = sum(log(field_map_eval.cov(above_thres_ind).*exp(1)));
+                cost = max(travel_time, 1/planning_params.meas_freq);
             case 'uncertainty'
                 P_f = sum(log(field_map_eval.cov.*exp(1)));
+                cost = max(travel_time, 1/planning_params.meas_freq);
             case 'renyi_adaptive'
                 above_thres_ind = find(field_map_eval.mean + ...
                     planning_params.beta*sqrt(field_map_eval.cov) >= planning_params.lower_thres);
@@ -107,6 +109,7 @@ while (planning_params.control_points > size(path_points, 1))
                 end
                 renyi_term = alpha^(1/(alpha-1));
                 P_f = sum(log(field_map_eval.cov(above_thres_ind).*renyi_term));
+                cost = 1;
             case 'renyi'
                 if strcmp(planning_params.renyi_uncertainty, 'Dopt')
                     alpha = 1 + 1/det(Rob_P);
@@ -115,12 +118,12 @@ while (planning_params.control_points > size(path_points, 1))
                 end
                 renyi_term = alpha^(1/(alpha-1));
                 P_f = sum(log(field_map_eval.cov.*renyi_term));
+                cost = 1;
             otherwise
                 warning('Unknown objective function!');
         end
         
         gain = P_i - P_f;
-        cost = max(travel_time, 1/planning_params.meas_freq);
         obj = -gain/cost;
         
         %disp(['Point: ', num2str(point_eval)]);

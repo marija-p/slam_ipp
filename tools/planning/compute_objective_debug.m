@@ -155,8 +155,10 @@ end
             above_thres_ind = find(field_map.mean + ...
                 planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);
             P_f = sum(log(field_map.cov(above_thres_ind).*exp(1)));
+            cost = max(get_trajectory_total_time(trajectory), 1/planning_params.meas_freq);
         case 'uncertainty'
             P_f = sum(log(field_map.cov.*exp(1)));
+            cost = max(get_trajectory_total_time(trajectory), 1/planning_params.meas_freq);
         case 'renyi_adaptive'
             above_thres_ind = find(field_map.mean + ...
                 planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);
@@ -167,6 +169,7 @@ end
             end
             renyi_term = alpha^(1/(alpha-1));
             P_f = sum(log(field_map.cov(above_thres_ind).*renyi_term));
+            cost = 1;
         case 'renyi'
             %if (P_i - sum(log(field_map.cov.*exp(1))) < 0)
             %    keyboard
@@ -178,6 +181,7 @@ end
             end
             renyi_term = alpha^(1/(alpha-1));
             P_f = sum(log(field_map.cov.*renyi_term));
+            cost = 1;
             disp(['Alpha = ', num2str(alpha)])
             disp(['Initial Shannon entropy = ', num2str(P_i)])
             disp(['Final Shannon entropy = ', num2str(sum(log(field_map.cov.*exp(1))))])
@@ -191,7 +195,6 @@ end
     %if (gain < 0)
     %    keyboard
     %end
-    cost = max(get_trajectory_total_time(trajectory), 1/planning_params.meas_freq);
     disp(['Gain = ', num2str(gain)])
     disp(['Cost = ', num2str(cost)])
     obj = -gain/cost;
