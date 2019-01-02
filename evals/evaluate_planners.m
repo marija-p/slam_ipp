@@ -6,7 +6,7 @@ append_to_logger = 0;
 
 % Number of trials to run
 if (~append_to_logger)
-    num_trials = 50;
+    num_trials = 100;
 else
     trials = fieldnames(logger);
     trials = regexp(trials,'\d*','Match');
@@ -42,6 +42,7 @@ for i = 1:num_trials
     
     rng(t, 'twister');
     gp_params.use_modified_kernel = 0;
+    gp_params.use_modified_kernel_prediction = 0;
     [metrics] = slam_gp(map_params, planning_params, opt_params, gp_params, ...
         training_data, gt_data, testing_data);
     logger.(['trial', num2str(t)]).('no_UI') = metrics;
@@ -51,7 +52,7 @@ for i = 1:num_trials
     
     rng(t, 'twister');
     gp_params.use_modified_kernel = 1;
-    gp_params.use_modified_kernel_prediction = 0;
+    gp_params.use_modified_kernel_prediction = 1;
     gp_params.N_gauss = 5;
     [metrics] = slam_gp(map_params, planning_params, opt_params, gp_params, ...
         training_data, gt_data, testing_data);
