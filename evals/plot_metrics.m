@@ -5,7 +5,7 @@ do_plot = 1;
 
 text_size = 10.5;
 
-time_vector = 0:0.1:200;
+time_vector = 0:0.1:180;
 
 times = metrics.times;
 P_traces = metrics.P_traces;
