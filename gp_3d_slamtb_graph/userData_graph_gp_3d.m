@@ -44,7 +44,7 @@ Time = struct(...
 [X,Y] = meshgrid(-2.5:1.25:2.5,-2.5:1.25:2.5);
 landmarks = [X(:), Y(:), zeros(numel(X),1)]';
 % Split landmarks
-%landmarks = landmarks(:,1:10);
+landmarks = landmarks(:,1:10);
 % Visualize landmarks
 %plot(landmarks(1,:), landmarks(2,:), 'ok');
 
@@ -125,7 +125,7 @@ Sensor{1} = struct(...
     'imageSize',          [640;480],...   % image size
     'pixErrorStd',        1.0,...         % pixel error std [pixels]
     'depthErrorStd',      0.1,...         % depth error std [m]
-    'intrinsic',          [320;240;583.28;579.41],... % intrinsic params [u0 v0 au av]
+    'intrinsic',          [320;240;720.42;719.37],... % intrinsic params [u0 v0 au av]
     'distortion',         [],...          % distortion params, e.g. [-0.3;0.1]
     'frameInMap',         false,...       % add sensor frame in slam map?
     'imGrid',             struct(...      % grid for Active Search
