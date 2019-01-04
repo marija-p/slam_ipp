@@ -12,7 +12,7 @@ res_z = 1;
 
 % Correlation function parameters.
 corr.name = 'gauss';
-corr.c0 = [5, 5, 5];
+corr.c0 = [10, 10, 10];
 corr.sigma = 600;
 
 % Create the random field.
@@ -26,10 +26,12 @@ F = rescale(F, 0, 40);
 ground_truth = F;
 
 % Visualize the random field.
-scatter3(mesh(:,1), mesh(:,2), mesh(:,3), 100, F, 'filled')
+scatter3(mesh(:,1), mesh(:,2), mesh(:,3), 100, ground_truth, 'filled')
 h_cb = colorbar;
 ylabel(h_cb, 'Temp. (deg)')
 axis equal
 xlabel('x (m)')
 ylabel('y (m)')
 zlabel('z (m)')
+
+save('ground_truth_3d_small3.mat', 'mesh', 'ground_truth')

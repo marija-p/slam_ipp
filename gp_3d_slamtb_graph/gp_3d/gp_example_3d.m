@@ -1,4 +1,4 @@
-load ground_truth_3d_small2.mat
+load ground_truth_3d_small3.mat
 
 %% Hyperparameter training %%
 
@@ -69,3 +69,12 @@ ylabel('y')
 zlabel('z')
 
 set(gcf, 'Position', [224, 639, 1021, 332]);
+
+% Save variables.
+X_gt = mesh;
+Y_gt = ground_truth;
+cov_func = {cov_func};
+N_gauss = 11;
+save('training_data_3d_small3.mat', 'hyp_trained', 'cov_func', 'inf_func', ...
+    'lik_func', 'mean_func', 'ground_truth', 'mesh', 'X_gt', 'Y_gt', 'N_gauss');
+    
