@@ -49,21 +49,21 @@ trajectory = ...
     sample_trajectory(trajectory, 1/planning_params.meas_freq);
 
 % Discard path if it is too long.
-if (size(points_meas,1) > 10)
-    obj = Inf;
-    return;
-end
+% if (size(points_meas,1) > 10)
+%     obj = Inf;
+%     return;
+% end
 
 % Discard path if measurements are out of environment bounds.
-if (any(points_meas(:,1) > map_params.pos_x+dim_x_env) || ...
-        any(points_meas(:,2) > map_params.pos_y+dim_y_env) || ...
-        any(points_meas(:,1) < map_params.pos_x) || ...
-        any(points_meas(:,2) < map_params.pos_y) || ...
-        any(points_meas(:,3) < map_params.pos_z) || ...
-        any(points_meas(:,3) > map_params.pos_z+dim_z_env))
-    obj = Inf;
-    return;
-end
+% if (any(points_meas(:,1) > map_params.pos_x+dim_x_env) || ...
+%         any(points_meas(:,2) > map_params.pos_y+dim_y_env) || ...
+%         any(points_meas(:,1) < map_params.pos_x) || ...
+%         any(points_meas(:,2) < map_params.pos_y) || ...
+%         any(points_meas(:,3) < map_params.pos_z) || ...
+%         any(points_meas(:,3) > map_params.pos_z+dim_z_env))
+%     obj = Inf;
+%     return;
+% end
 
 try
     
@@ -119,6 +119,16 @@ try
         % Take a measurement.
         if (mod(num_control_frames-1, meas_frame_interval) == 0)
             
+%             if (any(Rob.state.x(1) > map_params.pos_x+dim_x_env) || ...
+%                     any(Rob.state.x(2) > map_params.pos_y+dim_y_env) || ...
+%                     any(Rob.state.x(1) < map_params.pos_x) || ...
+%                     any(Rob.state.x(2) < map_params.pos_y) || ...
+%                     any(Rob.state.x(3) < map_params.pos_z) || ...
+%                     any(Rob.state.x(3) > map_params.pos_z+dim_z_env))
+%                 obj = Inf;
+%                 return;
+%             end
+            
             % Update training data.
             training_data.X_train = [training_data.X_train; Rob.state.x(1:3)'];
             % Take maximum likelihood measurement based on current field map state.
@@ -155,10 +165,12 @@ try
             above_thres_ind = find(field_map.mean + ...
                 planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);
             P_f = sum(log(field_map.cov(above_thres_ind).*exp(1)));
-            cost = max(get_trajectory_total_time(trajectory), 1/planning_params.meas_freq);
+            %cost = max(get_trajectory_total_time(trajectory), 1/planning_params.meas_freq);
+            cost = 1;
         case 'uncertainty'
             P_f = sum(log(field_map.cov.*exp(1)));
-            cost = max(get_trajectory_total_time(trajectory), 1/planning_params.meas_freq);
+            %cost = max(get_trajectory_total_time(trajectory), 1/planning_params.meas_freq);
+            cost = 1;
         case 'renyi_adaptive'
             above_thres_ind = find(field_map.mean + ...
                 planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);

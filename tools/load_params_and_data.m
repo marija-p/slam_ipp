@@ -28,15 +28,15 @@ planning_params.max_vel = 1.0;        % [m/s]
 planning_params.max_acc = 2.0;        % [m/s^2]
 
 % Parameters for control noise variance in each co-ordinate [x,y,z]
-planning_params.control_noise_coeffs = [0.001, 0.001, 0.001];
+planning_params.control_noise_coeffs = [0.01, 0.01, 0.01];
 % UAV initial position [m]
-planning_params.initial_position = [0, 0, 1];
+planning_params.initial_position = [-2, -2, 1];
 % UAV initial position error [standard dev] in each co-ordinate [x,y,z]
 % (Overwrites SLAM data.)
 planning_params.position_stdev = [0.1, 0.1, 0.1];
 
 % Frequency at which to send commands - simulate motion/covariance update
-planning_params.control_freq = 1;   % [Hz]
+planning_params.control_freq = 0.5;   % [Hz]
 % Frequency at which to take measurements
 planning_params.meas_freq = 0.25;    % [Hz]
 % Factor by which to divide keyframe/graph optimisation frequency
@@ -44,7 +44,7 @@ planning_params.meas_freq = 0.25;    % [Hz]
 planning_params.keyframe_predict_factor = 1;
 
 % Number of control points for a polynomial (start point fixed).
-planning_params.control_points = 3;
+planning_params.control_points = 4;
 
 % Total time budget for informative planning [s].
 planning_params.time_budget = 180;
@@ -65,9 +65,9 @@ planning_params.beta = 0;
 opt_params.max_iters = 10;
 opt_params.opt_method = 'cmaes'; % 'fmc'/cmaes'/'none'/'bo'
 % Covariances in each search dimension
-opt_params.cov_x = 1;
-opt_params.cov_y = 1;
-opt_params.cov_z = 0.5;
+opt_params.cov_x = 1.5;
+opt_params.cov_y = 1.5;
+opt_params.cov_z = 1;
 
 % GP-related parameters
 gp_params.hyp_trained = hyp_trained;

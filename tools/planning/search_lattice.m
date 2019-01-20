@@ -95,10 +95,12 @@ while (planning_params.control_points > size(path_points, 1))
                 above_thres_ind = find(field_map_eval.mean + ...
                     planning_params.beta*sqrt(field_map_eval.cov) >= planning_params.lower_thres);
                 P_f = sum(log(field_map_eval.cov(above_thres_ind).*exp(1)));
-                cost = max(travel_time, 1/planning_params.meas_freq);
+                %cost = max(travel_time, 1/planning_params.meas_freq);
+                cost = 1;
             case 'uncertainty'
                 P_f = sum(log(field_map_eval.cov.*exp(1)));
-                cost = max(travel_time, 1/planning_params.meas_freq);
+                %cost = max(travel_time, 1/planning_params.meas_freq);
+                cost = 1;
             case 'renyi_adaptive'
                 above_thres_ind = find(field_map_eval.mean + ...
                     planning_params.beta*sqrt(field_map_eval.cov) >= planning_params.lower_thres);

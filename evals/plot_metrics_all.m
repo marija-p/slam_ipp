@@ -1,4 +1,4 @@
-file_path = '~\PhD\Submissions\asldoc-2017-iros-popovic\images\';
+file_path = '~\PhD\Submissions\asldoc-2019-icra-popovic\images\';
 
 rescale_factor = 1;
 %rescale_factor = 0.75;

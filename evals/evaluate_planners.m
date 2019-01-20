@@ -39,15 +39,18 @@ for i = 1:num_trials
     end
     
     logger.(['trial', num2str(t)]).num = t;
+ 
+    %% Uncertainty %%
+    planning_params.obj_func = 'uncertainty';
     
     rng(t, 'twister');
     gp_params.use_modified_kernel = 0;
     gp_params.use_modified_kernel_prediction = 0;
     [metrics] = slam_gp(map_params, planning_params, opt_params, gp_params, ...
         training_data, gt_data, testing_data);
-    logger.(['trial', num2str(t)]).('no_UI') = metrics;
+    logger.(['trial', num2str(t)]).('uncertainty_no_UI') = metrics;
     clear global
-    fprintf(debug_file, 'no_UI\n');
+    fprintf(debug_file, 'uncertainty_no_UI\n');
     fprintf(debug_file, '%f %f\n', [metrics.times'; metrics.rmses']);
     
     rng(t, 'twister');
@@ -56,9 +59,33 @@ for i = 1:num_trials
     gp_params.N_gauss = 5;
     [metrics] = slam_gp(map_params, planning_params, opt_params, gp_params, ...
         training_data, gt_data, testing_data);
-    logger.(['trial', num2str(t)]).('UI_N_gauss_5') = metrics;
+    logger.(['trial', num2str(t)]).('uncertainty_UI_N_gauss_5') = metrics;
     clear global
-    fprintf(debug_file, 'UI_N_gauss_5\n');
+    fprintf(debug_file, 'uncertainty_UI_N_gauss_5\n');
+    fprintf(debug_file, '%f %f\n', [metrics.times'; metrics.rmses']);
+    
+    %% Renyi %%
+    planning_params.obj_func = 'renyi';
+
+    rng(t, 'twister');
+    gp_params.use_modified_kernel = 0;
+    gp_params.use_modified_kernel_prediction = 0;
+    [metrics] = slam_gp(map_params, planning_params, opt_params, gp_params, ...
+        training_data, gt_data, testing_data);
+    logger.(['trial', num2str(t)]).('renyi_no_UI') = metrics;
+    clear global
+    fprintf(debug_file, 'renyi_no_UI\n');
+    fprintf(debug_file, '%f %f\n', [metrics.times'; metrics.rmses']);
+    
+    rng(t, 'twister');
+    gp_params.use_modified_kernel = 1;
+    gp_params.use_modified_kernel_prediction = 1;
+    gp_params.N_gauss = 5;
+    [metrics] = slam_gp(map_params, planning_params, opt_params, gp_params, ...
+        training_data, gt_data, testing_data);
+    logger.(['trial', num2str(t)]).('renyi_UI_N_gauss_5') = metrics;
+    clear global
+    fprintf(debug_file, 'renyi_UI_N_gauss_5\n');
     fprintf(debug_file, '%f %f\n', [metrics.times'; metrics.rmses']);
     
     save data.mat
