@@ -15,6 +15,11 @@ percentile = 0.99;
 trials = fieldnames(logger);
 methods = fieldnames(logger.trial1);
 
+% Choose which methods to plot.
+% NB: - Always include "1" (trial number).
+methods_select = [1,4:5];
+methods = {methods{methods_select}};
+
 % Last trial is incomplete.
 if (length(methods) ~= length(fieldnames(logger.(trials{end}))))
     trials = trials(1:end-1);
