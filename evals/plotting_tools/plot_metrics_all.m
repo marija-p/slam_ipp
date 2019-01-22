@@ -1,11 +1,8 @@
-file_path = '~\PhD\Submissions\asldoc-2019-icra-popovic\images\';
-
 rescale_factor = 1;
 %rescale_factor = 0.75;
 text_size = 10.5;
 
 do_plot = 1;
-do_print = 0;
 show_legend = 1;
 
 paper_pos = [0, 0, 6, 4];
@@ -17,7 +14,7 @@ methods = fieldnames(logger.trial1);
 
 % Choose which methods to plot.
 % NB: - Always include "1" (trial number).
-methods_select = [1:5];
+methods_select = [1,3,5];
 methods = {methods{methods_select}};
 
 % Last trial is incomplete.
@@ -432,22 +429,12 @@ if (do_plot)
     hold off
 
     set(gcf, 'Position', [86, 540, 728, 434])
-    
-    if (do_print)
-        fig = gcf;
-        fig.PaperUnits = 'inches';
-        fig.PaperPosition = paper_pos;
-        fig.PaperPositionMode = 'manual';
-        print(fig, '-depsc', [file_path, 'methods.eps']);
-    end
-    
+    set(gcf,'color','w')
     
     if (show_legend)
-        if length(methods)-1 == 4
-            h_legend = legend(h, 'Unc. - no UI', 'Unc. - UI', 'Renyi - no UI', 'Renyi - UI');
-        else
-            h_legend = legend(h, 'No UI', 'UI - N = 5');
-        end
+        %h_legend = legend(h, 'Unc. - no UI', 'Unc. - UI', 'Renyi - no UI', 'Renyi - UI');
+        %h_legend = legend(h, 'No UI', 'UI - N = 5');
+        h_legend = legend(h, 'Uncertainty', 'Renyi');
         %set(h_legend, 'Location', 'SouthOutside');
         %set(h_legend, 'orientation', 'horizontal')
         %set(h_legend, 'box', 'off')

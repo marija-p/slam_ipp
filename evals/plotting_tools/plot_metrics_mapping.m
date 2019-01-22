@@ -1,11 +1,8 @@
-file_path = '~\PhD\Submissions\asldoc-2019-icra-popovic\images\';
-
 %rescale_factor = 1;
 rescale_factor = 0.75;
 text_size = 10.5;
 
 do_plot = 1;
-do_print = 0;
 show_legend = 1;
 
 paper_pos = [0, 0, 6, 4];
@@ -270,15 +267,7 @@ if (do_plot)
     hold off
 
     set(gcf, 'Position', [86, 540, 728, 434])
-    
-    if (do_print)
-        fig = gcf;
-        fig.PaperUnits = 'inches';
-        fig.PaperPosition = paper_pos;
-        fig.PaperPositionMode = 'manual';
-        print(fig, '-depsc', [file_path, 'methods.eps']);
-    end
-    
+    set(gcf,'color','w')
     
     if (show_legend)
         h_legend = legend(h, 'No UI', 'UI - N = 5', 'UI - N = 9');
