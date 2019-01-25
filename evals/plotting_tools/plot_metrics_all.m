@@ -14,7 +14,7 @@ methods = fieldnames(logger.trial1);
 
 % Choose which methods to plot.
 % NB: - Always include "1" (trial number).
-methods_select = [1,3,5];
+methods_select = [1:5];
 methods = {methods{methods_select}};
 
 % Last trial is incomplete.
@@ -236,7 +236,7 @@ if (do_plot)
         'FontSize'    , text_size, ...
         'LooseInset', max(get(gca,'TightInset'), 0.02));
     rescale_axes(rescale_factor);
-    axis([0 time_vector(end) 1 8.5])
+    axis([0 time_vector(end) 0.5 8.5])
     %    pbaspect(gca, [1 2 1])
     hold off
     
@@ -330,7 +330,7 @@ if (do_plot)
         'FontSize'    , text_size, ...
         'LooseInset', max(get(gca,'TightInset'), 0.02));
     rescale_axes(rescale_factor);
-    axis([0 time_vector(end) 0 0.01])
+    axis([0 time_vector(end) 0 0.02])
     %   pbaspect(gca, [1 2 1])
     hold off
     
@@ -432,9 +432,9 @@ if (do_plot)
     set(gcf,'color','w')
     
     if (show_legend)
-        %h_legend = legend(h, 'Unc. - no UI', 'Unc. - UI', 'Renyi - no UI', 'Renyi - UI');
+        h_legend = legend(h, 'Unc. - no UI', 'Unc. - UI', 'Renyi - no UI', 'Renyi - UI');
         %h_legend = legend(h, 'No UI', 'UI - N = 5');
-        h_legend = legend(h, 'Uncertainty', 'Renyi');
+        %h_legend = legend(h, 'Uncertainty', 'Renyi');
         %set(h_legend, 'Location', 'SouthOutside');
         %set(h_legend, 'orientation', 'horizontal')
         %set(h_legend, 'box', 'off')

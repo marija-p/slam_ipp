@@ -4,9 +4,6 @@ text_size = 10.5;
 
 do_plot = 1;
 show_legend = 1;
-
-paper_pos = [0, 0, 6, 4];
-
 percentile = 0.99;
 
 trials = fieldnames(logger);
@@ -14,7 +11,7 @@ methods = fieldnames(logger.trial1);
 
 % Choose which methods to plot.
 % NB: - Always include "1" (trial number).
-methods_select = [1,4:5];
+methods_select = [1,4,5];
 methods = {methods{methods_select}};
 
 % Last trial is incomplete.
@@ -163,7 +160,7 @@ if (do_plot)
     end
     
     h_xlabel = xlabel('Time (s)');
-    h_ylabel = ylabel('RMSE');
+    h_ylabel = ylabel('Map RMSE');
     set([h_xlabel, h_ylabel], ...
         'FontName'   , 'Helvetica');
     set(gca, ...
@@ -175,13 +172,13 @@ if (do_plot)
         'YGrid'       , 'on'      , ...
         'XColor'      , [.3 .3 .3], ...
         'YColor'      , [.3 .3 .3], ...
-        'YTick'       , 0:1:8, ...
+        'YTick'       , 0:2:12, ...
         'LineWidth'   , 1         , ...
         'FontSize'    , text_size, ...
         'LooseInset', max(get(gca,'TightInset'), 0.02));
     rescale_axes(rescale_factor);
-    axis([0 time_vector(end) 1 8.5])
-    %    pbaspect(gca, [1 2 1])
+    axis([0 time_vector(end) 1 10])
+    pbaspect(gca, [1 2 1])
     hold off
     
     %% Robot covariance trace (A-opt) %%
@@ -204,7 +201,7 @@ if (do_plot)
     end
     
     h_xlabel = xlabel('Time (s)');
-    h_ylabel = ylabel('Robot uncertainty @ A-opt');
+    h_ylabel = ylabel('Tr(\Sigma)');
     set([h_xlabel, h_ylabel], ...
         'FontName'   , 'Helvetica');
     set(gca, ...
@@ -222,7 +219,7 @@ if (do_plot)
         'LooseInset', max(get(gca,'TightInset'), 0.02));
     rescale_axes(rescale_factor);
     axis([0 time_vector(end) 0 0.02])
-    %   pbaspect(gca, [1 2 1])
+    pbaspect(gca, [1 2 1])
     hold off
  
     %% Robot pose RMSE %%
@@ -245,7 +242,7 @@ if (do_plot)
     end
     
     h_xlabel = xlabel('Time (s)');
-    h_ylabel = ylabel('Pose RMSE (m)');
+    h_ylabel = ylabel('Robot pose RMSE (m)');
     set([h_xlabel, h_ylabel], ...
         'FontName'   , 'Helvetica');
     set(gca, ...
@@ -263,14 +260,15 @@ if (do_plot)
         'LooseInset', max(get(gca,'TightInset'), 0.02));
     rescale_axes(rescale_factor);
     axis([0 time_vector(end) 0 0.1])
-    %    pbaspect(gca, [1 2 1])
+    pbaspect(gca, [1 2 1])
     hold off
 
     set(gcf, 'Position', [86, 540, 728, 434])
     set(gcf,'color','w')
+    set(findall(gcf,'-property','FontName'),'FontName','Times')
     
     if (show_legend)
-        h_legend = legend(h, 'No UI', 'UI - N = 5', 'UI - N = 9');
+        h_legend = legend(h, 'Without UI', 'With UI');
         %set(h_legend, 'Location', 'SouthOutside');
         %set(h_legend, 'orientation', 'horizontal')
         %set(h_legend, 'box', 'off')
