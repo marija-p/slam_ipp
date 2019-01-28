@@ -1,5 +1,5 @@
-function [metrics] = slam_gp_random(map_params, planning_params, opt_params, gp_params, ...
-    training_data, gt_data, testing_data)
+function [metrics] = slam_gp_rig(map_params, planning_params, opt_params, gp_params, ...
+    training_data, gt_data, testing_data, subtree_iters)
 
 % SLAMTB_GRAPH  A graph-SLAM algorithm with simulator and graphics.
 %
@@ -66,6 +66,11 @@ num_control_frames = 0;
 meas_frame_interval = planning_params.control_freq/planning_params.meas_freq;
 % Simulation time increment [s] = 1/control simulation frequency [Hz]
 Tim.dt = 1/planning_params.control_freq;
+
+% Initialize first vertex in tree.
+rigtree_planner = RIGTree();
+q_start = Vertex();
+q_start.location = Rob.state.x(1:3)';
 
 % GP field map
 field_map = [];
@@ -310,16 +315,85 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     if isempty(points_control)
         
-        % Sample random points in the environment as next control points.
-        path_current = Rob.state.x(1:3)';
+        % Initialise a tree.
+        rigtree_planner = rigtree_planner.resetTree();
+        rigtree_planner.rigtree.vertices = q_start;
+        rigtree_planner.rigtree.numvertices = 1;
+        rigtree_planner.setStart(q_start);
+        found_best_node = 0;
+        obj_best = Inf;
         
-        while size(path_current,1) < planning_params.control_points
-            x_rand = dim_x_env*rand(1,1) + map_params.pos_x;
-            y_rand = dim_y_env*rand(1,1) + map_params.pos_y;
-            z_rand = dim_z_env*rand(1,1) + map_params.pos_z;
-            point_next = [x_rand, y_rand, z_rand];
-            path_current = [path_current; point_next];
+        % Sub-tree planning.
+        for j = 1:subtree_iters
+            
+            % Sample configuration space and find nearest node.
+            x_samp = rigtree_planner.sampleLocation();
+            [q_nearest, ~] = rigtree_planner.findNearestVertex(x_samp);
+            x_feasible = rigtree_planner.stepToLocation(q_nearest.location, x_samp);
+            
+            % Find near points to be extended.
+            neighbors_idx = rigtree_planner.findNeighborIndices(x_feasible);
+            
+            if (isempty(neighbors_idx))
+                continue;
+                keyboard
+            end
+            
+            for i = 1:size(neighbors_idx)
+                
+                q_near = rigtree_planner.rigtree.vertices(neighbors_idx(i));
+                
+                % Extend towards new point.
+                q_new = Vertex();
+                q_new.location = rigtree_planner.stepToLocation(q_near.location, x_feasible);
+                
+                % Calculate new information and cost.
+                q_new = q_new.evaluateObjective(neighbors_idx(i), rigtree_planner, field_map, ...
+                    Rob, Sen, SimLmk, Lmk, Obs, Trj, Frm, Fac, factorRob, Opt, ...
+                    num_control_frames, currentFrame, training_data, testing_data, ...
+                    map_params, planning_params, gp_params);
+                
+                % Check if target vertex should be pruned.
+                %if (rigtree_planner.pruneVertex(q_new))
+                %    disp(['Pruned node: x = ', num2str(q_new.location(1)), ...
+                %        ', y = ', num2str(q_new.location(2)), ', z = ', num2str(q_new.location(3))])
+                %    continue;
+                %else
+                % Add edges and node to tree.
+                rigtree_planner.rigtree.vertices = ...
+                    [rigtree_planner.rigtree.vertices; q_new];
+                rigtree_planner.rigtree.numvertices = ...
+                    rigtree_planner.rigtree.numvertices + 1;
+                rigtree_planner.rigtree.edges = [rigtree_planner.rigtree.edges; ...
+                    rigtree_planner.addEdge(neighbors_idx(i), q_new)];
+                %end
+                
+                % Update best solution.
+                if (q_new.objective < obj_best)
+                    q_best_idx = rigtree_planner.rigtree.numvertices;
+                    obj_best = q_new.objective;
+                    found_best_node = 1;
+                end
+                
+                % Add to closed list if budget exceeded.
+                if (q_new.cost > planning_parameters.time_budget)
+                    rigtree_planner.rigtree.vertices_closed = ...
+                        [rigtree_planner.rigtree.vertices_closed; q_new];
+                end
+                
+            end
+            
         end
+        
+        % ???????
+        if (~found_best_node)
+            keyboard;
+        end
+        
+        % Find and draw the most informative path.
+        q_start = rigtree_planner.rigtree.vertices(q_best_idx);
+        vertices_current = rigtree_planner.tracePath(q_best_idx);
+        path_current = rigtree_planner.getVertexLocations(vertices_current);
         
         disp('Next path: ')
         disp(path_current)
