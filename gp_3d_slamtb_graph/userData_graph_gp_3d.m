@@ -41,7 +41,7 @@ Time = struct(...
 %num_landmarks = size(landmarks,2);
 %landmarks(3,1:num_landmarks/2) = landmarks(3,1:num_landmarks/2) + 0.5;
 %landmarks(3,num_landmarks/2+1:end) = landmarks(3,num_landmarks/2+1:end) + 2;
-[X,Y] = meshgrid(-2.5:1.25:2.5,-2.5:1.25:2.5);
+[X,Y] = meshgrid(-2.5:1:2.5,-2.5:1.25:2.5);
 landmarks = [X(:), Y(:), zeros(numel(X),1)]';
 % Split landmarks
 landmarks = landmarks(:,1:10);

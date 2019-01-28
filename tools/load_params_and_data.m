@@ -24,8 +24,8 @@ planning_params.lattice_points_y = 3;
 planning_params.lattice_points_z = 3;
 
 % Trajectory optimization references
-planning_params.max_vel = 1.0;        % [m/s]
-planning_params.max_acc = 2.0;        % [m/s^2]
+planning_params.max_vel = 1.5;        % [m/s]
+planning_params.max_acc = 3.0;        % [m/s^2]
 
 % Parameters for control noise variance in each co-ordinate [x,y,z]
 planning_params.control_noise_coeffs = [0.01, 0.01, 0.01];
@@ -66,9 +66,9 @@ planning_params.beta = 0;
 opt_params.max_iters = 10;
 opt_params.opt_method = 'cmaes'; % 'fmc'/cmaes'/'none'/'bo'
 % Covariances in each search dimension
-opt_params.cov_x = 1.5;
-opt_params.cov_y = 1.5;
-opt_params.cov_z = 1;
+opt_params.cov_x = 1;
+opt_params.cov_y = 1;
+opt_params.cov_z = 0.5;
 
 % GP-related parameters
 gp_params.hyp_trained = hyp_trained;
