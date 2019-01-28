@@ -24,11 +24,11 @@ dim_y_env = map_params.dim_y*map_params.res_y;
 dim_z_env = map_params.dim_y*map_params.res_z;
 
 switch planning_params.obj_func
-    case {'uncertainty_adaptive', 'renyi_adaptive'}
+    case {'uncertainty_adaptive', 'uncertainty_rate_adaptive', 'renyi_adaptive'}
         above_thres_ind = find(field_map.mean + ...
             planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);
         P_i = sum(log(field_map.cov(above_thres_ind).*exp(1)));
-    case {'uncertainty', 'renyi'}
+    case {'uncertainty', 'uncertainty_rate', 'renyi'}
         P_i = sum(log(field_map.cov.*exp(1)));
     otherwise
         warning('Unknown objective function!');
@@ -155,21 +155,18 @@ end
             above_thres_ind = find(field_map.mean + ...
                 planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);
             P_f = sum(log(field_map.cov(above_thres_ind).*exp(1)));
-            cost = max(get_trajectory_total_time(trajectory), 1/planning_params.meas_freq);
+            cost = 1;
         case 'uncertainty'
             P_f = sum(log(field_map.cov.*exp(1)));
-            cost = max(get_trajectory_total_time(trajectory), 1/planning_params.meas_freq);
-        case 'renyi_adaptive'
+            cost = 1;
+        case 'uncertainty_rate_adaptive'
             above_thres_ind = find(field_map.mean + ...
                 planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);
-            if strcmp(planning_params.renyi_uncertainty, 'Dopt')
-                alpha = 1 + 1/det(Rob_P_traj);
-            elseif strcmp(planning_params.renyi_uncertainty, 'Aopt')
-                alpha = 1 + 1/trace(Rob_P_traj);
-            end
-            renyi_term = alpha^(1/(alpha-1));
-            P_f = sum(log(field_map.cov(above_thres_ind).*renyi_term));
-            cost = 1;
+            P_f = sum(log(field_map.cov(above_thres_ind).*exp(1)));
+            cost = max(get_trajectory_total_time(trajectory), 1/planning_params.meas_freq);
+        case 'uncertainty_rate'
+            P_f = sum(log(field_map.cov.*exp(1)));
+            cost = max(get_trajectory_total_time(trajectory), 1/planning_params.meas_freq);
         case 'renyi'
             %if (P_i - sum(log(field_map.cov.*exp(1))) < 0)
             %    keyboard
