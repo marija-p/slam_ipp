@@ -1,9 +1,10 @@
 %rescale_factor = 1;
-rescale_factor = 0.75;
+rescale_factor = 0.8;
 text_size = 10.5;
+plot_aspect_ratio = [1 2 1];
 
 do_plot = 1;
-show_legend = 1;
+show_legend = 0;
 percentile = 0.99;
 
 trials = fieldnames(logger);
@@ -11,7 +12,7 @@ methods = fieldnames(logger.trial1);
 
 % Choose which methods to plot.
 % NB: - Always include "1" (trial number).
-methods_select = [1,4,5];
+methods_select = [1,3,5,7];
 methods = {methods{methods_select}};
 
 % Last trial is incomplete.
@@ -143,7 +144,13 @@ if (do_plot)
     %% RMSE %%
     subplot(1,3,1)
     hold on
-    if length(methods)-1 == 3
+    if length(methods)-1 == 4
+        boundedline(time_vector, mean_rmses(1,:), SEM_rmses(1,:)*ts, ...
+            time_vector, mean_rmses(2,:), SEM_rmses(2,:)*ts, ...
+            time_vector, mean_rmses(3,:), SEM_rmses(3,:)*ts, ...
+            time_vector, mean_rmses(4,:), SEM_rmses(4,:)*ts, ...
+            'alpha', 'cmap', colours, 'transparency', transparency);
+    elseif length(methods)-1 == 3
         boundedline(time_vector, mean_rmses(1,:), SEM_rmses(1,:)*ts, ...
             time_vector, mean_rmses(2,:), SEM_rmses(2,:)*ts, ...
             time_vector, mean_rmses(3,:), SEM_rmses(3,:)*ts, ...
@@ -178,13 +185,19 @@ if (do_plot)
         'LooseInset', max(get(gca,'TightInset'), 0.02));
     rescale_axes(rescale_factor);
     axis([0 time_vector(end) 1 10])
-    pbaspect(gca, [1 2 1])
+    pbaspect(gca, plot_aspect_ratio)
     hold off
     
     %% Robot covariance trace (A-opt) %%
     subplot(1,3,2)
     hold on
-    if length(methods)-1 == 3
+    if length(methods)-1 == 4
+        boundedline(time_vector, mean_Rob_Ps_Aopt(1,:), SEM_Rob_Ps_Aopt(1,:)*ts, ...
+            time_vector, mean_Rob_Ps_Aopt(2,:), SEM_Rob_Ps_Aopt(2,:)*ts, ...
+            time_vector, mean_Rob_Ps_Aopt(3,:), SEM_Rob_Ps_Aopt(3,:)*ts, ...
+            time_vector, mean_Rob_Ps_Aopt(4,:), SEM_Rob_Ps_Aopt(4,:)*ts, ...
+            'alpha', 'cmap', colours, 'transparency', transparency);
+    elseif length(methods)-1 == 3
         boundedline(time_vector, mean_Rob_Ps_Aopt(1,:), SEM_Rob_Ps_Aopt(1,:)*ts, ...
             time_vector, mean_Rob_Ps_Aopt(2,:), SEM_Rob_Ps_Aopt(2,:)*ts, ...
             time_vector, mean_Rob_Ps_Aopt(3,:), SEM_Rob_Ps_Aopt(3,:)*ts, ...
@@ -219,13 +232,19 @@ if (do_plot)
         'LooseInset', max(get(gca,'TightInset'), 0.02));
     rescale_axes(rescale_factor);
     axis([0 time_vector(end) 0 0.02])
-    pbaspect(gca, [1 2 1])
+    pbaspect(gca, plot_aspect_ratio)
     hold off
  
     %% Robot pose RMSE %%
     subplot(1,3,3)
     hold on
-    if length(methods)-1 == 3
+    if length(methods)-1 == 4
+        boundedline(time_vector, mean_pose_rmses(1,:), SEM_pose_rmses(1,:)*ts, ...
+            time_vector, mean_pose_rmses(2,:), SEM_pose_rmses(2,:)*ts, ...
+            time_vector, mean_pose_rmses(3,:), SEM_pose_rmses(3,:)*ts, ...
+            time_vector, mean_pose_rmses(4,:), SEM_pose_rmses(4,:)*ts, ...
+            'alpha', 'cmap', colours, 'transparency', transparency); 
+    elseif length(methods)-1 == 3
         boundedline(time_vector, mean_pose_rmses(1,:), SEM_pose_rmses(1,:)*ts, ...
             time_vector, mean_pose_rmses(2,:), SEM_pose_rmses(2,:)*ts, ...
             time_vector, mean_pose_rmses(3,:), SEM_pose_rmses(3,:)*ts, ...
@@ -260,7 +279,7 @@ if (do_plot)
         'LooseInset', max(get(gca,'TightInset'), 0.02));
     rescale_axes(rescale_factor);
     axis([0 time_vector(end) 0 0.1])
-    pbaspect(gca, [1 2 1])
+    pbaspect(gca, plot_aspect_ratio)
     hold off
 
     set(gcf, 'Position', [86, 540, 728, 434])
@@ -268,7 +287,7 @@ if (do_plot)
     set(findall(gcf,'-property','FontName'),'FontName','Times')
     
     if (show_legend)
-        h_legend = legend(h, 'Without UI', 'With UI');
+        h_legend = legend(h, 'Unc.', 'Unc. rate', 'Renyi', 'Random');
         %set(h_legend, 'Location', 'SouthOutside');
         %set(h_legend, 'orientation', 'horizontal')
         %set(h_legend, 'box', 'off')

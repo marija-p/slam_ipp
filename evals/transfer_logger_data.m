@@ -1,10 +1,10 @@
 % Transfer data from logger1 to logger objects.
 
-trials = fieldnames(logger);
-methods = fieldnames(logger1.trial1);
+trials = fieldnames(logger1);
+methods = fieldnames(logger1.trial18);
 
 for i = 1:length(trials)
-    for j = 2:length(methods)
+    for j = 1:length(methods)
         logger.(trials{i}).(methods{j}) = logger1.(trials{i}).(methods{j});
     end
 end

@@ -14,7 +14,7 @@ methods = fieldnames(logger.trial1);
 
 % Choose which methods to plot.
 % NB: - Always include "1" (trial number).
-methods_select = [1:5];
+methods_select = [1,3,5,7];
 methods = {methods{methods_select}};
 
 % Last trial is incomplete.
