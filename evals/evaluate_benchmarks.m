@@ -28,7 +28,7 @@ dim_z_env = 4;
     training_data, gt_data, testing_data] = ...
     load_params_and_data(dim_x_env, dim_y_env, dim_z_env);
 
-evaluate_random = 0;
+evaluate_random = 1;
 evaluate_rig = 1; subtree_iters = 100;
 
 for i = 1:num_trials
@@ -55,7 +55,7 @@ for i = 1:num_trials
         rng(t, 'twister');
         [metrics] = slam_gp_rig(map_params, planning_params, opt_params, gp_params, ...
             training_data, gt_data, testing_data, subtree_iters);
-        logger.(['trial', num2str(t)]).('random') = metrics;
+        logger.(['trial', num2str(t)]).('rig') = metrics;
         clear global
     end
     

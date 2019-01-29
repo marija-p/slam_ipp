@@ -33,10 +33,15 @@ classdef Vertex
             trajectory = ...
                 plan_path_waypoints(control_points, ...
                 planning_params.max_vel, planning_params.max_acc);
-
+            
             % Sample trajectory to find locations to take measurements at.
             [~, control_points, ~, ~] = ...
                 sample_trajectory(trajectory, 1/planning_params.control_freq);
+            
+            if size(control_points,1) < 2
+                self.objective = Inf;
+                return;
+            end
             
             % Control/measurement simulation.
             self.objective = compute_objective(control_points, field_map, ...

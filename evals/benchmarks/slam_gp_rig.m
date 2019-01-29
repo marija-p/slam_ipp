@@ -336,7 +336,6 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
             
             if (isempty(neighbors_idx))
                 continue;
-                keyboard
             end
             
             for i = 1:size(neighbors_idx)
@@ -348,10 +347,12 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
                 q_new.location = rigtree_planner.stepToLocation(q_near.location, x_feasible);
                 
                 % Calculate new information and cost.
+                Map_init = Map;
                 q_new = q_new.evaluateObjective(neighbors_idx(i), rigtree_planner, field_map, ...
                     Rob, Sen, SimLmk, Lmk, Obs, Trj, Frm, Fac, factorRob, Opt, ...
                     num_control_frames, currentFrame, training_data, testing_data, ...
                     map_params, planning_params, gp_params);
+                Map = Map_init;
                 
                 % Check if target vertex should be pruned.
                 %if (rigtree_planner.pruneVertex(q_new))
@@ -376,7 +377,7 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
                 end
                 
                 % Add to closed list if budget exceeded.
-                if (q_new.cost > planning_parameters.time_budget)
+                if (q_new.cost > planning_params.time_budget)
                     rigtree_planner.rigtree.vertices_closed = ...
                         [rigtree_planner.rigtree.vertices_closed; q_new];
                 end
@@ -390,7 +391,7 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
             keyboard;
         end
         
-        % Find and draw the most informative path.
+        % Find the most informative path.
         q_start = rigtree_planner.rigtree.vertices(q_best_idx);
         vertices_current = rigtree_planner.tracePath(q_best_idx);
         path_current = rigtree_planner.getVertexLocations(vertices_current);
