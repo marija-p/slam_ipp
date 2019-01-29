@@ -1,16 +1,16 @@
 %rescale_factor = 1;
-rescale_factor = 0.8;
+rescale_factor = 1;
 text_size = 10.5;
-plot_aspect_ratio = [1 2 1];
+plot_aspect_ratio = [1 1 1];
 
 do_plot = 1;
-show_legend = 0;
+show_legend = 1;
 percentile = 0.99;
 
 trials = fieldnames(logger);
 methods = fieldnames(logger.trial1);
 
-% Choose which methods to plot.
+% Choose which methods to plot.+
 % NB: - Always include "1" (trial number).
 methods_select = [1,3,5,7,8];
 methods = {methods{methods_select}};
@@ -142,7 +142,7 @@ if (do_plot)
     figure;
     
     %% GP field covariance trace %%
-    subplot(1,4,1)
+    subplot(2,2,1)
     hold on
     h = zeros(length(methods)-1,1);
     if length(methods)-1 == 4
@@ -193,7 +193,7 @@ if (do_plot)
     hold off
     
     %% RMSE %%
-    subplot(1,4,2)
+    subplot(2,2,2)
     hold on
     if length(methods)-1 == 4
         boundedline(time_vector, mean_rmses(1,:), SEM_rmses(1,:)*ts, ...
@@ -240,7 +240,7 @@ if (do_plot)
     hold off
     
     %% Robot covariance trace (A-opt) %%
-    subplot(1,4,3)
+    subplot(2,2,3)
     hold on
     if length(methods)-1 == 4
         boundedline(time_vector, mean_Rob_Ps_Aopt(1,:), SEM_Rob_Ps_Aopt(1,:)*ts, ...
@@ -287,7 +287,7 @@ if (do_plot)
     hold off
  
     %% Robot pose RMSE %%
-    subplot(1,4,4)
+    subplot(2,2,4)
     hold on
     if length(methods)-1 == 4
         boundedline(time_vector, mean_pose_rmses(1,:), SEM_pose_rmses(1,:)*ts, ...
@@ -333,7 +333,7 @@ if (do_plot)
     pbaspect(gca, plot_aspect_ratio)
     hold off
 
-    set(gcf, 'Position', [86, 540, 728, 434])
+    set(gcf, 'Position', [93, 501, 641, 448])
     set(gcf,'color','w')
     set(findall(gcf,'-property','FontName'),'FontName','Times')
     
