@@ -1,12 +1,10 @@
-rescale_factor = 1;
-%rescale_factor = 0.75;
+%rescale_factor = 1;
+rescale_factor = 0.8;
 text_size = 10.5;
+plot_aspect_ratio = [1 2 1];
 
 do_plot = 1;
-show_legend = 1;
-
-paper_pos = [0, 0, 6, 4];
-
+show_legend = 0;
 percentile = 0.99;
 
 trials = fieldnames(logger);
@@ -14,7 +12,7 @@ methods = fieldnames(logger.trial1);
 
 % Choose which methods to plot.
 % NB: - Always include "1" (trial number).
-methods_select = [1,3,5,8];
+methods_select = [1,3,5,7,8];
 methods = {methods{methods_select}};
 
 % Last trial is incomplete.
@@ -23,7 +21,7 @@ if (length(methods) ~= length(fieldnames(logger.(trials{end}))))
 end
 disp(['Number of trials = ', num2str(length(trials))])
 
-time_vector = 0:0.1:180;
+time_vector = 0:0.1:150;
 
 P_traces = zeros(length(methods)-1,length(time_vector));
 rmses = zeros(length(methods)-1,length(time_vector));
@@ -142,8 +140,9 @@ transparency = 0.3;
 if (do_plot)
     
     figure;
+    
     %% GP field covariance trace %%
-    subplot(2,3,1)
+    subplot(1,4,1)
     hold on
     h = zeros(length(methods)-1,1);
     if length(methods)-1 == 4
@@ -188,13 +187,13 @@ if (do_plot)
         'FontSize'    , text_size, ...
         'LooseInset', max(get(gca,'TightInset'), 0.02));
     
-    axis([0 time_vector(end) 0 6*10^7])
+    axis([0 time_vector(end) 0 2*10^6])
     rescale_axes(rescale_factor);
-    %   pbaspect(gca, [1 2 1])
+    pbaspect(gca, plot_aspect_ratio)
     hold off
     
     %% RMSE %%
-    subplot(2,3,2)
+    subplot(1,4,2)
     hold on
     if length(methods)-1 == 4
         boundedline(time_vector, mean_rmses(1,:), SEM_rmses(1,:)*ts, ...
@@ -219,7 +218,7 @@ if (do_plot)
     end
     
     h_xlabel = xlabel('Time (s)');
-    h_ylabel = ylabel('RMSE');
+    h_ylabel = ylabel('Map RMSE');
     set([h_xlabel, h_ylabel], ...
         'FontName'   , 'Helvetica');
     set(gca, ...
@@ -231,64 +230,17 @@ if (do_plot)
         'YGrid'       , 'on'      , ...
         'XColor'      , [.3 .3 .3], ...
         'YColor'      , [.3 .3 .3], ...
-        'YTick'       , 0:1:8, ...
+        'YTick'       , 0:2:12, ...
         'LineWidth'   , 1         , ...
         'FontSize'    , text_size, ...
         'LooseInset', max(get(gca,'TightInset'), 0.02));
     rescale_axes(rescale_factor);
-    axis([0 time_vector(end) 0.5 8.5])
-    %    pbaspect(gca, [1 2 1])
-    hold off
-    
-    %% MLL %%
-    subplot(2,3,3)
-    hold on
-    if length(methods)-1 == 4
-        boundedline(time_vector, mean_mlls(1,:), SEM_mlls(1,:)*ts, ...
-            time_vector, mean_mlls(2,:), SEM_mlls(2,:)*ts, ...
-            time_vector, mean_mlls(3,:), SEM_mlls(3,:)*ts, ...
-            time_vector, mean_mlls(4,:), SEM_mlls(4,:)*ts, ...
-            'alpha', 'cmap', colours, 'transparency', transparency);
-    elseif length(methods)-1 == 3
-        boundedline(time_vector, mean_mlls(1,:), SEM_mlls(1,:)*ts, ...
-            time_vector, mean_mlls(2,:), SEM_mlls(2,:)*ts, ...
-            time_vector, mean_mlls(3,:), SEM_mlls(3,:)*ts, ...
-            'alpha', 'cmap', colours, 'transparency', transparency);
-    elseif length(methods)-1 == 2
-        boundedline(time_vector, mean_mlls(1,:), SEM_mlls(1,:)*ts, ...
-            time_vector, mean_mlls(2,:), SEM_mlls(2,:)*ts, ...
-            'alpha', 'cmap', colours, 'transparency', transparency);
-    end
-    
-    for i = 1:length(methods)-1
-        mll = mean_mlls(i,:);
-        h(i) = plot(time_vector, mll, 'LineWidth', 1, 'Color', colours(i,:));
-    end
-    
-    h_xlabel = xlabel('Time (s)');
-    h_ylabel = ylabel('MLL');
-    set([h_xlabel, h_ylabel], ...
-        'FontName'   , 'Helvetica');
-    set(gca, ...
-        'Box'         , 'off'     , ...
-        'TickDir'     , 'out'     , ...
-        'TickLength'  , [.02 .02] , ...
-        'XMinorTick'  , 'on'      , ...
-        'YMinorTick'  , 'on'      , ...
-        'YGrid'       , 'on'      , ...
-        'XColor'      , [.3 .3 .3], ...
-        'YColor'      , [.3 .3 .3], ...
-        'YTick'       , 0:2:10, ...
-        'LineWidth'   , 1         , ...
-        'FontSize'    , text_size, ...
-        'LooseInset', max(get(gca,'TightInset'), 0.02));
-    rescale_axes(rescale_factor);
-    axis([0 time_vector(end) 0 10])
-    %    pbaspect(gca, [1 2 1])
+    axis([0 time_vector(end) 1 10])
+    pbaspect(gca, plot_aspect_ratio)
     hold off
     
     %% Robot covariance trace (A-opt) %%
-    subplot(2,3,4)
+    subplot(1,4,3)
     hold on
     if length(methods)-1 == 4
         boundedline(time_vector, mean_Rob_Ps_Aopt(1,:), SEM_Rob_Ps_Aopt(1,:)*ts, ...
@@ -313,7 +265,7 @@ if (do_plot)
     end
     
     h_xlabel = xlabel('Time (s)');
-    h_ylabel = ylabel('Robot uncertainty @ A-opt');
+    h_ylabel = ylabel('Tr(\Sigma)');
     set([h_xlabel, h_ylabel], ...
         'FontName'   , 'Helvetica');
     set(gca, ...
@@ -325,71 +277,24 @@ if (do_plot)
         'YGrid'       , 'on'      , ...
         'XColor'      , [.3 .3 .3], ...
         'YColor'      , [.3 .3 .3], ...
-        'YTick'       , 0:0.0025:1, ...
+        'YTick'       , 0:0.005:1, ...
         'LineWidth'   , 1         , ...
         'FontSize'    , text_size, ...
         'LooseInset', max(get(gca,'TightInset'), 0.02));
     rescale_axes(rescale_factor);
     axis([0 time_vector(end) 0 0.02])
-    %   pbaspect(gca, [1 2 1])
+    pbaspect(gca, plot_aspect_ratio)
     hold off
-    
-    %% Robot covariance trace (D-opt) %%
-    subplot(2,3,5)
-    hold on
-    if length(methods)-1 == 4
-        boundedline(time_vector, mean_Rob_Ps_Dopt(1,:), SEM_Rob_Ps_Dopt(1,:)*ts, ...
-            time_vector, mean_Rob_Ps_Dopt(2,:), SEM_Rob_Ps_Dopt(2,:)*ts, ...
-            time_vector, mean_Rob_Ps_Dopt(3,:), SEM_Rob_Ps_Dopt(3,:)*ts, ...
-            time_vector, mean_Rob_Ps_Dopt(4,:), SEM_Rob_Ps_Dopt(4,:)*ts, ...
-            'alpha', 'cmap', colours, 'transparency', transparency);
-    elseif length(methods)-1 == 3
-        boundedline(time_vector, mean_Rob_Ps_Dopt(1,:), SEM_Rob_Ps_Dopt(1,:)*ts, ...
-            time_vector, mean_Rob_Ps_Dopt(2,:), SEM_Rob_Ps_Dopt(2,:)*ts, ...
-            time_vector, mean_Rob_Ps_Dopt(3,:), SEM_Rob_Ps_Dopt(3,:)*ts, ...
-            'alpha', 'cmap', colours, 'transparency', transparency);
-    elseif length(methods)-1 == 2
-        boundedline(time_vector, mean_Rob_Ps_Dopt(1,:), SEM_Rob_Ps_Dopt(1,:)*ts, ...
-            time_vector, mean_Rob_Ps_Dopt(2,:), SEM_Rob_Ps_Dopt(2,:)*ts, ...
-            'alpha', 'cmap', colours, 'transparency', transparency);
-    end
-    
-    for i = 1:length(methods)-1
-        Rob_P_Dopt = mean_Rob_Ps_Dopt(i,:);
-        h(i) = plot(time_vector, Rob_P_Dopt, 'LineWidth', 1, 'Color', colours(i,:));
-    end
-    
-    h_xlabel = xlabel('Time (s)');
-    h_ylabel = ylabel('Robot uncertainty @ D-opt');
-    set([h_xlabel, h_ylabel], ...
-        'FontName'   , 'Helvetica');
-    set(gca, ...
-        'Box'         , 'off'     , ...
-        'TickDir'     , 'out'     , ...
-        'TickLength'  , [.02 .02] , ...
-        'XMinorTick'  , 'on'      , ...
-        'YMinorTick'  , 'on'      , ...
-        'YGrid'       , 'on'      , ...
-        'XColor'      , [.3 .3 .3], ...
-        'YColor'      , [.3 .3 .3], ...
-        'YTick'       , 0:10^-4:10^-2, ...
-        'LineWidth'   , 1         , ...
-        'FontSize'    , text_size, ...
-        'LooseInset', max(get(gca,'TightInset'), 0.02));
-    rescale_axes(rescale_factor);
-    axis([0 time_vector(end) 0 0.5*10^-4])
-    %   pbaspect(gca, [1 2 1])
-    hold off
-    
+ 
     %% Robot pose RMSE %%
-    subplot(2,3,6)
+    subplot(1,4,4)
     hold on
     if length(methods)-1 == 4
         boundedline(time_vector, mean_pose_rmses(1,:), SEM_pose_rmses(1,:)*ts, ...
             time_vector, mean_pose_rmses(2,:), SEM_pose_rmses(2,:)*ts, ...
             time_vector, mean_pose_rmses(3,:), SEM_pose_rmses(3,:)*ts, ...
             time_vector, mean_pose_rmses(4,:), SEM_pose_rmses(4,:)*ts, ...
-            'alpha', 'cmap', colours, 'transparency', transparency);
+            'alpha', 'cmap', colours, 'transparency', transparency); 
     elseif length(methods)-1 == 3
         boundedline(time_vector, mean_pose_rmses(1,:), SEM_pose_rmses(1,:)*ts, ...
             time_vector, mean_pose_rmses(2,:), SEM_pose_rmses(2,:)*ts, ...
@@ -407,7 +312,7 @@ if (do_plot)
     end
     
     h_xlabel = xlabel('Time (s)');
-    h_ylabel = ylabel('Pose RMSE (m)');
+    h_ylabel = ylabel('Robot pose RMSE (m)');
     set([h_xlabel, h_ylabel], ...
         'FontName'   , 'Helvetica');
     set(gca, ...
@@ -425,16 +330,15 @@ if (do_plot)
         'LooseInset', max(get(gca,'TightInset'), 0.02));
     rescale_axes(rescale_factor);
     axis([0 time_vector(end) 0 0.1])
-    %    pbaspect(gca, [1 2 1])
+    pbaspect(gca, plot_aspect_ratio)
     hold off
 
     set(gcf, 'Position', [86, 540, 728, 434])
     set(gcf,'color','w')
+    set(findall(gcf,'-property','FontName'),'FontName','Times')
     
     if (show_legend)
-        h_legend = legend(h, 'Unc. - no UI', 'Unc. - UI', 'Renyi - no UI', 'Renyi - UI');
-        %h_legend = legend(h, 'No UI', 'UI - N = 5');
-        %h_legend = legend(h, 'Uncertainty', 'Renyi');
+        h_legend = legend(h, 'Unc.', 'Unc. rate', 'Renyi', 'Random');
         %set(h_legend, 'Location', 'SouthOutside');
         %set(h_legend, 'orientation', 'horizontal')
         %set(h_legend, 'box', 'off')
