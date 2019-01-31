@@ -9,7 +9,7 @@ classdef RIGTree
         space = [-2.5 2.5 -2.5 2.5 1 5];
         
         % RRT expansion step size
-        q_delta = 0.8;
+        q_delta = 4;
         
         % Tree structure
         rigtree = struct('vertices', [],'numvertices',[], 'edges',[], ...
@@ -88,7 +88,7 @@ classdef RIGTree
         function [neighbors_idx] = findNeighborIndices(self, x_feasible)
             
             % Compute RRT* radius.
-            r = 50*(log(self.rigtree.numvertices+1)/self.rigtree.numvertices+1)^1/3;
+            r = 5*(log(self.rigtree.numvertices+1)/self.rigtree.numvertices+1)^1/3;
             %r = 100;
             
             % Get locations of open vertices.
