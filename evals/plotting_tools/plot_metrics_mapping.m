@@ -1,18 +1,18 @@
 %rescale_factor = 1;
 rescale_factor = 0.8;
 text_size = 10.5;
-plot_aspect_ratio = [1 2 1];
+plot_aspect_ratio = [1 1.5 1];
 
 do_plot = 1;
 show_legend = 0;
-percentile = 0.99;
+percentile = 0.95;
 
 trials = fieldnames(logger);
 methods = fieldnames(logger.trial1);
 
 % Choose which methods to plot.
 % NB: - Always include "1" (trial number).
-methods_select = [1,3,5,8];
+methods_select = [1,4,5];
 methods = {methods{methods_select}};
 
 % Last trial is incomplete.
