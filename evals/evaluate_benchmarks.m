@@ -29,9 +29,9 @@ dim_z_env = 4;
     load_params_and_data(dim_x_env, dim_y_env, dim_z_env);
 
 evaluate_random = 1;
-evaluate_rig = 1; subtree_iters = 100;
+evaluate_rig = 1; subtree_iters = 60;
 
-for i = 1:num_trials
+for i = 32:52
     
     if (~append_to_logger)
         t = i;

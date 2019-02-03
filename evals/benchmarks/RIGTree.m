@@ -9,7 +9,7 @@ classdef RIGTree
         space = [-2.5 2.5 -2.5 2.5 1 5];
         
         % RRT expansion step size
-        q_delta = 4;
+        q_delta = 5;
         
         % Tree structure
         rigtree = struct('vertices', [],'numvertices',[], 'edges',[], ...

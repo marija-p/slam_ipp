@@ -5,19 +5,19 @@ plot_aspect_ratio = [1.25 1 1];
 
 do_plot = 1;
 show_legend = 0;
-percentile = 0.99;
+percentile = 0.95;
 
 trials = fieldnames(logger);
-methods = fieldnames(logger.trial1);
+methods = fieldnames(logger.trial31);
 
 % Choose which methods to plot.+
 % NB: - Always include "1" (trial number).
-methods_select = [1,3,5,7,8,9];
+methods_select = [1,2,3,5];
 methods = {methods{methods_select}};
 
 % Last trial is incomplete.
 if (length(methods) ~= length(fieldnames(logger.(trials{end}))))
-    trials = trials(1:30);
+    trials = trials(1:end-1);
 end
 disp(['Number of trials = ', num2str(length(trials))])
 
