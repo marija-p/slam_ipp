@@ -31,7 +31,7 @@ dim_z_env = 4;
 evaluate_random = 1;
 evaluate_rig = 1; subtree_iters = 60;
 
-for i = 32:52
+for i = 47:52
     
     if (~append_to_logger)
         t = i;
