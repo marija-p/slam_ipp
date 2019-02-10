@@ -72,8 +72,6 @@ meas_frame_interval = planning_params.control_freq/planning_params.meas_freq;
 % Simulation time increment [s] = 1/control simulation frequency [Hz]
 Tim.dt = 1/planning_params.control_freq;
 
-% Lattice for 3D grid search
-lattice = create_lattice(map_params, planning_params);
 % GP field map
 field_map = [];
 
