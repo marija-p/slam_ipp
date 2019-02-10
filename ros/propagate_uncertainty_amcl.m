@@ -1,3 +1,5 @@
+close all; clear all;
+
 load map.mat
 
 start_pose = [0; 0; pi/2];
