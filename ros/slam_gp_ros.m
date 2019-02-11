@@ -41,9 +41,10 @@ while (~reached_point)
     end
 end
 
-time_elapsed = 0;
-
 points_goal = point_init;
+
+time_elapsed = 0;
+tic;
 
 %% V. Main loop
 while (true)
@@ -76,30 +77,28 @@ while (true)
             end
         end
         
-        % Update the GP.
-        [field_map, training_data] = ...
-            take_measurement_at_point(Rob(rob).state.x(1:3)', ...
-            SimRob(rob).state.x(1:3)', Rob_P, field_map, .....
-            training_data, gt_data, testing_data, gp_params, map_params);
+        % Get the robot position covariance.
+        Rob_P = [amcl_pose_msg.covariance(1), amcl_pose_msg.covariance(2); ...
+            amcl_pose_msg.covariance(3), amcl_pose_msg.covariance(4)];
         
-        metrics.times = [metrics.times; Map.t];
-        metrics.points_meas = [metrics.points_meas; Rob(rob).state.x(1:3)'];
-        metrics.points_meas_gt = [metrics.points_meas_gt; SimRob(rob).state.x(1:3)'];
+        % Update the GP.
+        temp_msg = receive(temp_sub);
+        temp = temp_msg.Data;
+        [field_map, training_data] = ...
+            take_measurement_at_point_ros(point_current, Rob_P, temp, field_map, ...
+            training_data, gt_data, testing_data, gp_params);
+        
+        current_time = toc;
+        metrics.times = [metrics.times; current_time];
+        metrics.points_meas = [metrics.points_meas; point_current];
         metrics.measurements = [metrics.measurements; training_data.Y_train(end)];
         metrics.P_traces = [metrics.P_traces; sum(field_map.cov)];
-        metrics.rmses = [metrics.rmses; compute_rmse(field_map.mean, gt_data.Y_gt)];
-        metrics.mlls = [metrics.mlls; compute_mll(field_map, gt_data.Y_gt)];
         metrics.Rob_Ps(:,:,size(metrics.times,1)) = Rob_P;
-        
-        %disp(['Distance between real + estimated robot positions: ', ...
-        %    num2str(pdist([Rob.state.x(1:3)'; SimRob.state.x(1:3)']))])
-        disp(['Map RMSE = ', num2str(metrics.rmses(end))])
-        
         
     end
     
     %% Planning.
-    
+    %{
     % I. Grid search.
     points_path = search_lattice(Rob, lattice, field_map, ...
         SimLmk, Sen, Lmk, Obs, Trj, Frm, Fac, factorRob, Opt, ...
@@ -130,17 +129,16 @@ while (true)
     
     
     % Figure of the Field:
-    if (refresh_field_fig)
         FldFig = drawFldFig(FldFig,  ...
             Rob, Lmk, ...
             SimRob, ...
             field_map.mean, field_map.cov, ...
             FigOpt);
-        refresh_field_fig = 0;
-    end
     
     % Do draw all objects
     drawnow;
-
+    %}
+    
+    keyboard
     
 end
