@@ -24,7 +24,7 @@ planning_params.max_vel = 0.26;        % [m/s]
 planning_params.max_acc = 3.0;        % [m/s^2]
 
 % Robot initial measurement pose [x,y,yaw] [m,m,rad]
-planning_params.meas_pose_init = [0, 0, pi/2];
+planning_params.meas_pose_init = [0, 0, 0];
 
 % Achievement distance before a point is considered reached [m].
 planning_params.achievement_dist = 0.1;
@@ -67,19 +67,20 @@ gp_params.inf_func = inf_func;
 gp_params.cov_func = cov_func;
 gp_params.lik_func = lik_func;
 % Whether to account for robot's pose uncertainty in GP field mapping.
-gp_params.use_modified_kernel = 1;
+gp_params.use_modified_kernel = 0;
 % Whether to account for robot's pose uncertainty in prediction - objective function.
-gp_params.use_modified_kernel_prediction = 1;
+gp_params.use_modified_kernel_prediction = 0;
 
 % Create the inference grid.
 x = linspace(0,dim_x_env,dim_x_env/map_params.res_x);
 y = linspace(0,dim_y_env,dim_y_env/map_params.res_y);
 [X,Y] = meshgrid(x,y); mesh = [X(:) Y(:)];
 testing_data.X_test = mesh;
+testing_data.X_test(:,1) = testing_data.X_test(:,1) + map_params.pos_x;
+testing_data.X_test(:,2) = testing_data.X_test(:,2) + map_params.pos_y;
 % Training data - estimated and real (ground truth)
 training_data.X_train = [];
 training_data.P_train = zeros(2,2,200);
-training_data.X_train_gt = [];
 training_data.Y_train = [];
 
 end
