@@ -1,11 +1,14 @@
-function [metrics] = slam_gp_ros(map_params, planning_params, opt_params, gp_params, ...
-    training_data, gt_data, testing_data)
+function [metrics] = ...
+    slam_gp_ros(map_params, planning_params, opt_params, gp_params, ...
+    training_data, testing_data, transforms)
 % TurtleBot3 temperature mapping experiments for RAL-19.
 % ---
 % M Popovic 2019
 %
 
 %clear
+
+load map.mat
 
 % ROS communications
 goal_pub = rospublisher('/move_base/goal');
@@ -21,35 +24,25 @@ dim_x = map_params.dim_x;
 dim_y = map_params.dim_y;
 
 % Lattice for 3D grid search
-lattice = create_lattice(map_params, planning_params);
+%lattice = create_lattice(map_params, planning_params);
 % GP field map
 field_map = [];
 
 % Initialise data logging.
 metrics = initialize_metrics(map_params, planning_params, opt_params, gp_params);
+metrics.Rob_Ps = zeros(2,2,200); % 2D
 
-% Go to initial measurement point.
-reached_point = false;
-point_init = planning_params.meas_pose_init(1:2);
-while (~reached_point)
-    amcl_pose_msg = receive(amcl_pose_sub);
-    point_current = [amcl_pose_msg.Pose.Pose.Position.X, ...
-        amcl_pose_msg.Pose.Pose.Position.Y];
-    
-    if (pdist2(point_init, point_current) < planning_params.achievement_dist)
-        reached_point = true;
-    end
-end
+% Set initial measurement point.
+points_meas = planning_params.meas_pose_init(1:2);
 
-points_goal = point_init;
-
+% Start timer.
 time_elapsed = 0;
 tic;
 
 %% V. Main loop
 while (true)
     
-    % Check if planning budget exceeded
+    % Check if planning budget exceeded.
     if (time_elapsed > planning_params.time_budget)
         disp('Time budget exceeded!')
         return;
@@ -57,14 +50,17 @@ while (true)
     
     %% Sensing.
     % Take measurements along path, updating the GP field map.
-    for i = 1:size(points_goal)
+    for i = 1:size(points_meas)
         
         % Send the command.
         amcl_pose_msg = receive(amcl_pose_sub);
         point_current = [amcl_pose_msg.Pose.Pose.Position.X, ...
             amcl_pose_msg.Pose.Pose.Position.Y];
-        goal_msg = create_goal_msg(point_current, points_goal(i,:), goal_msg);
+        goal_msg = create_goal_msg(point_current, points_meas(i,:), goal_msg);
         send(goal_pub, goal_msg);
+        
+        disp('Heading to:')
+        disp(points_meas(i,:))
         
         % Wait to reach target measurement point.
         reached_point = false;
@@ -72,20 +68,25 @@ while (true)
             amcl_pose_msg = receive(amcl_pose_sub);
             point_current = [amcl_pose_msg.Pose.Pose.Position.X, ...
                 amcl_pose_msg.Pose.Pose.Position.Y];
-            if (pdist2(points_goal(i,:), point_current) < planning_params.achievement_dist)
+            if (pdist2(points_meas(i,:), point_current) < planning_params.achievement_dist)
                 reached_point = true;
             end
         end
         
-        % Get the robot position covariance.
-        Rob_P = [amcl_pose_msg.covariance(1), amcl_pose_msg.covariance(2); ...
-            amcl_pose_msg.covariance(3), amcl_pose_msg.covariance(4)];
+        keyboard
         
+        % Get the robot position covariance.
+        Rob_P = [amcl_pose_msg.Pose.Covariance(1), amcl_pose_msg.Pose.Covariance(2); ...
+            amcl_pose_msg.Pose.Covariance(7), amcl_pose_msg.Pose.Covariance(8)];
+        T_MAP_LINK = trvec2tform(point_current);
+        T_MAP_TEMP = T_MAP_LINK * transforms.T_LINK_TEMP;
+        x_MAP_TEMP = tform2trvec(T_MAP_TEMP);
         % Update the GP.
         temp_msg = receive(temp_sub);
         temp = temp_msg.Data;
+        
         [field_map, training_data] = ...
-            take_measurement_at_point_ros(point_current, Rob_P, temp, field_map, ...
+            take_measurement_at_point_ros(x_MAP_TEMP, Rob_P, temp, field_map, ...
             training_data, gt_data, testing_data, gp_params);
         
         current_time = toc;
@@ -97,7 +98,7 @@ while (true)
         
     end
     
-    %% Planning.
+    %% Planning. -- TO DO.
     %{
     % I. Grid search.
     points_path = search_lattice(Rob, lattice, field_map, ...
