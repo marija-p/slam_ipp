@@ -1,6 +1,6 @@
 % Workspace dimensions [m]
-dim_x_env = 5;
-dim_y_env = 5;
+dim_x_env = 2;
+dim_y_env = 2;
 
 % Static transforms.
 transforms.T_LINK_TEMP = ...              % Robot body -> temperature sensor.
@@ -12,5 +12,6 @@ transforms.T_LINK_TEMP = ...              % Robot body -> temperature sensor.
 [map_params, planning_params, opt_params, gp_params, training_data, testing_data] = ...
     load_params_and_data_ros(dim_x_env, dim_y_env);
 
+% Let's go!
 [metrics] = slam_gp_ros(map_params, planning_params, opt_params, gp_params, ...
     training_data, testing_data, transforms);

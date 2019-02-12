@@ -59,7 +59,7 @@ while (true)
         goal_msg = create_goal_msg(point_current, points_meas(i,:), goal_msg);
         send(goal_pub, goal_msg);
         
-        disp('Heading to:')
+        disp('Heading to: ')
         disp(points_meas(i,:))
         
         % Wait to reach target measurement point.
@@ -73,12 +73,10 @@ while (true)
             end
         end
         
-        keyboard
-        
         % Get the robot position covariance.
         Rob_P = [amcl_pose_msg.Pose.Covariance(1), amcl_pose_msg.Pose.Covariance(2); ...
             amcl_pose_msg.Pose.Covariance(7), amcl_pose_msg.Pose.Covariance(8)];
-        T_MAP_LINK = trvec2tform(point_current);
+        T_MAP_LINK = trvec2tform([point_current, 0]);
         T_MAP_TEMP = T_MAP_LINK * transforms.T_LINK_TEMP;
         x_MAP_TEMP = tform2trvec(T_MAP_TEMP);
         % Update the GP.
@@ -86,8 +84,8 @@ while (true)
         temp = temp_msg.Data;
         
         [field_map, training_data] = ...
-            take_measurement_at_point_ros(x_MAP_TEMP, Rob_P, temp, field_map, ...
-            training_data, gt_data, testing_data, gp_params);
+            take_measurement_at_point_ros(x_MAP_TEMP(1:2), Rob_P, temp, field_map, ...
+            training_data, testing_data, gp_params);
         
         current_time = toc;
         metrics.times = [metrics.times; current_time];
@@ -95,6 +93,8 @@ while (true)
         metrics.measurements = [metrics.measurements; training_data.Y_train(end)];
         metrics.P_traces = [metrics.P_traces; sum(field_map.cov)];
         metrics.Rob_Ps(:,:,size(metrics.times,1)) = Rob_P;
+        
+        keyboard
         
     end
     
