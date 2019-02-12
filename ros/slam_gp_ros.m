@@ -33,7 +33,14 @@ metrics = initialize_metrics(map_params, planning_params, opt_params, gp_params)
 metrics.Rob_Ps = zeros(2,2,200); % 2D
 
 % Set initial measurement point.
-points_meas = planning_params.meas_pose_init(1:2);
+%points_meas = planning_params.meas_pose_init(1:2);
+points_path = [0, 0.5; 0.5, 0; 0.5, 0.5; 0, 0];
+points_path_steps = [0; sqrt(sum(diff(points_path,[],1).^2,2))]';
+points_path_cumlen = cumsum(points_path_steps);
+tq = 0:planning_params.max_vel/planning_params.meas_freq:points_path_cumlen(end);
+points_meas = [];
+points_meas(:,1) = interp1(points_path_cumlen, points_path(:,1)', tq, 'spline');
+points_meas(:,2) = interp1(points_path_cumlen, points_path(:,2)', tq, 'spline');
 
 % Start timer.
 time_elapsed = 0;
@@ -139,7 +146,5 @@ while (true)
     % Do draw all objects
     drawnow;
     %}
-    
-    keyboard
     
 end
