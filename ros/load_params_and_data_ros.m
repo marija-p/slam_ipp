@@ -29,8 +29,10 @@ planning_params.meas_pose_init = [0, 0.5, 0];
 % Achievement distance before a point is considered reached [m].
 planning_params.achievement_dist = 0.1;
 
-% Frequency at which to take measurements
+% Frequency at which to take measurements (real)
 planning_params.meas_freq = 0.25;    % [Hz]
+% Frequency at which to simulate control actions (uncertainty prediction)
+planning_params.control_freq = 15;   % [Hz]
 
 % Number of control points for a polynomial (start point fixed).
 planning_params.control_points = 4;
