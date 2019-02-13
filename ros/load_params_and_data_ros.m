@@ -24,7 +24,7 @@ planning_params.max_vel = 0.26;        % [m/s]
 planning_params.max_acc = 3.0;        % [m/s^2]
 
 % Robot initial measurement pose [x,y,yaw] [m,m,rad]
-planning_params.meas_pose_init = [0, 0, 0];
+planning_params.meas_pose_init = [0, 0.5, 0];
 
 % Achievement distance before a point is considered reached [m].
 planning_params.achievement_dist = 0.1;
