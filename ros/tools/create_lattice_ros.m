@@ -1,4 +1,4 @@
-function [lattice_env] = create_lattice_2d(map_params, planning_params)
+function [lattice_env] = create_lattice_ros(map_params, planning_params)
 % Create 2D lattice for TurtleBot3.
 
 plot_lattice = 1;
