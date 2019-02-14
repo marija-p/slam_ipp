@@ -115,7 +115,8 @@ while (true)
     yaw = quat2eul(q);
     pose_current = [point_current, yaw];
     path_points = search_lattice_ros(pose_current, Rob_P, lattice, ...
-        field_map, occupancy_map, map_params, gp_params, planning_params, transforms);
+        field_map, occupancy_map, training_data, testing_data, ...
+        map_params, gp_params, planning_params, transforms);
     
     % II. Trajectory optimization.
     if (strcmp(opt_params.opt_method, 'cmaes'))
