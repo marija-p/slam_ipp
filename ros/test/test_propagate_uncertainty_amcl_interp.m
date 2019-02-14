@@ -6,7 +6,7 @@ planning_params.control_freq = 15;
 planning_params.max_vel = 0.25;
 
 % Interpolate measurement points along the path.
-points_path = [0, 0; 0, 2.5];
+points_path = [0, 0; 0, 2];
 points_path_steps = [0; sqrt(sum(diff(points_path,[],1).^2,2))]';
 points_path_cumlen = cumsum(points_path_steps);
 tq = 0:planning_params.max_vel/planning_params.control_freq:points_path_cumlen(end);
@@ -50,7 +50,7 @@ amcl.ResamplingInterval = 1;
 amcl.ParticleLimits = [500 5000];
 amcl.GlobalLocalization = false;
 % Gaussian distribution for initial pose.
-amcl.InitialPose = start_pose;
+amcl.InitialPose = [0, 0, pi/2];
 amcl.InitialCovariance = eye(3)*0.5;
 
 %% Control loop.
