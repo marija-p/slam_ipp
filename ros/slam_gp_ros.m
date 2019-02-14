@@ -9,6 +9,7 @@ function [metrics] = ...
 %clear
 
 load map.mat
+occupancy_map = map;
 
 % ROS communications
 goal_pub = rospublisher('/move_base/goal');
@@ -24,7 +25,7 @@ dim_x = map_params.dim_x;
 dim_y = map_params.dim_y;
 
 % Lattice for 3D grid search
-%lattice = create_lattice(map_params, planning_params);
+lattice = create_lattice_ros(map_params, planning_params);
 % GP field map
 field_map = [];
 
@@ -81,8 +82,10 @@ while (true)
         end
         
         % Get the robot position covariance.
-        Rob_P = [amcl_pose_msg.Pose.Covariance(1), amcl_pose_msg.Pose.Covariance(2); ...
-            amcl_pose_msg.Pose.Covariance(7), amcl_pose_msg.Pose.Covariance(8)];
+        Rob_P = [amcl_pose_msg.Pose.Covariance(1), amcl_pose_msg.Pose.Covariance(2), amcl_pose_msg.Pose.Covariance(6); ...
+            amcl_pose_msg.Pose.Covariance(7), amcl_pose_msg.Pose.Covariance(8), amcl_pose_msg.Pose.Covariance(12); ...
+            amcl_pose_msg.Pose.Covariance(31), amcl_pose_msg.Pose.Covariance(32), amcl_pose_msg.Pose.Covariance(36)];
+        % Ignore orientation for now. xD
         T_MAP_LINK = trvec2tform([point_current, 0]);
         T_MAP_TEMP = T_MAP_LINK * transforms.T_LINK_TEMP;
         x_MAP_TEMP = tform2trvec(T_MAP_TEMP);
@@ -91,7 +94,7 @@ while (true)
         temp = temp_msg.Data;
         
         [field_map, training_data] = ...
-            take_measurement_at_point_ros(x_MAP_TEMP(1:2), Rob_P, temp, field_map, ...
+            take_measurement_at_point_ros(x_MAP_TEMP(1:2), Rob_P(1:2,1:2), temp, field_map, ...
             training_data, testing_data, gp_params);
         
         current_time = toc;
@@ -106,12 +109,15 @@ while (true)
     end
     
     %% Planning. -- TO DO.
-    %{
     % I. Grid search.
-    points_path = search_lattice(Rob, lattice, field_map, ...
-        SimLmk, Sen, Lmk, Obs, Trj, Frm, Fac, factorRob, Opt, ...
-        training_data, testing_data, map_params, planning_params, gp_params);
+    q = [amcl_pose_msg.Pose.Pose.Orientation.W, amcl_pose_msg.Pose.Pose.Orientation.X, ...
+        amcl_pose_msg.Pose.Pose.Orientation.Y, amcl_pose_msg.Pose.Pose.Orientation.Z];
+    yaw = quat2eul(q);
+    pose_current = [point_current, yaw];
+    path_points = search_lattice_ros(pose_current, Rob_P, lattice, ...
+        field_map, occupancy_map, map_params, gp_params, planning_params, transforms);
     
+    %{
     % II. Trajectory optimization.
     if (strcmp(opt_params.opt_method, 'cmaes'))
         path_optimized = optimize_with_cmaes(points_path, field_map, ...

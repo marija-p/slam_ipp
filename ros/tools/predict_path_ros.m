@@ -86,13 +86,15 @@ for i = 2:size(points_control,1)
     [~, pose_est, Rob_P] = amcl(current_pose, scan);
     
     if (mod(i-1,meas_frame_interval) == 0)
+        %disp('Predicting measurement at: ')
+        %disp(pose_est(1:2))
         field_map = predict_map_update_ros(pose_est(1:2), Rob_P(1:2, 1:2), ...
             field_map, training_data, testing_data, map_params, gp_params);
     end
     
 end
 
-disp(Rob_P)
+%disp(Rob_P)
 
 end
 
