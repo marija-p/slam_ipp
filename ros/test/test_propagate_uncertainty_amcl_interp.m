@@ -69,11 +69,7 @@ for i = 2:size(points_meas,1)
     % Update estimated robot's pose and covariance using new odometry and
     % sensor readings.
     [isUpdated, estimatedPose, estimatedCovariance] = amcl(current_pose, scan);
-    
-    % Re-compute the distance to the goal.
-    distanceToGoal= norm(current_pose(1:2)' - goal_pose(1:2));
-    
-    waitfor(controlRate);
+
     disp(current_pose)
     
 end
