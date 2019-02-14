@@ -143,6 +143,8 @@ while (planning_params.control_points > size(path_points, 1))
     
     point_prev = point_best;
     
+    keyboard
+    
     disp('Next best point: ')
     disp(point_best)
     

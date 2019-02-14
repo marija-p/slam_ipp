@@ -3,6 +3,7 @@ function [field_map, Rob_P] = ...
     field_map, occupancy_map, training_data, testing_data, ...
     map_params, gp_params, planning_params, transforms)
 % Predicts robot uncertainty (using AMCL) + field map for a candidate path.
+% NB: - Stuff is hard-coded for TurtleBot3. No time to make parameters. xD
 % ---
 % Inputs:
 % path_point: candidate path

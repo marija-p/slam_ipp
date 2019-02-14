@@ -117,16 +117,16 @@ while (true)
     path_points = search_lattice_ros(pose_current, Rob_P, lattice, ...
         field_map, occupancy_map, map_params, gp_params, planning_params, transforms);
     
-    %{
     % II. Trajectory optimization.
     if (strcmp(opt_params.opt_method, 'cmaes'))
-        path_optimized = optimize_with_cmaes(points_path, field_map, ...
-            Rob, Sen, SimLmk, Lmk, Obs, Trj, Frm, Fac, factorRob, Opt, ...
-            num_control_frames, currentFrame, training_data, testing_data, ...
-            map_params, planning_params, opt_params, gp_params);
+        path_optimized = optimize_with_cmaes_ros(path_points, yaw, Rob_P, ...
+            field_map, occupancy_map, training_data, testing_data, ...
+            map_params, planning_params, opt_params, gp_params, transforms);
     else
         path_optimized = points_path;
     end
+    
+    %{
     
     disp('Next path: ')
     disp(path_optimized)
