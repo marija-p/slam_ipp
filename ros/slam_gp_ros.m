@@ -10,6 +10,7 @@ function [metrics] = ...
 
 load map.mat
 occupancy_map = map;
+assignin('base', 'occupancy_map', occupancy_map);
 
 % ROS communications
 goal_pub = rospublisher('/move_base/goal');
@@ -104,26 +105,25 @@ while (true)
     % I. Grid search.
     q = [amcl_pose_msg.Pose.Pose.Orientation.W, amcl_pose_msg.Pose.Pose.Orientation.X, ...
         amcl_pose_msg.Pose.Pose.Orientation.Y, amcl_pose_msg.Pose.Pose.Orientation.Z];
-    yaw = quat2eul(q);
-    pose_current = [point_current, yaw];
+    rot = quat2eul(q);
+    pose_current = [point_current, rot(3)];
     path_points = search_lattice_ros(pose_current, Rob_P, lattice, ...
         field_map, occupancy_map, training_data, testing_data, ...
         map_params, gp_params, planning_params, transforms);
     
     disp('Lattice search result: ')
     disp(path_points)
-    keyboard
     
     % II. Trajectory optimization.
     if (strcmp(opt_params.opt_method, 'cmaes'))
-        path_optimized = optimize_with_cmaes_ros(path_points, yaw, Rob_P, ...
+        path_optimized = optimize_with_cmaes_ros(path_points, rot(3), Rob_P, ...
             field_map, occupancy_map, training_data, testing_data, ...
             map_params, planning_params, opt_params, gp_params, transforms);
     else
         path_optimized = points_path;
     end
     
-    disp('Optimized path: ')
+    disp('Optimization result: ')
     disp(path_optimized)
     %disp(['Time: ', num2str(Map.t)])
     
@@ -138,6 +138,9 @@ while (true)
     metrics.path_travelled = [metrics.path_travelled; path_optimized];
    
     keyboard
+
+    disp('Measurement points: ')
+    disp(points_meas)
     
     % Do draw all objects
     drawnow;
