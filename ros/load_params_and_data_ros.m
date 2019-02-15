@@ -32,10 +32,10 @@ planning_params.achievement_dist = 0.08;
 % Frequency at which to take measurements (real)
 planning_params.meas_freq = 0.25;    % [Hz]
 % Frequency at which to simulate control actions (uncertainty prediction)
-planning_params.control_freq = 10;   % [Hz]
+planning_params.control_freq = 8;   % [Hz]
 
 % Number of control points for a polynomial (start point fixed).
-planning_params.control_points = 4;
+planning_params.control_points = 3;
 
 % Total time budget for informative planning [s].
 planning_params.time_budget = 180;
