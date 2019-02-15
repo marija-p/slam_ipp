@@ -21,7 +21,6 @@ planning_params.lattice_points_y = 3;
 
 % Trajectory optimization references
 planning_params.max_vel = 0.26;        % [m/s]
-planning_params.max_acc = 3.0;        % [m/s^2]
 
 % Robot initial measurement pose [x,y,yaw] [m,m,rad]
 planning_params.meas_pose_init = [0, 0.5, 0];

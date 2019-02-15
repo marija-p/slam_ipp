@@ -28,6 +28,16 @@ end
 
 %try
     
+    % Discard path if it is too long.
+    path_steps = [0; sqrt(sum(diff(path_points,[],1).^2,2))]';
+    path_cumlen = cumsum(path_steps);
+    path_dist = path_cumlen(end);
+    num_meas = (path_dist/planning_params.max_vel) * planning_params.meas_freq;
+    if (num_meas > 8)
+        obj = Inf;
+        return;
+    end
+
     [field_map, Rob_P] = predict_path_ros(path_points, yaw_init, Rob_P_init, ...
         field_map, occupancy_map, training_data, testing_data, ...
         map_params, gp_params, planning_params, transforms);
