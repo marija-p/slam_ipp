@@ -27,12 +27,12 @@ planning_params.max_acc = 3.0;        % [m/s^2]
 planning_params.meas_pose_init = [0, 0.5, 0];
 
 % Achievement distance before a point is considered reached [m].
-planning_params.achievement_dist = 0.1;
+planning_params.achievement_dist = 0.08;
 
 % Frequency at which to take measurements (real)
 planning_params.meas_freq = 0.25;    % [Hz]
 % Frequency at which to simulate control actions (uncertainty prediction)
-planning_params.control_freq = 15;   % [Hz]
+planning_params.control_freq = 10;   % [Hz]
 
 % Number of control points for a polynomial (start point fixed).
 planning_params.control_points = 4;
@@ -57,8 +57,8 @@ planning_params.beta = 0;
 opt_params.max_iters = 10;
 opt_params.opt_method = 'cmaes'; % 'fmc'/cmaes'/'none'/'bo'
 % Covariances in each search dimension
-opt_params.cov_x = 0.2;
-opt_params.cov_y = 0.2;
+opt_params.cov_x = 0.5;
+opt_params.cov_y = 0.5;
 
 % GP-related parameters
 gp_params.hyp_trained = hyp_trained;

@@ -1,9 +1,9 @@
-obj = compute_objective_ros(path_points, yaw_init, Rob_P_init, field_map, occupancy_map, ...
-    training_data, testing_data, map_params, planning_params, gp_params, transforms);
+function obj = compute_objective_ros(path_points, yaw_init, Rob_P_init, field_map, occupancy_map, ...
+    training_data, testing_data, map_params, planning_params, gp_params, transforms)
 % Calculates the expected informative objective for a path.
 % ---
 % Inputs:
-% control_points: list of waypoints to navigate to
+% path_points: list of waypoints to navigate to
 % yaw_init: initial robot yaw [rad]
 % Rob_P_init: initial robot pose covariance (3x3)
 % field_map: current GP field map
@@ -26,7 +26,7 @@ switch planning_params.obj_func
         warning('Unknown objective function!');
 end
 
-try
+%try
     
     [field_map, Rob_P] = predict_path_ros(path_points, yaw_init, Rob_P_init, ...
         field_map, occupancy_map, training_data, testing_data, ...
@@ -53,18 +53,18 @@ try
             above_thres_ind = find(field_map.mean + ...
                 planning_params.beta*sqrt(field_map.cov) >= planning_params.lower_thres);
             if strcmp(planning_params.renyi_uncertainty, 'Dopt')
-                alpha = 1 + 1/det(Rob_P_traj);
+                alpha = 1 + 1/det(Rob_P);
             elseif strcmp(planning_params.renyi_uncertainty, 'Aopt')
-                alpha = 1 + 1/trace(Rob_P_traj);
+                alpha = 1 + 1/trace(Rob_P);
             end
             renyi_term = alpha^(1/(alpha-1));
             P_f = sum(log(field_map.cov(above_thres_ind).*renyi_term));
             cost = 1;
         case 'renyi'
             if strcmp(planning_params.renyi_uncertainty, 'Dopt')
-                alpha = 1 + 1/det(Rob_P_traj);
+                alpha = 1 + 1/det(Rob_P);
             elseif strcmp(planning_params.renyi_uncertainty, 'Aopt')
-                alpha = 1 + 1/trace(Rob_P_traj);
+                alpha = 1 + 1/trace(Rob_P);
             end
             renyi_term = alpha^(1/(alpha-1));
             P_f = sum(log(field_map.cov.*renyi_term));
@@ -78,6 +78,6 @@ try
     obj = -gain/cost;
     
 % Optimization doesn't work for some reason. xD
-catch
-    obj = Inf;
-end
+%catch
+%    obj = Inf;
+%end

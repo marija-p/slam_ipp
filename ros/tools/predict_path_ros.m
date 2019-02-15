@@ -67,7 +67,7 @@ amcl.ParticleLimits = [500 5000];
 amcl.GlobalLocalization = false;
 % Gaussian distribution for initial pose.
 amcl.InitialPose = [path_points(1,:), yaw_init];
-amcl.InitialCovariance = Rob_P_init;
+amcl.InitialCovariance = diag(diag(Rob_P_init));
 
 %% Control loop.
 for i = 2:size(points_control,1)

@@ -15,6 +15,7 @@ transforms.T_LINK_SCAN = ...              % Robot body -> laser scanner.
      0, 0, 1, 0.122;
      0, 0, 0, 1];
  
+ % Parameters
  [map_params, planning_params, opt_params, gp_params, training_data, testing_data] = ...
      load_params_and_data_ros(dim_x_env, dim_y_env);
 

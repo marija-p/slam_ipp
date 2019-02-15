@@ -31,17 +31,9 @@ field_map = [];
 
 % Initialise data logging.
 metrics = initialize_metrics(map_params, planning_params, opt_params, gp_params);
-metrics.Rob_Ps = zeros(2,2,200); % 2D
 
 % Set initial measurement point.
-%points_meas = planning_params.meas_pose_init(1:2);
-points_path = [0, 0.5; 0.5, 0; 0.5, 0.5; 0, 0];
-points_path_steps = [0; sqrt(sum(diff(points_path,[],1).^2,2))]';
-points_path_cumlen = cumsum(points_path_steps);
-tq = 0:planning_params.max_vel/planning_params.meas_freq:points_path_cumlen(end);
-points_meas = [];
-points_meas(:,1) = interp1(points_path_cumlen, points_path(:,1)', tq, 'spline');
-points_meas(:,2) = interp1(points_path_cumlen, points_path(:,2)', tq, 'spline');
+points_meas = planning_params.meas_pose_init(1:2);
 
 % Start timer.
 time_elapsed = 0;
@@ -118,6 +110,10 @@ while (true)
         field_map, occupancy_map, training_data, testing_data, ...
         map_params, gp_params, planning_params, transforms);
     
+    disp('Lattice search result: ')
+    disp(path_points)
+    keyboard
+    
     % II. Trajectory optimization.
     if (strcmp(opt_params.opt_method, 'cmaes'))
         path_optimized = optimize_with_cmaes_ros(path_points, yaw, Rob_P, ...
@@ -127,31 +123,23 @@ while (true)
         path_optimized = points_path;
     end
     
-    %{
-    
-    disp('Next path: ')
+    disp('Optimized path: ')
     disp(path_optimized)
-    disp(['Time: ', num2str(Map.t)])
+    %disp(['Time: ', num2str(Map.t)])
     
-    % Create polynomial path through the control points.
-    trajectory = plan_path_waypoints(path_optimized, planning_params.max_vel, ...
-        planning_params.max_acc);
-    % Sample trajectory for motion simulation.
-    [~, points_control, ~, ~] = ...
-        sample_trajectory(trajectory, 1/planning_params.control_freq);
-    
+    % Interpolate measurements along the path.
+    points_path_steps = [0; sqrt(sum(diff(path_optimized,[],1).^2,2))]';
+    points_path_cumlen = cumsum(points_path_steps);
+    tq = 0:planning_params.max_vel/planning_params.meas_freq:points_path_cumlen(end);
+    points_meas = [];
+    points_meas(:,1) = interp1(points_path_cumlen, path_optimized(:,1)', tq, 'spline');
+    points_meas(:,2) = interp1(points_path_cumlen, path_optimized(:,2)', tq, 'spline');
+ 
     metrics.path_travelled = [metrics.path_travelled; path_optimized];
-    
-    
-    % Figure of the Field:
-        FldFig = drawFldFig(FldFig,  ...
-            Rob, Lmk, ...
-            SimRob, ...
-            field_map.mean, field_map.cov, ...
-            FigOpt);
+   
+    keyboard
     
     % Do draw all objects
     drawnow;
-    %}
     
 end
