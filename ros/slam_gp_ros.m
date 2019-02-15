@@ -40,6 +40,8 @@ points_meas = planning_params.meas_pose_init(1:2);
 time_elapsed = 0;
 tic;
 
+field_fig = create_field_fig(points_meas, map_params);
+
 %% V. Main loop
 while (true)
     
@@ -101,7 +103,7 @@ while (true)
         
     end
     
-    %% Planning. -- TO DO.
+    %% Planning.
     % I. Grid search.
     q = [amcl_pose_msg.Pose.Pose.Orientation.W, amcl_pose_msg.Pose.Pose.Orientation.X, ...
         amcl_pose_msg.Pose.Pose.Orientation.Y, amcl_pose_msg.Pose.Pose.Orientation.Z];
@@ -142,7 +144,8 @@ while (true)
     disp('Measurement points: ')
     disp(points_meas)
     
-    % Do draw all objects
+    % Update graphics
+    field_fig = update_field_fig(field_fig, field_map, map_params);
     drawnow;
     
 end
