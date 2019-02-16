@@ -31,7 +31,7 @@ planning_params.achievement_dist = 0.08;
 % Frequency at which to take measurements (real)
 planning_params.meas_freq = 0.25;    % [Hz]
 % Frequency at which to simulate control actions (uncertainty prediction)
-planning_params.control_freq = 8;   % [Hz]
+planning_params.control_freq = 4;   % [Hz]
 
 % Number of control points for a polynomial (start point fixed).
 planning_params.control_points = 3;
@@ -53,7 +53,7 @@ planning_params.lower_thres = 30;
 planning_params.beta = 0;
 
 % Optimization/CMA-ES related parameters
-opt_params.max_iters = 10;
+opt_params.max_iters = 5;
 opt_params.opt_method = 'cmaes'; % 'fmc'/cmaes'/'none'/'bo'
 % Covariances in each search dimension
 opt_params.cov_x = 0.5;

@@ -8,6 +8,8 @@ function [metrics] = ...
 
 %clear
 
+close all;
+
 load map.mat
 occupancy_map = map;
 assignin('base', 'occupancy_map', occupancy_map);
@@ -145,7 +147,8 @@ while (true)
     disp(points_meas)
     
     % Update graphics
-    field_fig = update_field_fig(field_fig, field_map, map_params);
+    field_fig = ...
+        update_field_fig(field_fig, field_map, path_optimized, points_meas, map_params);
     drawnow;
     
 end
