@@ -101,7 +101,7 @@ while (true)
         metrics.P_traces = [metrics.P_traces; sum(field_map.cov)];
         metrics.Rob_Ps(:,:,size(metrics.times,1)) = Rob_P;
         
-        keyboard
+        by keyboard
         
     end
     
@@ -136,8 +136,8 @@ while (true)
     points_path_cumlen = cumsum(points_path_steps);
     tq = 0:planning_params.max_vel/planning_params.meas_freq:points_path_cumlen(end);
     points_meas = [];
-    points_meas(:,1) = interp1(points_path_cumlen, path_optimized(:,1)', tq, 'spline');
-    points_meas(:,2) = interp1(points_path_cumlen, path_optimized(:,2)', tq, 'spline');
+    points_meas(:,1) = interp1(points_path_cumlen, path_optimized(:,1)', tq, 'linear');
+    points_meas(:,2) = interp1(points_path_cumlen, path_optimized(:,2)', tq, 'linear');
  
     metrics.path_travelled = [metrics.path_travelled; path_optimized];
    

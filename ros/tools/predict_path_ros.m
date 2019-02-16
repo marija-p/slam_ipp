@@ -29,8 +29,8 @@ points_path_steps = [0; sqrt(sum(diff(path_points,[],1).^2,2))]';
 points_path_cumlen = cumsum(points_path_steps);
 tq = 0:planning_params.max_vel/planning_params.control_freq:points_path_cumlen(end);
 points_control = [];
-points_control(:,1) = interp1(points_path_cumlen, path_points(:,1)', tq, 'spline');
-points_control(:,2) = interp1(points_path_cumlen, path_points(:,2)', tq, 'spline');
+points_control(:,1) = interp1(points_path_cumlen, path_points(:,1)', tq, 'linear');
+points_control(:,2) = interp1(points_path_cumlen, path_points(:,2)', tq, 'linear');
 
 %% Lidar scanner.
 lidar = LidarSensor;
