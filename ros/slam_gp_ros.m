@@ -37,6 +37,7 @@ metrics = initialize_metrics(map_params, planning_params, opt_params, gp_params)
 
 % Set initial measurement point.
 points_meas = planning_params.meas_pose_init(1:2);
+path_optimized = points_meas;
 
 % Start timer.
 time_elapsed = 0;
@@ -101,7 +102,11 @@ while (true)
         metrics.P_traces = [metrics.P_traces; sum(field_map.cov)];
         metrics.Rob_Ps(:,:,size(metrics.times,1)) = Rob_P;
         
-        by keyboard
+        % Update graphics
+        field_fig = ...
+            update_field_fig(field_fig, field_map, path_optimized, points_meas, map_params);
+        
+        keyboard
         
     end
     
@@ -145,10 +150,5 @@ while (true)
 
     disp('Measurement points: ')
     disp(points_meas)
-    
-    % Update graphics
-    field_fig = ...
-        update_field_fig(field_fig, field_map, path_optimized, points_meas, map_params);
-    drawnow;
     
 end

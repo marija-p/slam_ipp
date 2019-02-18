@@ -3,11 +3,11 @@ function [map_params, planning_params, opt_params, gp_params, ...
     load_params_and_data_ros(dim_x_env, dim_y_env)
 % Loads default parameters + training data for RA-L19 IPP algorithms.
 
-load training_data_3d_small2.mat
+load hyp_trained.mat
 
 % Map resolution [m/cell]
-map_params.res_x = 0.10;
-map_params.res_y = 0.10;
+map_params.res_x = 0.40;
+map_params.res_y = 0.40;
 % Map dimensions [cells]
 map_params.dim_x = dim_x_env/map_params.res_x;
 map_params.dim_y = dim_y_env/map_params.res_y;
@@ -23,7 +23,7 @@ planning_params.lattice_points_y = 3;
 planning_params.max_vel = 0.26;        % [m/s]
 
 % Robot initial measurement pose [x,y,yaw] [m,m,rad]
-planning_params.meas_pose_init = [0, 0.5, 0];
+planning_params.meas_pose_init = [0, 0.1, 0];
 
 % Achievement distance before a point is considered reached [m].
 planning_params.achievement_dist = 0.08;
@@ -42,7 +42,7 @@ planning_params.time_budget = 180;
 % Objective function for informative planning.
 % 'uncertainty_adaptive'/'uncertainty_rate_adaptive'/'renyi_adaptive'
 % 'uncertainty'/'uncertainty_rate'/'renyi'
-planning_params.obj_func = 'uncertainty';
+planning_params.obj_func = 'renyi';
 % Renyi objective function only: uncertainty measure for alpha parameter.
 planning_params.renyi_uncertainty = 'Aopt';
 

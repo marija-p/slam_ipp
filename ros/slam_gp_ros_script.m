@@ -1,6 +1,6 @@
 % Workspace dimensions [m]
-dim_x_env = 2;
-dim_y_env = 2;
+dim_x_env = 2.8;
+dim_y_env = 2.8;
 
 % Static transforms.
 transforms.T_LINK_TEMP = ...              % Robot body -> temperature sensor.
