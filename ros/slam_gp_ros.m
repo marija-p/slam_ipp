@@ -10,7 +10,7 @@ function [metrics] = ...
 
 close all;
 
-load map.mat
+load map_lab_trim.mat
 occupancy_map = map;
 assignin('base', 'occupancy_map', occupancy_map);
 
