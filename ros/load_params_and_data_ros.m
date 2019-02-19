@@ -9,8 +9,8 @@ load hyp_trained.mat
 map_params.res_x = 0.40;
 map_params.res_y = 0.40;
 % Map dimensions [cells]
-map_params.dim_x = dim_x_env/map_params.res_x;
-map_params.dim_y = dim_y_env/map_params.res_y;
+map_params.dim_x = round(dim_x_env/map_params.res_x);
+map_params.dim_y = round(dim_y_env/map_params.res_y);
 % Position of map in the environment [m]
 map_params.pos_x = -dim_x_env / 2;
 map_params.pos_y = -dim_y_env / 2;
@@ -23,7 +23,7 @@ planning_params.lattice_points_y = 3;
 planning_params.max_vel = 0.26;        % [m/s]
 
 % Robot initial measurement pose [x,y,yaw] [m,m,rad]
-planning_params.meas_pose_init = [0, 0.1, 0];
+planning_params.meas_pose_init = [0.1, 0, 0];
 
 % Achievement distance before a point is considered reached [m].
 planning_params.achievement_dist = 0.08;
@@ -73,8 +73,8 @@ gp_params.use_modified_kernel = 0;
 gp_params.use_modified_kernel_prediction = 0;
 
 % Create the inference grid.
-x = linspace(0,dim_x_env,dim_x_env/map_params.res_x);
-y = linspace(0,dim_y_env,dim_y_env/map_params.res_y);
+x = 0:map_params.res_x:dim_x_env-map_params.res_x;
+y = 0:map_params.res_y:dim_y_env-map_params.res_y;
 [X,Y] = meshgrid(x,y); mesh = [X(:) Y(:)];
 testing_data.X_test = mesh;
 testing_data.X_test(:,1) = testing_data.X_test(:,1) + map_params.pos_x;
