@@ -41,8 +41,8 @@ if (plot_trajectory)
     keyboard
 end
 
-rng(1, 'twister'); % 1 - without UI, 6 - with UI
-gp_params.use_modified_kernel = 0;
+rng(6, 'twister'); % 1 - without UI, 6 - with UI
+gp_params.use_modified_kernel = 1;
 gp_params.N_gauss = 5;
 [metrics] = slam_gp_circle(traj_points, map_params, planning_params, ...
     opt_params, gp_params, training_data, gt_data, testing_data);
