@@ -106,7 +106,7 @@ while (true)
         field_fig = ...
             update_field_fig(field_fig, field_map, path_optimized, points_meas, map_params);
         
-        keyboard
+        %keyboard
         
     end
     
