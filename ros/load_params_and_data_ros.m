@@ -23,10 +23,10 @@ planning_params.lattice_points_y = 3;
 planning_params.max_vel = 0.26;        % [m/s]
 
 % Robot initial measurement pose [x,y,yaw] [m,m,rad]
-planning_params.meas_pose_init = [0.1, 0, 0];
+planning_params.meas_pose_init = [0.2, 0, 0];
 
 % Achievement distance before a point is considered reached [m].
-planning_params.achievement_dist = 0.08;
+planning_params.achievement_dist = 0.05;
 
 % Frequency at which to take measurements (real)
 planning_params.meas_freq = 0.25;    % [Hz]
@@ -42,24 +42,25 @@ planning_params.time_budget = 180;
 % Objective function for informative planning.
 % 'uncertainty_adaptive'/'uncertainty_rate_adaptive'/'renyi_adaptive'
 % 'uncertainty'/'uncertainty_rate'/'renyi'
-planning_params.obj_func = 'renyi';
+planning_params.obj_func = 'renyi_adaptive';
 % Renyi objective function only: uncertainty measure for alpha parameter.
 planning_params.renyi_uncertainty = 'Aopt';
 
 % Threshold for adaptive planning - only regions above this value are
 % considered "interesting" and used when computing information gain.
-planning_params.lower_thres = 30;
+planning_params.lower_thres = 27;
 % Design parameter for uncertainty-aware adaptive planning
-planning_params.beta = 0;
+planning_params.beta = 1;
 
 % Optimization/CMA-ES related parameters
-opt_params.max_iters = 5;
+opt_params.max_iters = 3;
 opt_params.opt_method = 'cmaes'; % 'fmc'/cmaes'/'none'/'bo'
 % Covariances in each search dimension
-opt_params.cov_x = 0.5;
-opt_params.cov_y = 0.5;
+opt_params.cov_x = 2;
+opt_params.cov_y = 2;
 
 % GP-related parameters
+hyp_trained.mean = 28;
 gp_params.hyp_trained = hyp_trained;
 gp_params.N_gauss = 9; %N_gauss;
 gp_params.inf_func = inf_func;
@@ -68,7 +69,7 @@ gp_params.inf_func = inf_func;
 gp_params.cov_func = cov_func;
 gp_params.lik_func = lik_func;
 % Whether to account for robot's pose uncertainty in GP field mapping.
-gp_params.use_modified_kernel = 0;
+gp_params.use_modified_kernel = 1;
 % Whether to account for robot's pose uncertainty in prediction - objective function.
 gp_params.use_modified_kernel_prediction = 0;
 

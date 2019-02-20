@@ -88,6 +88,7 @@ while (true)
         T_MAP_TEMP = T_MAP_LINK * transforms.T_LINK_TEMP;
         x_MAP_TEMP = tform2trvec(T_MAP_TEMP);
         % Update the GP.
+        pause(3);
         temp_msg = receive(temp_sub);
         temp = temp_msg.Data;
         
@@ -135,6 +136,7 @@ while (true)
     disp('Optimization result: ')
     disp(path_optimized)
     %disp(['Time: ', num2str(Map.t)])
+    keyboard
     
     % Interpolate measurements along the path.
     points_path_steps = [0; sqrt(sum(diff(path_optimized,[],1).^2,2))]';
@@ -146,7 +148,7 @@ while (true)
  
     metrics.path_travelled = [metrics.path_travelled; path_optimized];
    
-    keyboard
+    save test_trial.mat                                                
 
     disp('Measurement points: ')
     disp(points_meas)

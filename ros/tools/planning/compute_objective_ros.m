@@ -26,7 +26,7 @@ switch planning_params.obj_func
         warning('Unknown objective function!');
 end
 
-%try
+try
     
     % Discard path if it is too long.
     path_steps = [0; sqrt(sum(diff(path_points,[],1).^2,2))]';
@@ -88,6 +88,6 @@ end
     obj = -gain/cost;
     
 % Optimization doesn't work for some reason. xD
-%catch
-%    obj = Inf;
-%end
+catch
+    obj = Inf;
+end

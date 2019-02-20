@@ -16,7 +16,7 @@ hold on
 field_fig.mean = imagesc([pos_x pos_x+dim_x*res_x], ...
     [pos_y pos_y+dim_y*res_y], zeros(map_params.dim_y, map_params.dim_x));
 axis([pos_x pos_x+dim_x*res_x pos_y pos_y+dim_y*res_y])
-caxis([22 28])
+caxis([26.5 28])
 %axis([-1, 1, -1, 1])
 colorbar
 set(gca, 'YDir', 'Normal')
@@ -30,7 +30,7 @@ subplot(1,2,2)
 field_fig.cov = imagesc([pos_x pos_x+dim_x*res_x], ...
     [pos_y pos_y+dim_y*res_y], zeros(map_params.dim_y, map_params.dim_x));
 axis([pos_x pos_x+dim_x*res_x pos_y pos_y+dim_y*res_y])
-caxis([0 2])
+caxis([0.04 0.05])
 colorbar
 set(gca, 'YDir', 'Normal')
 axis off
