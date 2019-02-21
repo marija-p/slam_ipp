@@ -23,7 +23,7 @@ planning_params.lattice_points_y = 3;
 planning_params.max_vel = 0.26;        % [m/s]
 
 % Robot initial measurement pose [x,y,yaw] [m,m,rad]
-planning_params.meas_pose_init = [0.2, 0, 0];
+planning_params.meas_pose_init = [1.2, 1.2, -pi/2];
 
 % Achievement distance before a point is considered reached [m].
 planning_params.achievement_dist = 0.05;
@@ -50,7 +50,7 @@ planning_params.renyi_uncertainty = 'Aopt';
 % considered "interesting" and used when computing information gain.
 planning_params.lower_thres = 27;
 % Design parameter for uncertainty-aware adaptive planning
-planning_params.beta = 1;
+planning_params.beta = 6;
 
 % Optimization/CMA-ES related parameters
 opt_params.max_iters = 3;
@@ -60,7 +60,7 @@ opt_params.cov_x = 2;
 opt_params.cov_y = 2;
 
 % GP-related parameters
-hyp_trained.mean = 28;
+%hyp_trained.mean = 28;
 gp_params.hyp_trained = hyp_trained;
 gp_params.N_gauss = 9; %N_gauss;
 gp_params.inf_func = inf_func;
