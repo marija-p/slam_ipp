@@ -19,6 +19,6 @@ transforms.T_LINK_SCAN = ...              % Robot body -> laser scanner.
  [map_params, planning_params, opt_params, gp_params, training_data, testing_data] = ...
      load_params_and_data_ros(dim_x_env, dim_y_env);
 
-% Let'ross go!
+% Let's go!
 [metrics] = slam_gp_ros(map_params, planning_params, opt_params, gp_params, ...
     training_data, testing_data, transforms);

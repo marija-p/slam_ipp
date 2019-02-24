@@ -42,7 +42,7 @@ planning_params.time_budget = 180;
 % Objective function for informative planning.
 % 'uncertainty_adaptive'/'uncertainty_rate_adaptive'/'renyi_adaptive'
 % 'uncertainty'/'uncertainty_rate'/'renyi'
-planning_params.obj_func = 'renyi_adaptive';
+planning_params.obj_func = 'renyi';
 % Renyi objective function only: uncertainty measure for alpha parameter.
 planning_params.renyi_uncertainty = 'Aopt';
 
@@ -56,8 +56,8 @@ planning_params.beta = 6;
 opt_params.max_iters = 3;
 opt_params.opt_method = 'cmaes'; % 'fmc'/cmaes'/'none'/'bo'
 % Covariances in each search dimension
-opt_params.cov_x = 2;
-opt_params.cov_y = 2;
+opt_params.cov_x = 1.5;
+opt_params.cov_y = 1.5;
 
 % GP-related parameters
 %hyp_trained.mean = 28;

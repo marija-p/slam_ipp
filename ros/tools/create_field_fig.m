@@ -16,7 +16,7 @@ hold on
 field_fig.mean = imagesc([pos_x pos_x+dim_x*res_x], ...
     [pos_y pos_y+dim_y*res_y], zeros(map_params.dim_y, map_params.dim_x));
 axis([pos_x pos_x+dim_x*res_x pos_y pos_y+dim_y*res_y])
-caxis([26 27.5])
+caxis([25 27])
 %axis([-1, 1, -1, 1])
 colorbar
 set(gca, 'YDir', 'Normal')

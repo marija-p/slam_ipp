@@ -88,7 +88,7 @@ while (true)
         T_MAP_TEMP = T_MAP_LINK * transforms.T_LINK_TEMP;
         x_MAP_TEMP = tform2trvec(T_MAP_TEMP);
         % Update the GP.
-        pause(3);
+        keyboard %pause(3);
         temp_msg = receive(temp_sub);
         temp = temp_msg.Data;
         
