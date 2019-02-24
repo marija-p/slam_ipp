@@ -1,6 +1,8 @@
 function [] = plot_path(metrics, planning_params)
 % Visualizes planned trajectory 
 
+figure;
+
 t = [];
 p = [];
 p_control = metrics.path_travelled;
@@ -56,7 +58,7 @@ if isequal(size(colors_meas),[1 3])
     colors_meas = colors_meas';
 end
 
-scatter3(p_meas(:,1), p_meas(:,2), p_meas(:,3), 60, colors_meas, 'filled');
+scatter3(p_meas(:,1), p_meas(:,2), p_meas(:,3), 20, colors_meas, 'filled');
 
 xlabel('x (m)')
 ylabel('y (m)')
