@@ -30,6 +30,10 @@ switch planning_params.obj_func
         P_i = sum(log(field_map.cov(above_thres_ind).*exp(1)));
     case {'uncertainty', 'uncertainty_rate', 'renyi'}
         P_i = sum(log(field_map.cov.*exp(1)));
+    case {'heuristic'}
+        P_i = sum(field_map.cov);
+        r = Rob.state.r(1:3);
+        Rob_P_i = trace(Map.P(r,r) + factorRob.state.P(1:3,1:3));
     otherwise
         warning('Unknown objective function!');
 end
@@ -183,12 +187,22 @@ end
             disp(['Initial Shannon entropy = ', num2str(P_i)])
             disp(['Final Shannon entropy = ', num2str(sum(log(field_map.cov.*exp(1))))])
             disp(['Final Renyi entropy = ', num2str(P_f)])
+        case 'heuristic'
+            P_f = sum(field_map.cov);
+            Rob_P_f = trace(Rob_P_traj);
+            cost = 1;
         otherwise
             warning('Unknown objective function!');
     end
     
     % Formulate objective.
     gain = P_i - P_f;
+    if strcmp(planning_params.obj_func, 'heuristic')
+        gain = (0.5/1.7536*10^6)*(P_i - P_f) + ...
+            (0.5/0.02)*(Rob_P_i - Rob_P_f);
+    else
+        gain = P_i - P_f;
+    end
     %if (gain < 0)
     %    keyboard
     %end

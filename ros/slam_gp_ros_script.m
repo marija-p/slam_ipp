@@ -1,4 +1,4 @@
-% Workspace dimensions [m]
+ % Workspace dimensions [m]
 dim_x_env = 2.8;
 dim_y_env = 2.8;
 
