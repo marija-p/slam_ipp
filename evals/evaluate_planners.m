@@ -6,7 +6,7 @@ append_to_logger = 0;
 
 % Number of trials to run
 if (~append_to_logger)
-    num_trials = 100;
+    num_trials = 51;
 else
     trials = fieldnames(logger);
     trials = regexp(trials,'\d*','Match');
@@ -30,7 +30,7 @@ dim_z_env = 4;
 
 debug_file = fopen('map_rmses.txt', 'w');
 
-for i = 1:num_trials
+for i = 47:num_trials
     
     if (~append_to_logger)
         t = i;
