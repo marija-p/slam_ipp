@@ -91,6 +91,9 @@ while (planning_params.control_points > size(path_points, 1))
         Rob_P = Map_eval.P(r,r) + factorRob_eval.state.P(1:3,1:3);
         
         % Predict map update at target location.
+        if ismember(point_eval, path_points, 'rows')
+            continue;
+        end
         field_map_eval = predict_map_update(point_eval, Rob_P, field_map, ...
             training_data, testing_data, map_params, gp_params);
         

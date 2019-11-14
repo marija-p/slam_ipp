@@ -3,7 +3,7 @@ function [map_params, planning_params, opt_params, gp_params, ...
     load_params_and_data(dim_x_env, dim_y_env, dim_z_env)
 % Loads default parameters + training data for RA-L19 IPP algorithms.
 
-load training_data_3d_small2.mat
+load training_data_3d_small2_matern.mat
 
 % Map resolution [m/cell]
 map_params.res_x = 0.25;
