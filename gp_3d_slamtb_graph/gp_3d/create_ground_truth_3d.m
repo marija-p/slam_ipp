@@ -12,8 +12,8 @@ res_z = 1;
 
 % Correlation function parameters.
 corr.name = 'gauss';
-corr.c0 = [10, 10, 10];
-corr.sigma = 600;
+corr.c0 = [2, 2, 2];
+corr.sigma = 100;
 
 % Create the random field.
 x = linspace(0,dim_x_env,dim_x_env/res_x);

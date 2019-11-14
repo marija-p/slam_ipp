@@ -8,11 +8,11 @@ show_legend = 1;
 percentile = 0.95;
 
 trials = fieldnames(logger);
-methods = fieldnames(logger.trial31);
+methods = fieldnames(logger.trial1);
 
 % Choose which methods to plot.+
 % NB: - Always include "1" (trial number).
-methods_select = [1,2,3,5,6,7,8];
+methods_select = [1,2,5,7,9];
 methods = {methods{methods_select}};
 
 % Last trial is incomplete.
@@ -29,6 +29,8 @@ mlls = zeros(length(methods)-1,length(time_vector));
 Rob_Ps_Aopt = zeros(length(methods)-1,length(time_vector));
 Rob_Ps_Dopt = zeros(length(methods)-1,length(time_vector));
 pose_rmses = zeros(length(methods)-1,length(time_vector));
+
+trials = trials(1:10);
 
 for i = 1:length(trials)
     

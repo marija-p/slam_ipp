@@ -320,6 +320,8 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
         %    grid_to_env_coordinates([max_j, max_i, max_k], map_params);
         %disp(['Next goal: ', num2str(point_goal)])
         
+        tic;
+        
         % I. Grid search.
         path_points = search_lattice(Rob, lattice, field_map, ...
             SimLmk, Sen, Lmk, Obs, Trj, Frm, Fac, factorRob, Opt, ...
@@ -335,6 +337,8 @@ for currentFrame = Tim.firstFrame : Tim.lastFrame
             path_optimized = path_points;
         end
         
+        replanning_time = toc;
+        disp(['Replanning took ', num2str(replanning_time), 's.'])
         disp('Next path: ')
         disp(path_optimized)
         disp(['Time: ', num2str(Map.t)])

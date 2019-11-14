@@ -35,7 +35,7 @@ global Map
 
 %% I. Specify user-defined options - EDIT USER DATA FILE userData.m
 
-userData_gp_2d;
+userData_ekf_gp_2d;
 % userData;           % user-defined data. SCRIPT.
 % userDataPnt;        % user-defined data for points. SCRIPT.
 % userDataLin;        % user-defined data for lines. SCRIPT.
