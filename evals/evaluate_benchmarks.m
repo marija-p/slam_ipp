@@ -6,7 +6,7 @@ append_to_logger = 1;
 
 % Number of trials to run
 if (~append_to_logger)
-    num_trials = 100;
+    num_trials = 50;
 else
     trials = fieldnames(logger);
     trials = regexp(trials,'\d*','Match');
@@ -28,7 +28,7 @@ dim_z_env = 4;
     training_data, gt_data, testing_data] = ...
     load_params_and_data(dim_x_env, dim_y_env, dim_z_env);
 
-evaluate_random = 0;
+evaluate_random = 1;
 evaluate_rig = 1; subtree_iters = 60;
 
 for i = 1:num_trials

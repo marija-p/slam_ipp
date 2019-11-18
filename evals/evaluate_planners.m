@@ -101,7 +101,7 @@ for i = 1:num_trials
      %fprintf(debug_file, 'heuristic_UI_N_gauss_5\n');
      %fprintf(debug_file, '%f %f\n', [metrics.times'; metrics.rmses']);
      
-     save data.mat
+     save data_env10.mat
      
      disp(['Completed Trial ', num2str(t)])
      

@@ -3,7 +3,7 @@ load training_data_2d.mat
 rng(1);
 
 % Length of the simulation (number of time-steps).
-nSteps = 600;
+nSteps = 200;
 
 X_test = X_gt;
 X_train = [];
@@ -51,7 +51,7 @@ LandFeatures(:,:,5)=[40 40]';
 % Initialization.
 xVehicleTrue = [40 25 0]'; % start position (x, y, theta)
 xEst = xVehicleTrue;
-PEst = diag([1^2 1^2 0.01]);
+PEst = diag([1 1 0.01]);
 
 % Array of detected landmarks.
 MappedLandFeatures = NaN*zeros(nLandFeatures,2);
@@ -194,7 +194,7 @@ for k = 2:nSteps
         % Do GP regression.
         cov_func_UI = {@covUI, cov_func, N_gauss, PEst(1:2,1:2)};
         [ymu, ys, fmu, fs, ~ , post] = ...
-            gp(hyp_trained, inf_func, mean_func, cov_func, lik_func, ...
+            gp(hyp_trained, inf_func, mean_func, cov_func_UI, lik_func, ...
             X_train, Y_train, X_test);
     end
     

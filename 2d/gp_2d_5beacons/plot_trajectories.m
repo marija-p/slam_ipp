@@ -2,10 +2,10 @@ figure;
 
 subplot(1,2,1)
 hold on
-scatter(X_train(100:200,1), X_train(100:200,2), 50, Y_train(100:200), 'filled');
-for i = 100:5:200
-    draw_ellipse(X_train(i,:)',P_train(:,:,i),3);
-end
+scatter(X_train(1:199,1), X_train(1:199,2), 50, Y_train(1:199), 'filled');
+%for i = 100:5:200
+%    draw_ellipse(X_train(i,:)',P_train(:,:,i),3);
+%end
 grid minor
 colormap hot
 caxis([0 50])

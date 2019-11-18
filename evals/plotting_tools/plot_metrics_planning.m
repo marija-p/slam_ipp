@@ -12,8 +12,13 @@ methods = fieldnames(logger.trial1);
 
 % Choose which methods to plot.+
 % NB: - Always include "1" (trial number).
-methods_select = [1,2,5,7,9];
+% Our methods
+%methods_select = [1,2,3,5,8];
+% Benchmarks
+methods_select = [1,5,6,7,9];
+%methods_select = [1,2,3];
 methods = {methods{methods_select}};
+%methods = {'num', 'uncertainty_UI_N_gauss_5', 'renyi_UI_N_gauss_5'};
 
 % Last trial is incomplete.
 if (length(methods) ~= length(fieldnames(logger.(trials{end}))))
@@ -29,8 +34,6 @@ mlls = zeros(length(methods)-1,length(time_vector));
 Rob_Ps_Aopt = zeros(length(methods)-1,length(time_vector));
 Rob_Ps_Dopt = zeros(length(methods)-1,length(time_vector));
 pose_rmses = zeros(length(methods)-1,length(time_vector));
-
-trials = trials(1:10);
 
 for i = 1:length(trials)
     
@@ -400,8 +403,12 @@ if (do_plot)
     %set(findall(gcf,'-property','FontName'),'FontName','Times')
     
     if (show_legend)
-        h_legend = legend(h, 'Unc.', 'Unc. rate', 'Rényi', ...
-            'Random', 'RIG-tree', 'Weighted');
+        % Our methods
+        %h_legend = legend(h, 'Unc.', 'Unc. rate', 'Rényi', 'Weighted');
+        % Benchmarks
+        h_legend = legend(h, 'Rényi', 'Random', 'RIG-tree - Unc.', 'RIG-tree - Rényi');
+        
+        %h_legend = legend(h, 'Rényi', 'Random', 'RIG-tree - Unc.', 'Rényi');
         set(h_legend, 'Location', 'SouthOutside');
         set(h_legend, 'orientation', 'horizontal')
         set(h_legend, 'box', 'off')

@@ -12,7 +12,7 @@ res_z = 1;
 
 % Correlation function parameters.
 corr.name = 'gauss';
-corr.c0 = [2, 2, 2];
+corr.c0 = [3,3,3];
 corr.sigma = 100;
 
 % Create the random field.
@@ -34,4 +34,4 @@ xlabel('x (m)')
 ylabel('y (m)')
 zlabel('z (m)')
 
-save('ground_truth_3d_small3.mat', 'mesh', 'ground_truth')
+save('ground_truth_3d_small10.mat', 'mesh', 'ground_truth')
