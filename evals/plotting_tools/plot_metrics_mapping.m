@@ -12,7 +12,7 @@ methods = fieldnames(logger.trial1);
 
 % Choose which methods to plot.
 % NB: - Always include "1" (trial number).
-methods_select = [1,2,3];
+methods_select = [1,4,5];
 methods = {methods{methods_select}};
 
 % Last trial is incomplete.
@@ -184,7 +184,7 @@ if (do_plot)
         'FontSize'    , text_size, ...
         'LooseInset', max(get(gca,'TightInset'), 0.02));
     rescale_axes(rescale_factor);
-    axis([0 time_vector(end) 1 10])
+    axis([0 time_vector(end) 2 10])
     pbaspect(gca, plot_aspect_ratio)
     hold off
     
@@ -214,7 +214,7 @@ if (do_plot)
     end
     
     h_xlabel = xlabel('Time (s)');
-    h_ylabel = ylabel('Tr(\Sigma)');
+    h_ylabel = ylabel('Tr($\mathbf{\Sigma}$)');
     set([h_xlabel, h_ylabel], ...
         'FontName'   , 'Helvetica');
     set(gca, ...
@@ -282,9 +282,9 @@ if (do_plot)
     pbaspect(gca, plot_aspect_ratio)
     hold off
 
-    set(gcf, 'Position', [86, 540, 728, 434])
+    %set(gcf, 'Position', [86, 540, 728, 434])
     set(gcf,'color','w')
-    set(findall(gcf,'-property','FontName'),'FontName','Times')
+    set(findall(gcf,'-property','FontName'),'FontName','CMU Serif')
     
     if (show_legend)
         h_legend = legend(h, 'Unc.', 'Unc. rate', 'Renyi', 'Random');

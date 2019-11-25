@@ -29,9 +29,9 @@ dim_z_env = 4;
     load_params_and_data(dim_x_env, dim_y_env, dim_z_env);
 
 evaluate_random = 1;
-evaluate_rig = 1; subtree_iters = 60;
+evaluate_rig = 1; subtree_iters = 30;
 
-for i = 1:num_trials
+for i = 51:99
     
     if (~append_to_logger)
         t = i;
@@ -52,6 +52,14 @@ for i = 1:num_trials
     
     %% RIG-tree %%
     if (evaluate_rig)
+   
+        rng(t, 'twister');
+        planning_params.obj_func = 'uncertainty';
+        [metrics] = slam_gp_rig(map_params, planning_params, opt_params, gp_params, ...
+            training_data, gt_data, testing_data, subtree_iters);
+        logger.(['trial', num2str(t)]).('rig') = metrics;
+        clear global
+        
         rng(t, 'twister');
         planning_params.obj_func = 'renyi';
         [metrics] = slam_gp_rig(map_params, planning_params, opt_params, gp_params, ...

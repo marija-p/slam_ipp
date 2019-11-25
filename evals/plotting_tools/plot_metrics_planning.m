@@ -10,15 +10,16 @@ percentile = 0.95;
 trials = fieldnames(logger);
 methods = fieldnames(logger.trial1);
 
-% Choose which methods to plot.+
+% Choose which methods to plot.
 % NB: - Always include "1" (trial number).
 % Our methods
-%methods_select = [1,2,3,5,8];
+methods_select = [1,2,3,8,5];
+legend_labels = {'Unc.', 'Unc. rate', 'Weighted', 'Rényi'};
 % Benchmarks
-methods_select = [1,5,6,7,9];
-%methods_select = [1,2,3];
+%methods_select = [1,6,7,9,5];
+%legend_labels = {'Random', 'RIG-tree - Unc.', 'RIG-tree - Rényi','CMA-ES - Rényi'};
+
 methods = {methods{methods_select}};
-%methods = {'num', 'uncertainty_UI_N_gauss_5', 'renyi_UI_N_gauss_5'};
 
 % Last trial is incomplete.
 if (length(methods) ~= length(fieldnames(logger.(trials{end}))))
@@ -34,6 +35,14 @@ mlls = zeros(length(methods)-1,length(time_vector));
 Rob_Ps_Aopt = zeros(length(methods)-1,length(time_vector));
 Rob_Ps_Dopt = zeros(length(methods)-1,length(time_vector));
 pose_rmses = zeros(length(methods)-1,length(time_vector));
+
+%trials = trials(1:50); % Environmnt 1
+%trials = trials(51:99); % Environment 8
+%trials = trials(100:149); % Environment 6
+%trials = trials(150:199); % Environment 9
+%trials = trials(200:248); % Environment 10
+
+%trials = trials(100:146);
 
 for i = 1:length(trials)
     
@@ -73,11 +82,11 @@ for i = 1:length(trials)
         ts_resampled = resample(ts, time_vector, 'zoh');
         mlls(j-1,:,i) = ts_resampled.data';
         
-        ts = timeseries(Rob_P_Aopt, time);
+        ts = timeseries(Rob_P_Aopt(1:size(time,1)), time);
         ts_resampled = resample(ts, time_vector, 'zoh');
         Rob_Ps_Aopt(j-1,:,i) = ts_resampled.data';
         
-        ts = timeseries(Rob_P_Dopt, time);
+        ts = timeseries(Rob_P_Dopt(1:size(time,1)), time);
         ts_resampled = resample(ts, time_vector, 'zoh');
         Rob_Ps_Dopt(j-1,:,i) = ts_resampled.data';
 
@@ -129,13 +138,14 @@ end
 % Symmetric
 ts = tinv(percentile, length(trials));
 
-colours = [0    0.4470    0.7410;
-    0.8500    0.3250    0.0980;
-    0.9290    0.6940    0.1250;
-    0.4940    0.1840    0.5560;
+%colours = [0    0.4470    0.7410;
+   % 0.9290    0.6940    0.1250;
+   % 0.4940    0.1840    0.5560;
+colours = [0.1379    0.1379    0.0345;
     0.4660    0.6740    0.1880;
-%0.6350    0.0780    0.1840];
-0.3010    0.7450    0.9330];
+0.3010    0.7450    0.9330;
+%0.6350    0.0780    0.1840;
+    0.8500    0.3250    0.0980];
 %0.1379    0.1379    0.0345];
 transparency = 0.3;
 
@@ -207,7 +217,7 @@ if (do_plot)
         'FontSize'    , text_size, ...
         'LooseInset', max(get(gca,'TightInset'), 0.02));
     
-    axis([0 time_vector(end) 0 2*10^6])
+    axis([0 time_vector(end) 0 0.5*10^6])
     rescale_axes(rescale_factor);
     pbaspect(gca, plot_aspect_ratio)
     hold off
@@ -315,7 +325,7 @@ if (do_plot)
     end
     
     h_xlabel = xlabel('Time (s)');
-    h_ylabel = ylabel('Tr(\Sigma)');
+    h_ylabel = ylabel('Tr($\mathbf{\Sigma}$)');
     set([h_xlabel, h_ylabel], ...
         'FontName'   , 'Helvetica');
     set(gca, ...
@@ -400,15 +410,10 @@ if (do_plot)
 
     set(gcf, 'Position', [93, 501, 641, 448])
     set(gcf,'color','w')
-    %set(findall(gcf,'-property','FontName'),'FontName','Times')
+    set(findall(gcf,'-property','FontName'),'FontName','CMU Serif')
     
     if (show_legend)
-        % Our methods
-        %h_legend = legend(h, 'Unc.', 'Unc. rate', 'Rényi', 'Weighted');
-        % Benchmarks
-        h_legend = legend(h, 'Rényi', 'Random', 'RIG-tree - Unc.', 'RIG-tree - Rényi');
-        
-        %h_legend = legend(h, 'Rényi', 'Random', 'RIG-tree - Unc.', 'Rényi');
+        h_legend = legend(h, legend_labels);
         set(h_legend, 'Location', 'SouthOutside');
         set(h_legend, 'orientation', 'horizontal')
         set(h_legend, 'box', 'off')
